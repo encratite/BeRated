@@ -49,7 +49,6 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="PlayerRating.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Vector.cs" />
   </ItemGroup>

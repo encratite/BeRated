@@ -7,12 +7,10 @@ create table player
 	id serial primary key,
 	steam_id text unique not null,
 	-- The latest name of the player
-	name text not null,
-	rating integer not null
+	name text not null
 );
 
 create index player_steam_id_index on player (steam_id);
-create index player_rating_index on player (rating desc);
 
 drop table if exists kill cascade;
 
@@ -21,11 +19,7 @@ create table kill
 	id serial primary key,
 	time timestamp not null,
 	killer_id integer references player(id) not null,
-	killer_old_rating integer not null,
-	killer_new_rating integer not null,
 	victim_id integer references player(id) not null,
-	victim_old_rating integer not null,
-	victim_new_rating integer not null,
 	-- False if the killer is a terrorist, true if he is a counter-terrorist
 	killer_is_ct boolean not null,
 	weapon text not null,

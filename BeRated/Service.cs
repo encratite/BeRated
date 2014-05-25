@@ -121,52 +121,34 @@ namespace BeRated
 			var time = new DateTime(year, month, day, hour, minute, second);
 			using (var transaction = _Connection.BeginTransaction())
 			{
-				int killerId;
-				int killerOldRating;
-				UpdateOrCreatePlayer(killerSteamId, killerName, out killerId, out killerOldRating);
-				int victimId;
-				int victimOldRating;
-				UpdateOrCreatePlayer(victimSteamId, victimName, out victimId, out victimOldRating);
-				var killerRating = new PlayerRating(killerOldRating);
-				var victimRating = new PlayerRating(victimOldRating);
-				PlayerRating.UpdateRatings(killerRating, victimRating);
-				UpdateRating(killerId, killerRating.Rating);
-				UpdateRating(victimId, victimRating.Rating);
+				int killerId = UpdateOrCreatePlayer(killerSteamId, killerName);
+				int victimId = UpdateOrCreatePlayer(victimSteamId, victimName);
 				_Factory.NonQuery(
-					"insert into kill (time, killer_id, killer_old_rating, killer_new_rating, victim_id, victim_old_rating, victim_new_rating, killer_is_ct, weapon, distance) " +
-					"values (@time, @killerId, @killerOldRating, @killerNewRating, @victimId, @victimOldRating, @victimNewRating, @killerIsCT, @weapon, @distance)",
+					"insert into kill (time, killer_id, victim_id, killer_is_ct, weapon, distance) " +
+					"values (@time, @killerId, @victimId,  @killerIsCT, @weapon, @distance)",
 					new CommandParameter("@time", time),
 					new CommandParameter("@killerId", killerId),
-					new CommandParameter("@killerOldRating", killerOldRating),
-					new CommandParameter("@killerNewRating", killerRating.Rating),
 					new CommandParameter("@victimId", victimId),
-					new CommandParameter("@victimOldRating", victimOldRating),
-					new CommandParameter("@victimNewRating", victimRating.Rating),
 					new CommandParameter("@killerIsCT", killerIsCT),
 					new CommandParameter("@weapon", weapon),
 					new CommandParameter("@distance", distance)
 					);
-				Console.WriteLine("{0} ({1}) killed {2} ({3}), gaining {4} rating", killerName, killerRating.Rating, victimName, victimRating.Rating, killerRating.Rating - killerOldRating);
+				Console.WriteLine("{0} killed {1} with weapon {2}", killerName, victimName, weapon);
 				transaction.Commit();
 			}
 		}
 
-		private void UpdateOrCreatePlayer(string steamId, string name, out int id, out int rating)
+		private int UpdateOrCreatePlayer(string steamId, string name)
 		{
+			// For the compiler
+			int id = 0;
 			bool playerExisted = false;
-			using (var reader = _Factory.Reader("select id, rating from player where steam_id = @steamId", new CommandParameter("@steamId", steamId)))
+			using (var reader = _Factory.Reader("select id from player where steam_id = @steamId", new CommandParameter("@steamId", steamId)))
 			{
 				if (reader.Read())
 				{
 					id = reader.GetInt32("id");
-					rating = reader.GetInt32("rating");
 					playerExisted = true;
-				}
-				else
-				{
-					// For the compiler
-					id = 0;
-					rating = PlayerRating.InitialRating;
 				}
 			}
 			if (playerExisted)
@@ -180,24 +162,15 @@ namespace BeRated
 			else
 			{
 				using (var command = _Factory.Command(
-						"insert into player (steam_id, name, rating) values (@steamId, @name, @rating) returning id",
+						"insert into player (steam_id, name) values (@steamId, @name) returning id",
 						new CommandParameter("@steamId", steamId),
-						new CommandParameter("@name", name),
-						new CommandParameter("@rating", rating)
+						new CommandParameter("@name", name)
 						))
 				{
 					id = (int)command.ExecuteScalar();
 				}
 			}
-		}
-
-		private void UpdateRating(int id, int rating)
-		{
-			_Factory.NonQuery(
-				"update player set rating = @rating where id = @id",
-				new CommandParameter("@rating", rating),
-				new CommandParameter("@id", id)
-				);
+			return id;
 		}
 	}
 }
