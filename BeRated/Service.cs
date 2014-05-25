@@ -64,7 +64,7 @@ namespace BeRated
 			_Connection = new NpgsqlConnection(_Configuration.ConnectionString);
 			_Connection.Open();
 			_Factory = new DatabaseFactory(_Connection);
-			Test();
+			// Test();
 			var addresses = Dns.GetHostAddresses(_Configuration.Host);
 			if (addresses.Length == 0)
 				throw new ApplicationException("Unable to resolve host");
