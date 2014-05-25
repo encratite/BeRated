@@ -36,15 +36,12 @@ namespace Test
 
 		private static void ProcessKill(Player winner, Player loser)
 		{
-			int winnerDifference;
-			int loserDifference;
-			PlayerRating.UpdateRatings(winner.Rating, loser.Rating, out winnerDifference, out loserDifference);
+			PlayerRating.UpdateRatings(winner.Rating, loser.Rating);
 			winner.Kills++;
 			loser.Deaths++;
-			// Console.WriteLine("{0} ({1}, {2}) killed {3} ({4}, {5})", winner, winner.Rating, winnerDifference, loser, loser.Rating, loserDifference);
 		}
 
-		private static void EvaluateParameters(int kills = 1000, int? maximumAdjustment = null, int? ratingBase = null, int? exponentDivisor = null, bool hasTarget = false)
+		private static void EvaluateParameters(int kills = 10000, int? maximumAdjustment = null, int? ratingBase = null, int? exponentDivisor = null, bool hasTarget = false)
 		{
 			if(maximumAdjustment.HasValue)
 				PlayerRating.MaximumAdjustment = maximumAdjustment.Value;
