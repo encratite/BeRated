@@ -23,7 +23,9 @@ create table kill
 	-- False if the killer is a terrorist, true if he is a counter-terrorist
 	killer_is_ct boolean not null,
 	weapon text not null,
-	distance real not null
+	distance real not null,
+	-- May be null because this information is not contained in the kill log line itself
+	map text
 );
 
 create index kill_killer_id_time_index on kill (killer_id, time desc);

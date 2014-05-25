@@ -18,6 +18,9 @@ namespace BeRated
 		private DbConnection _Connection;
 		private DatabaseFactory _Factory;
 
+		private string _CurrentMap = null;
+		private bool _IgnoreBots = true;
+
 		public Service(Configuration configuration)
 		{
 			_Configuration = configuration;
@@ -48,16 +51,23 @@ namespace BeRated
 			return output;
 		}
 
-		public void Run()
+		private void Test()
 		{
-			_Connection = new NpgsqlConnection(_Configuration.ConnectionString);
-			_Connection.Open();
-			_Factory = new DatabaseFactory(_Connection);
+			_IgnoreBots = false;
+			ProcessLogLine("RL 05/23/2014 - 19:10:37: Started map \"de_dust2\" (CRC \"1333465166\")");
 			while (true)
 			{
 				ProcessLogLine("RL 05/23/2014 - 19:12:32: \"SomeName<2><STEAM_1:0:123456><TERRORIST>\" [-589 2261 -122] killed \"Tom<8><BOT><CT>\" [-478 1860 -63] with \"hkp2000\" (headshot)\n");
 				Thread.Sleep(1000);
 			}
+		}
+
+		public void Run()
+		{
+			_Connection = new NpgsqlConnection(_Configuration.ConnectionString);
+			_Connection.Open();
+			_Factory = new DatabaseFactory(_Connection);
+			Test();
 			var addresses = Dns.GetHostAddresses(_Configuration.Host);
 			if (addresses.Length == 0)
 				throw new ApplicationException("Unable to resolve host");
@@ -88,10 +98,30 @@ namespace BeRated
 
 		private void ProcessLogLine(string line)
 		{
-			var pattern = new Regex("RL (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): \"(.+?)<\\d+><(.+?)><(TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed \"(.+?)<\\d+><(.+?)><(?:TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
-			var match = pattern.Match(line);
-			if (!match.Success)
+			var mapPattern = new Regex("^RL \\d{2}\\/\\d{2}\\/\\d+ - \\d{2}:\\d{2}:\\d{2}: Started map \"(.+?)\" \\(CRC \"\\d+\"\\)");
+			var mapMatch = mapPattern.Match(line);
+			if (mapMatch.Success)
+			{
+				ProcessMap(mapMatch);
 				return;
+			}
+			var killPattern = new Regex("^RL (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): \"(.+?)<\\d+><(.+?)><(TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed \"(.+?)<\\d+><(.+?)><(?:TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
+			var killMatch = killPattern.Match(line);
+			if (killMatch.Success)
+			{
+				ProcessKill(killMatch);
+				return;
+			}
+		}
+
+		private void ProcessMap(Match match)
+		{
+			_CurrentMap = match.Groups[1].Value;
+			Console.WriteLine("Current map is {0}", _CurrentMap);
+		}
+
+		private void ProcessKill(Match match)
+		{
 			var groups = match.Groups;
 			int offset = 1;
 			Func<string> getString = () => groups[offset++].Value;
@@ -119,19 +149,23 @@ namespace BeRated
 			string weapon = getString();
 			bool headshot = getString() != "";
 			var time = new DateTime(year, month, day, hour, minute, second);
+			const string botId = "BOT";
+			if (_IgnoreBots && (killerSteamId == botId || victimSteamId == botId))
+				return;
 			using (var transaction = _Connection.BeginTransaction())
 			{
 				int killerId = UpdateOrCreatePlayer(killerSteamId, killerName);
 				int victimId = UpdateOrCreatePlayer(victimSteamId, victimName);
 				_Factory.NonQuery(
-					"insert into kill (time, killer_id, victim_id, killer_is_ct, weapon, distance) " +
-					"values (@time, @killerId, @victimId,  @killerIsCT, @weapon, @distance)",
+					"insert into kill (time, killer_id, victim_id, killer_is_ct, weapon, distance, map) " +
+					"values (@time, @killerId, @victimId,  @killerIsCT, @weapon, @distance, @map)",
 					new CommandParameter("@time", time),
 					new CommandParameter("@killerId", killerId),
 					new CommandParameter("@victimId", victimId),
 					new CommandParameter("@killerIsCT", killerIsCT),
 					new CommandParameter("@weapon", weapon),
-					new CommandParameter("@distance", distance)
+					new CommandParameter("@distance", distance),
+					new CommandParameter("@map", _CurrentMap)
 					);
 				Console.WriteLine("{0} killed {1} with weapon {2}", killerName, victimName, weapon);
 				transaction.Commit();
