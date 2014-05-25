@@ -11,6 +11,9 @@ create table player
 	rating integer not null
 );
 
+create index player_steam_id_index on player (steam_id);
+create index player_rating_index on player (rating desc);
+
 drop type if exists player_team cascade;
 
 create type player_team as enum
@@ -35,3 +38,6 @@ create table kill
 	weapon text not null,
 	distance real not null
 );
+
+create index kill_killer_id_time_index on kill (killer_id, time desc);
+create index kill_victim_id_time_index on kill (victim_id, time desc);

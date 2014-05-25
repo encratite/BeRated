@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Ashod;
 
 namespace BeRated
 {
@@ -10,6 +6,9 @@ namespace BeRated
 	{
 		static void Main(string[] arguments)
 		{
+			var configuration = XmlFile.Read<Configuration>();
+			var service = new Service(configuration);
+			service.Run();
 		}
 	}
 }

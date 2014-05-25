@@ -48,7 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="PlayerRating.cs" />
+    <Compile Include="Service.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -56,6 +58,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">
+      <Project>{9659019c-3181-4c5c-bd0d-0117456328a6}</Project>
+      <Name>Ashod</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
