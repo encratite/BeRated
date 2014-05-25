@@ -41,10 +41,10 @@ namespace Test
 			loser.Deaths++;
 		}
 
-		private static void EvaluateParameters(int kills = 10000, int? maximumAdjustment = null, int? ratingBase = null, int? exponentDivisor = null, bool hasTarget = false)
+		private static void EvaluateParameters(int kills = 100000, int? maximumAdjustment = null, int? ratingBase = null, int? exponentDivisor = null, bool hasTarget = false)
 		{
 			if(maximumAdjustment.HasValue)
-				PlayerRating.MaximumAdjustment = maximumAdjustment.Value;
+				PlayerRating.MaximumAdjustmentFactor = maximumAdjustment.Value;
 			if(ratingBase.HasValue)
 				PlayerRating.Base = ratingBase.Value;
 			if(exponentDivisor.HasValue)
@@ -53,13 +53,10 @@ namespace Test
 			var players = new List<Player>
 			{
 				new Player(10),
+				new Player(10),
+				new Player(10),
 				new Player(15),
-				new Player(20),
-				new Player(25),
 				new Player(30),
-				new Player(35),
-				new Player(40),
-				new Player(45),
 				new Player(50),
 			};
 
