@@ -19,7 +19,6 @@ namespace BeRated
 		private DatabaseFactory _Factory;
 
 		private string _CurrentMap = null;
-		private bool _IgnoreBots = true;
 
 		public Service(Configuration configuration)
 		{
@@ -28,7 +27,7 @@ namespace BeRated
 
 		private bool IsWellFormedPacket(byte[] packet)
 		{
-			if (packet.Length <= 5)
+			if (packet.Length <= 7)
 				return false;
 			for (int i = 0; i < 4; i++)
 			{
@@ -36,15 +35,14 @@ namespace BeRated
 				if (input != 0xff)
 					return false;
 			}
-			byte lastByte = packet[packet.Length - 1];
-			if (lastByte != 0)
+			if (packet[4] != 'R' || packet[packet.Length - 1] != 0)
 				return false;
 			return true;
 		}
 
 		private string GetStringFromPacket(byte[] packet)
 		{
-			var packetWithoutHeader = packet.Skip(4);
+			var packetWithoutHeader = packet.Skip(5);
 			var packetWithoutSuffix = packetWithoutHeader.Take(packetWithoutHeader.Count() - 1);
 			byte[] payload = packetWithoutSuffix.ToArray();
 			string output = Encoding.UTF8.GetString(payload);
@@ -53,11 +51,10 @@ namespace BeRated
 
 		private void Test()
 		{
-			_IgnoreBots = false;
-			ProcessLogLine("RL 05/23/2014 - 19:10:37: Started map \"de_dust2\" (CRC \"1333465166\")");
+			ProcessLogLine("L 05/23/2014 - 19:10:37: Started map \"de_dust2\" (CRC \"1333465166\")");
 			while (true)
 			{
-				ProcessLogLine("RL 05/23/2014 - 19:12:32: \"SomeName<2><STEAM_1:0:123456><TERRORIST>\" [-589 2261 -122] killed \"Tom<8><BOT><CT>\" [-478 1860 -63] with \"hkp2000\" (headshot)\n");
+				ProcessLogLine("L 05/23/2014 - 19:12:32: \"SomeName<2><STEAM_1:0:123456><TERRORIST>\" [-589 2261 -122] killed \"Tom<8><STEAM_1:0:343434><CT>\" [-478 1860 -63] with \"hkp2000\" (headshot)\n");
 				Thread.Sleep(1000);
 			}
 		}
@@ -98,14 +95,14 @@ namespace BeRated
 
 		private void ProcessLogLine(string line)
 		{
-			var mapPattern = new Regex("^RL \\d{2}\\/\\d{2}\\/\\d+ - \\d{2}:\\d{2}:\\d{2}: Started map \"(.+?)\" \\(CRC \"\\d+\"\\)");
+			var mapPattern = new Regex("^L \\d{2}\\/\\d{2}\\/\\d+ - \\d{2}:\\d{2}:\\d{2}: Started map \"(.+?)\" \\(CRC \"\\d+\"\\)");
 			var mapMatch = mapPattern.Match(line);
 			if (mapMatch.Success)
 			{
 				ProcessMap(mapMatch);
 				return;
 			}
-			var killPattern = new Regex("^RL (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): \"(.+?)<\\d+><(.+?)><(TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed \"(.+?)<\\d+><(.+?)><(?:TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
+			var killPattern = new Regex("^L (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): \"(.+?)<\\d+><(.+?)><(TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed \"(.+?)<\\d+><(.+?)><(?:TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
 			var killMatch = killPattern.Match(line);
 			if (killMatch.Success)
 			{
@@ -150,7 +147,7 @@ namespace BeRated
 			bool headshot = getString() != "";
 			var time = new DateTime(year, month, day, hour, minute, second);
 			const string botId = "BOT";
-			if (_IgnoreBots && (killerSteamId == botId || victimSteamId == botId))
+			if (killerSteamId == botId || victimSteamId == botId)
 				return;
 			using (var transaction = _Connection.BeginTransaction())
 			{
