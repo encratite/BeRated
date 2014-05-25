@@ -14,14 +14,6 @@ create table player
 create index player_steam_id_index on player (steam_id);
 create index player_rating_index on player (rating desc);
 
-drop type if exists player_team cascade;
-
-create type player_team as enum
-(
-	'terrorist',
-	'counter_terrorist'
-);
-
 drop table if exists kill cascade;
 
 create table kill
@@ -34,7 +26,8 @@ create table kill
 	victim_id integer references player(id) not null,
 	victim_old_rating integer not null,
 	victim_new_rating integer not null,
-	killer_team player_team not null,
+	-- False if the killer is a terrorist, true if he is a counter-terrorist
+	killer_is_ct boolean not null,
 	weapon text not null,
 	distance real not null
 );

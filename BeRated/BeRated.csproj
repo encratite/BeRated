@@ -51,6 +51,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="PlayerRating.cs" />
     <Compile Include="Service.cs" />
+    <Compile Include="Vector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
