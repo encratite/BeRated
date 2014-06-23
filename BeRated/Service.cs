@@ -1,4 +1,5 @@
 ﻿using Ashod.Database;
+using BeRated.Common;
 using Npgsql;
 using System;
 using System.Data.Common;
@@ -102,11 +103,10 @@ namespace BeRated
 				ProcessMap(mapMatch);
 				return;
 			}
-			var killPattern = new Regex("^L (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): \"(.+?)<\\d+><(.+?)><(TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed \"(.+?)<\\d+><(.+?)><(?:TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
-			var killMatch = killPattern.Match(line);
-			if (killMatch.Success)
+			var kill = LogParser.ReadPlayerKill(line);
+			if (kill != null)
 			{
-				ProcessKill(killMatch);
+				ProcessKill(kill);
 				return;
 			}
 		}
@@ -117,54 +117,26 @@ namespace BeRated
 			Console.WriteLine("Current map is {0}", _CurrentMap);
 		}
 
-		private void ProcessKill(Match match)
+		private void ProcessKill(PlayerKill kill)
 		{
-			var groups = match.Groups;
-			int offset = 1;
-			Func<string> getString = () => groups[offset++].Value;
-			Func<int> getInt = () => Convert.ToInt32(getString());
-			int month = getInt();
-			int day = getInt();
-			int year = getInt();
-			int hour = getInt();
-			int minute = getInt();
-			int second = getInt();
-			string killerName = getString();
-			string killerSteamId = getString();
-			bool killerIsCT = getString() == "CT";
-			int killerX = getInt();
-			int killerY = getInt();
-			int killerZ = getInt();
-			var killerPosition = new Vector(killerX, killerY, killerZ);
-			string victimName = getString();
-			string victimSteamId = getString();
-			int victimX = getInt();
-			int victimY = getInt();
-			int victimZ = getInt();
-			var victimPosition = new Vector(victimX, victimY, victimZ);
-			double distance = killerPosition.Distance(victimPosition);
-			string weapon = getString();
-			bool headshot = getString() != "";
-			var time = new DateTime(year, month, day, hour, minute, second);
-			const string botId = "BOT";
-			if (killerSteamId == botId || victimSteamId == botId)
+			if (kill.Killer.SteamId == LogParser.BotId || kill.Victim.SteamId == LogParser.BotId)
 				return;
 			using (var transaction = _Connection.BeginTransaction())
 			{
-				int killerId = UpdateOrCreatePlayer(killerSteamId, killerName);
-				int victimId = UpdateOrCreatePlayer(victimSteamId, victimName);
+				int killerId = UpdateOrCreatePlayer(kill.Killer.SteamId, kill.Killer.Name);
+				int victimId = UpdateOrCreatePlayer(kill.Victim.SteamId, kill.Victim.Name);
 				_Factory.NonQuery(
 					"insert into kill (time, killer_id, victim_id, killer_is_ct, weapon, distance, map) " +
 					"values (@time, @killerId, @victimId,  @killerIsCT, @weapon, @distance, @map)",
-					new CommandParameter("@time", time),
+					new CommandParameter("@time", kill.Time),
 					new CommandParameter("@killerId", killerId),
 					new CommandParameter("@victimId", victimId),
-					new CommandParameter("@killerIsCT", killerIsCT),
-					new CommandParameter("@weapon", weapon),
-					new CommandParameter("@distance", distance),
+					new CommandParameter("@killerIsCT", kill.KillerTeam == PlayerTeam.CounterTerrorist),
+					new CommandParameter("@weapon", kill.Weapon),
+					new CommandParameter("@distance", kill.KillerPosition.Distance(kill.VictimPosition)),
 					new CommandParameter("@map", _CurrentMap)
 					);
-				Console.WriteLine("{0} killed {1} with weapon {2}", killerName, victimName, weapon);
+				Console.WriteLine("{0} killed {1} with weapon {2}", kill.Killer.Name, kill.Victim.Name, kill.Weapon);
 				transaction.Commit();
 			}
 		}

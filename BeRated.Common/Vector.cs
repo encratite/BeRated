@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace BeRated
+namespace BeRated.Common
 {
-	class Vector
+	public class Vector
 	{
 		public readonly int X;
 		public readonly int Y;
