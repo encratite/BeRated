@@ -14,7 +14,9 @@ namespace LogAnalyser
 
 		const int Iterations = 100000;
 
-		const double InitialMutationSpeed = 2.0;
+		const int MinimumEncountersForErrorEvaluation = 20;
+
+		const double InitialMutationSpeed = 3.0;
 		const double MinimumMutationSpeed = 0.1;
 		const double MutationSpeedAdjustment = (InitialMutationSpeed - MinimumMutationSpeed) / (Iterations / 2);
 
@@ -84,7 +86,7 @@ namespace LogAnalyser
 					Console.WriteLine("{0} vs. {1}: {2} encounters", _PlayerData[steamId1].Identity.Name, _PlayerData[steamId2].Identity.Name, totalEncounters);
 					Console.Write("{0:0.0}% actual, {1:0.0}% expected, ", actualValue, expectedValue);
 					var originalColour = Console.ForegroundColor;
-					if (totalEncounters >= 15)
+					if (totalEncounters >= MinimumEncountersForErrorEvaluation)
 					{
 						if (absoluteDifference < 5.0)
 							Console.ForegroundColor = ConsoleColor.Green;
@@ -160,6 +162,7 @@ namespace LogAnalyser
 		RatingEvaluation EvaluateRatings(PlayerRating[] ratings)
 		{
 			double error = 0.0;
+			int errorSamples = 0;
 			foreach (string steamId1 in _PerformanceMatrix.Keys)
 			{
 				foreach (string steamId2 in _PerformanceMatrix.Keys)
@@ -174,10 +177,14 @@ namespace LogAnalyser
 					if(totalEncounters == 0)
 						continue;
 					double actualValue = (double)performance.Kills / totalEncounters;
-					error += Math.Pow(expectedValue - actualValue, 2.0);
+					if (totalEncounters >= MinimumEncountersForErrorEvaluation)
+					{
+						error += Math.Pow(expectedValue - actualValue, 2.0);
+						errorSamples++;
+					}
 				}
 			}
-			error = Math.Sqrt(error) / ratings.Length;
+			error /= errorSamples;
 			var evaluation = new RatingEvaluation(ratings, error);
 			return evaluation;
 		}
