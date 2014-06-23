@@ -60,6 +60,29 @@ namespace LogAnalyser
 					killDeathRatio = (double)playerInformation.KillCount / playerInformation.DeathCount;
 				Console.WriteLine("{0} ({1}): KDR {2:0.00}, rating {3:0.00}", rating.Identity.Name, rating.Identity.SteamId, killDeathRatio, rating.Rating);
 			}
+			PrintEncounterStatistics(ratings);
+		}
+
+		void PrintEncounterStatistics(IOrderedEnumerable<PlayerRating> ratings)
+		{
+			foreach (string steamId1 in _PerformanceMatrix.Keys)
+			{
+				foreach (string steamId2 in _PerformanceMatrix.Keys)
+				{
+					if (steamId1 == steamId2)
+						continue;
+					double rating1 = ratings.Where(x => x.Identity.SteamId == steamId1).First().Rating;
+					double rating2 = ratings.Where(x => x.Identity.SteamId == steamId2).First().Rating;
+					double expectedValue = ExpectedWinRatio(rating1, rating2) * 100.0;
+					var performance = GetPeformanceEntry(steamId1, steamId2);
+					int totalEncounters = performance.Kills + performance.Deaths;
+					if (totalEncounters == 0)
+						continue;
+					double actualValue = (double)performance.Kills / totalEncounters * 100.0;
+					Console.WriteLine("{0} vs. {1}: {2} encounters", _PlayerData[steamId1].Identity.Name, _PlayerData[steamId2].Identity.Name, totalEncounters);
+					Console.WriteLine("{0:0.0}% actual, {1:0.0}% expected, {2:0.0}% deviation", actualValue, expectedValue, actualValue - expectedValue);
+				}
+			}
 		}
 
 		void ProcessLog(string path)
