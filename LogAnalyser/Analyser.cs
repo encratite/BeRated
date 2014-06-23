@@ -9,14 +9,13 @@ namespace LogAnalyser
 	class Analyser
 	{
 		const double MinimumRating = 1.0;
-		const double MaximumRating = 100.0;
-		const double InitialRating = 10.0;
+		const double InitialRating = 100.0;
 
 		const int Iterations = 100000;
 
-		const int MinimumEncountersForErrorEvaluation = 20;
+		const int ErrorEvaluationEncounterBarrier = 100;
 
-		const double InitialMutationSpeed = 3.0;
+		const double InitialMutationSpeed = 10.0;
 		const double MinimumMutationSpeed = 0.1;
 		const double MutationSpeedAdjustment = (InitialMutationSpeed - MinimumMutationSpeed) / (Iterations / 2);
 
@@ -86,7 +85,7 @@ namespace LogAnalyser
 					Console.WriteLine("{0} vs. {1}: {2} encounters", _PlayerData[steamId1].Identity.Name, _PlayerData[steamId2].Identity.Name, totalEncounters);
 					Console.Write("{0:0.0}% actual, {1:0.0}% expected, ", actualValue, expectedValue);
 					var originalColour = Console.ForegroundColor;
-					if (totalEncounters >= MinimumEncountersForErrorEvaluation)
+					if (totalEncounters >= 15)
 					{
 						if (absoluteDifference < 5.0)
 							Console.ForegroundColor = ConsoleColor.Green;
@@ -154,15 +153,9 @@ namespace LogAnalyser
 			return performance;
 		}
 
-		double GetRandomRating()
-		{
-			return _Random.NextDouble() * (MaximumRating - MinimumRating) + MinimumRating;
-		}
-
 		RatingEvaluation EvaluateRatings(PlayerRating[] ratings)
 		{
 			double error = 0.0;
-			int errorSamples = 0;
 			foreach (string steamId1 in _PerformanceMatrix.Keys)
 			{
 				foreach (string steamId2 in _PerformanceMatrix.Keys)
@@ -177,14 +170,10 @@ namespace LogAnalyser
 					if(totalEncounters == 0)
 						continue;
 					double actualValue = (double)performance.Kills / totalEncounters;
-					if (totalEncounters >= MinimumEncountersForErrorEvaluation)
-					{
-						error += Math.Pow(expectedValue - actualValue, 2.0);
-						errorSamples++;
-					}
+					double errorWeight = Math.Pow(Math.Min((double)totalEncounters / ErrorEvaluationEncounterBarrier, 1.0), 2.0);
+					error += errorWeight * Math.Pow(expectedValue - actualValue, 2.0);
 				}
 			}
-			error /= errorSamples;
 			var evaluation = new RatingEvaluation(ratings, error);
 			return evaluation;
 		}
@@ -199,7 +188,6 @@ namespace LogAnalyser
 			int index = _Random.Next(_PlayerData.Count);
 			var playerRating = ratings[index];
 			double newRating = playerRating.Rating + (_Random.Next(2) == 1 ? 1 : -1) * _MutationSpeed;
-			newRating = Math.Min(newRating, MaximumRating);
 			newRating = Math.Max(newRating, MinimumRating);
 			var newPlayerRating = new PlayerRating(playerRating.Identity, newRating);
 			_MutationSpeed = Math.Max(_MutationSpeed - MutationSpeedAdjustment, MinimumMutationSpeed);
