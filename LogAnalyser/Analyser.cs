@@ -8,14 +8,27 @@ namespace LogAnalyser
 {
 	class Analyser
 	{
+		const double MinimumRating = 1.0;
+		const double MaximumRating = 100.0;
+		const double InitialRating = 10.0;
+
+		const int Iterations = 100000;
+
+		const double InitialMutationSpeed = 2.0;
+		const double MinimumMutationSpeed = 0.1;
+		const double MutationSpeedAdjustment = (InitialMutationSpeed - MinimumMutationSpeed) / (Iterations / 2);
+
 		Random _Random = new Random();
 		Dictionary<string, PlayerInformation> _PlayerData;
 		Dictionary<string, Dictionary<string, PlayerPerformance>> _PerformanceMatrix;
+
+		double _MutationSpeed;
 
 		public void ProcessLogs(string path)
 		{
 			_PlayerData = new Dictionary<string, PlayerInformation>();
 			_PerformanceMatrix = new Dictionary<string, Dictionary<string, PlayerPerformance>>();
+			_MutationSpeed = InitialMutationSpeed;
 			var files = Directory.GetFiles(path);
 			foreach (var file in files)
 				ProcessLog(file);
@@ -23,13 +36,19 @@ namespace LogAnalyser
 
 		public void Analyse()
 		{
-			const int iterations = 1000000;
-			RatingEvaluation bestRatings = EvaluateRating();
-			for (int i = 0; i < iterations; i++)
+			var initialRatings = new List<PlayerRating>();
+			foreach (var playerInformation in _PlayerData.Values)
 			{
-				var evaluation = EvaluateRating();
-				if (evaluation.Error < bestRatings.Error)
-					bestRatings = evaluation;
+				var rating = new PlayerRating(playerInformation.Identity, InitialRating);
+				initialRatings.Add(rating);
+			}
+			RatingEvaluation bestRatings = EvaluateRatings(initialRatings.ToArray());
+			for (int i = 0; i < Iterations; i++)
+			{
+				var mutatedRatings = GetMutatedRatings(bestRatings.Ratings);
+				var mutatedRatingEvaluation = EvaluateRatings(mutatedRatings);
+				if (mutatedRatingEvaluation.Error < bestRatings.Error)
+					bestRatings = mutatedRatingEvaluation;
 			}
 			Console.WriteLine("Error: {0}", bestRatings.Error);
 			var ratings = bestRatings.Ratings.OrderByDescending(x => x.Rating);
@@ -96,17 +115,13 @@ namespace LogAnalyser
 			return performance;
 		}
 
-		RatingEvaluation EvaluateRating()
+		double GetRandomRating()
 		{
-			var ratings = new Dictionary<string, PlayerRating>();
-			foreach (var player in _PlayerData.Values)
-			{
-				const double minimumRating = 1.0;
-				const double maximumRating = 10.0;
-				double rating = _Random.NextDouble() * (maximumRating - minimumRating) + minimumRating;
-				var playerRating = new PlayerRating(player.Identity, rating);
-				ratings[player.Identity.SteamId] = playerRating;
-			}
+			return _Random.NextDouble() * (MaximumRating - MinimumRating) + MinimumRating;
+		}
+
+		RatingEvaluation EvaluateRatings(PlayerRating[] ratings)
+		{
 			double error = 0.0;
 			foreach (string steamId1 in _PerformanceMatrix.Keys)
 			{
@@ -114,9 +129,9 @@ namespace LogAnalyser
 				{
 					if (steamId1 == steamId2)
 						continue;
-					double rating1 = ratings[steamId1].Rating;
-					double rating2 = ratings[steamId2].Rating;
-					double expectedValue = ExpectedValue(rating1, rating2);
+					double rating1 = ratings.Where(x => x.Identity.SteamId == steamId1).First().Rating;
+					double rating2 = ratings.Where(x => x.Identity.SteamId == steamId2).First().Rating;
+					double expectedValue = ExpectedWinRatio(rating1, rating2);
 					var performance = GetPeformanceEntry(steamId1, steamId2);
 					int totalEncounters = performance.Kills + performance.Deaths;
 					if(totalEncounters == 0)
@@ -125,14 +140,28 @@ namespace LogAnalyser
 					error += Math.Pow(expectedValue - actualValue, 2.0);
 				}
 			}
-			error = Math.Sqrt(error);
-			var evaluation = new RatingEvaluation(ratings.Values.ToList(), error);
+			error = Math.Sqrt(error) / ratings.Length;
+			var evaluation = new RatingEvaluation(ratings, error);
 			return evaluation;
 		}
 
-		double ExpectedValue(double rating1, double rating2)
+		double ExpectedWinRatio(double rating1, double rating2)
 		{
 			return rating1 / (rating1 + rating2);
+		}
+
+		PlayerRating[] GetMutatedRatings(PlayerRating[] ratings)
+		{
+			int index = _Random.Next(_PlayerData.Count);
+			var playerRating = ratings[index];
+			double newRating = playerRating.Rating + (_Random.Next(2) == 1 ? 1 : -1) * _MutationSpeed;
+			newRating = Math.Min(newRating, MaximumRating);
+			newRating = Math.Max(newRating, MinimumRating);
+			var newPlayerRating = new PlayerRating(playerRating.Identity, newRating);
+			_MutationSpeed = Math.Max(_MutationSpeed - MutationSpeedAdjustment, MinimumMutationSpeed);
+			var newRatings = ratings.ToArray();
+			newRatings[index] = newPlayerRating;
+			return newRatings;
 		}
 	}
 }
