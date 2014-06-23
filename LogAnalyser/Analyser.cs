@@ -79,8 +79,22 @@ namespace LogAnalyser
 					if (totalEncounters == 0)
 						continue;
 					double actualValue = (double)performance.Kills / totalEncounters * 100.0;
+					double difference = actualValue - expectedValue;
+					double absoluteDifference = Math.Abs(difference);
 					Console.WriteLine("{0} vs. {1}: {2} encounters", _PlayerData[steamId1].Identity.Name, _PlayerData[steamId2].Identity.Name, totalEncounters);
-					Console.WriteLine("{0:0.0}% actual, {1:0.0}% expected, {2:0.0}% deviation", actualValue, expectedValue, actualValue - expectedValue);
+					Console.Write("{0:0.0}% actual, {1:0.0}% expected, ", actualValue, expectedValue);
+					var originalColour = Console.ForegroundColor;
+					if (totalEncounters >= 15)
+					{
+						if (absoluteDifference < 5.0)
+							Console.ForegroundColor = ConsoleColor.Green;
+						else if (absoluteDifference < 10.0)
+							Console.ForegroundColor = ConsoleColor.Yellow;
+						else
+							Console.ForegroundColor = ConsoleColor.Red;
+					}
+					Console.WriteLine("{0:0.0}% deviation", difference);
+					Console.ForegroundColor = originalColour;
 				}
 			}
 		}
