@@ -43,6 +43,9 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="Analyser.cs" />
+    <Compile Include="PlayerPerformance.cs" />
+    <Compile Include="PlayerRating.cs" />
+    <Compile Include="RatingEvaluation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

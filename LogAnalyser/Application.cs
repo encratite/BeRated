@@ -13,6 +13,8 @@ namespace LogAnalyser
 			}
 			var analyser = new Analyser();
 			analyser.ProcessLogs(arguments[0]);
+			analyser.Analyse();
+			Console.ReadLine();
 		}
 	}
 }
