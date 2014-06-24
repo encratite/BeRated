@@ -12,9 +12,9 @@ namespace BeRated
 				return;
 			}
             string logPath = arguments[0];
-			var analyser = new Analyser();
-			analyser.ProcessLogs(logPath);
-            analyser.Analyse();
+			var analysis = new Analysis();
+			analysis.ProcessLogs(logPath);
+            analysis.Analyse();
 			Console.ReadLine();
 		}
 	}

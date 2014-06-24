@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace BeRated
 {
-	class Analyser
+	class Analysis
 	{
 		const double MinimumRating = 1.0;
 		const double InitialRating = 100.0;

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeRated.Analysis", "BeRated
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeRated.Common", "BeRated.Common\BeRated.Common.csproj", "{37FB6E96-EA93-4368-96E2-370D538735D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeRated.Logs", "BeRated.Logs\BeRated.Logs.csproj", "{E888B0CB-DB7C-4B67-B591-6A715046C64C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,16 @@ Global
 		{37FB6E96-EA93-4368-96E2-370D538735D5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{37FB6E96-EA93-4368-96E2-370D538735D5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{37FB6E96-EA93-4368-96E2-370D538735D5}.Release|Win32.ActiveCfg = Release|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E888B0CB-DB7C-4B67-B591-6A715046C64C}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

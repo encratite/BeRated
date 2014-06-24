@@ -7,7 +7,7 @@ namespace BeRated
     {
 		public const string BotId = "BOT";
 
-		static Regex KillPattern = new Regex("^L (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): \"(.+?)<\\d+><(.+?)><(TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed \"(.+?)<\\d+><(.+?)><(?:TERRORIST|CT)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
+		static Regex KillPattern = new Regex("^L (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): \"(.+?)<\\d+><(.+?)><(.+?)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed \"(.+?)<\\d+><(.+?)><(.+?)>\" \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
 
 		public static PlayerKill ReadPlayerKill(string line)
 		{
@@ -26,12 +26,13 @@ namespace BeRated
 			int second = getInt();
 			string killerName = getString();
 			string killerSteamId = getString();
-			var killerTeam = getString() == "CT" ? PlayerTeam.CounterTerrorist : PlayerTeam.Terrorist;
+			string killerTeam = getString();
 			int killerX = getInt();
 			int killerY = getInt();
 			int killerZ = getInt();
 			string victimName = getString();
 			string victimSteamId = getString();
+			string victimTeam = getString();
 			int victimX = getInt();
 			int victimY = getInt();
 			int victimZ = getInt();
@@ -41,10 +42,11 @@ namespace BeRated
 			{
 				Time = new DateTime(year, month, day, hour, minute, second),
 				Killer = new PlayerIdentity(killerSteamId, killerName),
+				KillerTeam = killerTeam,
 				KillerPosition = new Vector(killerX, killerY, killerZ),
 				Victim = new PlayerIdentity(victimSteamId, victimName),
+				VictimTeam = victimTeam,
 				VictimPosition = new Vector(victimX, victimY, victimZ),
-				KillerTeam = killerTeam,
 				Headshot = headshot,
 				Weapon = weapon,
 			};
