@@ -6,14 +6,16 @@ namespace LogAnalyser
 	{
 		static void Main(string[] arguments)
 		{
-			if (arguments.Length != 1)
+			if (arguments.Length != 2)
 			{
-				Console.WriteLine("Usage: <path to SRCDS logs folder>");
+				Console.WriteLine("Usage: <path to SRCDS logs folder> <player data .csv output path>");
 				return;
 			}
+            string logPath = arguments[0];
+            string csvPath = arguments[1];
 			var analyser = new Analyser();
-			analyser.ProcessLogs(arguments[0]);
-			analyser.Analyse();
+			analyser.ProcessLogs(logPath);
+            analyser.Analyse(csvPath);
 			Console.ReadLine();
 		}
 	}
