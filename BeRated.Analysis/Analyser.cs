@@ -34,7 +34,7 @@ namespace BeRated
 				ProcessLog(file);
 		}
 
-		public void Analyse(string playerCsvOutputPath)
+		public void Analyse()
 		{
 			var initialRatings = new List<PlayerRating>();
 			foreach (var playerInformation in _PlayerData.Values)
@@ -52,17 +52,13 @@ namespace BeRated
 			}
             Console.WriteLine("Error: {0}", bestRatings.Error);
             var ratings = bestRatings.Ratings.OrderByDescending(x => x.Rating);
-            using (var csvWriter = new StreamWriter(playerCsvOutputPath, false))
+            foreach (var rating in ratings)
             {
-                foreach (var rating in ratings)
-                {
-                    var playerInformation = _PlayerData[rating.Identity.SteamId];
-                    double? killDeathRatio = null;
-                    if (playerInformation.DeathCount > 0)
-                        killDeathRatio = (double)playerInformation.KillCount / playerInformation.DeathCount;
-                    Console.WriteLine("{0} ({1}): KDR {2:0.00}, rating {3:0.00}", rating.Identity.Name, rating.Identity.SteamId, killDeathRatio, rating.Rating);
-                    csvWriter.WriteLine("{0},{1},{2},{3},{4:0.00}", rating.Identity.Name, rating.Identity.SteamId, playerInformation.KillCount, playerInformation.DeathCount, rating.Rating);
-                }
+                var playerInformation = _PlayerData[rating.Identity.SteamId];
+                double? killDeathRatio = null;
+                if (playerInformation.DeathCount > 0)
+                    killDeathRatio = (double)playerInformation.KillCount / playerInformation.DeathCount;
+                Console.WriteLine("{0} ({1}): KDR {2:0.00}, rating {3:0.00}", rating.Identity.Name, rating.Identity.SteamId, killDeathRatio, rating.Rating);
             }
             PrintEncounterStatistics(ratings);
 		}
