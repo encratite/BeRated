@@ -1,6 +1,4 @@
-﻿using BeRated.Common;
-
-namespace LogAnalyser
+﻿namespace BeRated
 {
 	class PlayerRating
 	{

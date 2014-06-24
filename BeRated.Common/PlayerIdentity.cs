@@ -1,4 +1,4 @@
-﻿namespace BeRated.Common
+﻿namespace BeRated
 {
 	public class PlayerIdentity
 	{

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace BeRated.Common
+namespace BeRated
 {
     public static class LogParser
     {

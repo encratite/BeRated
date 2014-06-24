@@ -1,4 +1,4 @@
-﻿namespace LogAnalyser
+﻿namespace BeRated
 {
 	class PlayerPerformance
 	{

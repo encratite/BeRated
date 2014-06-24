@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BeRated.Common
+namespace BeRated
 {
 	public class PlayerInformation
 	{

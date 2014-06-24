@@ -7,7 +7,7 @@
     <ProjectGuid>{37FB6E96-EA93-4368-96E2-370D538735D5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BeRated.Common</RootNamespace>
+    <RootNamespace>BeRated</RootNamespace>
     <AssemblyName>BeRated.Common</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

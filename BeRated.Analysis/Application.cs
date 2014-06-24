@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LogAnalyser
+namespace BeRated
 {
 	class Application
 	{

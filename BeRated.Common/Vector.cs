@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BeRated.Common
+namespace BeRated
 {
 	public class Vector
 	{
