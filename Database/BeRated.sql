@@ -24,17 +24,58 @@ create table player_kill
 alter table player_kill add constraint player_kill_unique unique (time, killer_steam_id, victim_steam_id)
 go
 
-if object_id('get_user_name') is not null
-	drop function get_user_name
+if object_id('get_player_name') is not null
+	drop function get_player_name
 go
 
-create function get_user_name
+create function get_player_name
 (
-	@steam_id nvarchar(128)
+	@steam_id varchar(32)
 )
 returns nvarchar(128)
 begin
 	return (select top 1 killer_name from player_kill where killer_steam_id = @steam_id)
+end
+go
+
+if object_id('get_player_kills') is not null
+	drop function get_player_kills
+go
+
+create function get_player_kills
+(
+	@steam_id varchar(32)
+)
+returns integer
+begin
+	return (select count(*) from player_kill where killer_steam_id = @steam_id)
+end
+go
+
+if object_id('get_user_weapon_statistics') is not null
+	drop function get_user_weapon_statistics
+go
+
+create function get_user_weapon_statistics
+(
+	@steam_id nvarchar(128)
+)
+returns @weaponStatistics table
+(
+	weapon varchar(16) not null,
+	kills integer not null,
+	usage_percentage decimal(10, 1) not null
+) as
+begin
+	insert into @weaponStatistics
+		select
+			weapon,
+			count(*) as kills,
+			convert(decimal(10, 1), (cast(count(*) as real) / dbo.get_player_kills(@steam_id)) * 100) as usage_percentage
+		from player_kill
+		where killer_steam_id = @steam_id
+		group by weapon
+	return
 end
 go
 
@@ -44,7 +85,7 @@ go
 
 create view player_statistics as
 	select
-		dbo.get_user_name(kill_subquery.steam_id) as name,
+		dbo.get_player_name(kill_subquery.steam_id) as name,
 		kill_subquery.steam_id as steam_id,
 		kill_subquery.kills as kills,
 		death_subquery.deaths as deaths,
@@ -68,8 +109,8 @@ go
 
 create view encounter_statistics as
 	select
-		dbo.get_user_name(query1.killer_steam_id) as player1,
-		dbo.get_user_name(query1.victim_steam_id) as player2,
+		dbo.get_player_name(query1.killer_steam_id) as player1,
+		dbo.get_player_name(query1.victim_steam_id) as player2,
 		query1.kills as kills,
 		query2.kills as deaths,
 		query1.kills + query2.kills as encounters,
