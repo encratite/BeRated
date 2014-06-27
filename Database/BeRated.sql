@@ -1,4 +1,4 @@
-if object_id('dbo.player_kill') is not null
+if object_id('player_kill') is not null
 	drop table player_kill
 go
 
@@ -52,38 +52,12 @@ begin
 end
 go
 
-if object_id('get_user_weapon_statistics') is not null
-	drop function get_user_weapon_statistics
+if object_id('get_player_statistics') is not null
+	drop procedure get_player_statistics
 go
 
-create function get_user_weapon_statistics
-(
-	@steam_id nvarchar(128)
-)
-returns @weaponStatistics table
-(
-	weapon varchar(16) not null,
-	kills integer not null,
-	usage_percentage decimal(10, 1) not null
-) as
+create procedure get_player_statistics as
 begin
-	insert into @weaponStatistics
-		select
-			weapon,
-			count(*) as kills,
-			convert(decimal(10, 1), (cast(count(*) as real) / dbo.get_player_kills(@steam_id)) * 100) as usage_percentage
-		from player_kill
-		where killer_steam_id = @steam_id
-		group by weapon
-	return
-end
-go
-
-if object_id('player_statistics') is not null
-	drop view player_statistics
-go
-
-create view player_statistics as
 	select
 		dbo.get_player_name(kill_subquery.steam_id) as name,
 		kill_subquery.steam_id as steam_id,
@@ -101,16 +75,41 @@ create view player_statistics as
 			as death_subquery
 	where
 		kill_subquery.steam_id = headshot_subquery.steam_id and kill_subquery.steam_id = death_subquery.steam_id
+    order by name
+end
 go
 
-if object_id('encounter_statistics') is not null
-	drop view encounter_statistics
+if object_id('get_player_weapon_statistics') is not null
+	drop procedure get_player_weapon_statistics
 go
 
-create view encounter_statistics as
-	select
-		dbo.get_player_name(query1.killer_steam_id) as player1,
-		dbo.get_player_name(query1.victim_steam_id) as player2,
+create procedure get_player_weapon_statistics
+(
+	@steam_id varchar(32)
+) as
+begin
+    select
+        weapon,
+        count(*) as kills,
+        convert(decimal(10, 1), (cast(count(*) as real) / dbo.get_player_kills(@steam_id)) * 100) as usage_percentage
+    from player_kill
+    where killer_steam_id = @steam_id
+    group by weapon
+    order by kills desc
+end
+go
+
+if object_id('get_player_encounters') is not null
+	drop procedure get_player_encounters
+go
+
+create procedure get_player_encounters
+(
+    @steam_id varchar(32)
+) as
+begin
+    select
+		dbo.get_player_name(query1.victim_steam_id) as victim,
 		query1.kills as kills,
 		query2.kills as deaths,
 		query1.kills + query2.kills as encounters,
@@ -121,6 +120,8 @@ create view encounter_statistics as
 		(select killer_steam_id, victim_steam_id, count(*) as kills from player_kill group by killer_steam_id, victim_steam_id)
 			as query2
 	where
+		query1.killer_steam_id = @steam_id and
 		query1.killer_steam_id = query2.victim_steam_id and
 		query1.victim_steam_id = query2.killer_steam_id
-go
+	order by encounters desc
+end
