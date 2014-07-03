@@ -66,5 +66,5 @@ create table purchase
 	time timestamp not null,
 	team team_type not null,
 	item text not null,
-	primary key (player_id, line, time)
+	primary key (line, time)
 );
