@@ -64,6 +64,7 @@ create table purchase
 	-- Required for unique constraint
 	line integer not null,
 	time timestamp not null,
+	team team_type not null,
 	item text not null,
 	primary key (player_id, line, time)
 );
