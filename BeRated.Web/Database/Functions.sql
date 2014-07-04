@@ -86,7 +86,7 @@ begin
 	return deaths;
 end $$ language 'plpgsql';
 
-create or replace function get_player_kill_death_ratio(player_id integer) returns double precision as $$
+create or replace function get_player_kill_death_ratio(player_id integer) returns numeric as $$
 declare
 	kills integer;
 	deaths integer;
@@ -96,17 +96,17 @@ begin
 	if deaths = 0 then
 		return null;
 	end if;
-	return (kills::double precision) / deaths;
+	return (kills::numeric) / deaths;
 end $$ language 'plpgsql';
 
-create or replace function get_player_stats() returns table
+create or replace function get_all_player_stats() returns table
 (
 	id integer,
 	steam_id text,
 	name text,
 	kills integer,
 	deaths integer,
-	kill_death_ratio double precision
+	kill_death_ratio numeric
 ) as $$ begin
 	return query select
 		player.id,
@@ -114,6 +114,6 @@ create or replace function get_player_stats() returns table
 		player.name,
 		get_player_kills(player.id),
 		get_player_deaths(player.id),
-		get_player_kill_death_ratio(player.id)
+		round(get_player_kill_death_ratio(player.id), 2)
 	from player;
 end $$ language 'plpgsql';

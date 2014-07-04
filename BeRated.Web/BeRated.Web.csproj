@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
+    <Compile Include="Query\AllPlayerStatsRow.cs" />
     <Compile Include="Server.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +83,10 @@
     <ProjectReference Include="..\..\Ashod\Ashod.WebSocket\Ashod.WebSocket.csproj">
       <Project>{7b4923d9-8607-4b59-93fd-e2a4327a11bf}</Project>
       <Name>Ashod.WebSocket</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">
+      <Project>{9659019c-3181-4c5c-bd0d-0117456328a6}</Project>
+      <Name>Ashod</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

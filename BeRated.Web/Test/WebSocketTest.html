@@ -7,15 +7,15 @@
 <body>
 	<script>
 	function runTest() {
-		var url = 'ws://127.0.0.1:65080/';
+		var url = 'ws://127.0.0.1:1337/';
 		console.log('Connecting');
 		var socket = new WebSocket(url);
 		socket.onopen = function() {
 			console.log('Connected');
 			var call = {
 				id: 1,
-				method: 'test',
-				arguments: [173, 'A string']
+				method: 'getAllPlayerStats',
+				arguments: []
 			};
 			var message = JSON.stringify(call);
 			socket.send(message);

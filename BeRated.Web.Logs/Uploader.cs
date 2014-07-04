@@ -10,7 +10,7 @@ namespace BeRated
 	{
 		string _LogPath;
 		string _ConnectionString;
-		DatabaseFactory _Database;
+		DatabaseCommander _Database;
 
 		public Uploader(string logPath, string connectionString)
 		{
@@ -30,7 +30,7 @@ namespace BeRated
 		public void Run()
 		{
 			var connection = new NpgsqlConnection(_ConnectionString);
-			_Database = new DatabaseFactory(connection);
+			_Database = new DatabaseCommander(connection);
 			var files = Directory.GetFiles(_LogPath);
 			using (var transaction = _Database.Transaction())
 			{
