@@ -10,25 +10,37 @@
 		var url = 'ws://127.0.0.1:1337/';
 		console.log('Connecting');
 		var socket = new WebSocket(url);
-		socket.onopen = function() {
-			console.log('Connected');
+		
+		function call(method) {
+			var callArguments = [];
+			for(var i = 1; i < arguments.length; i++) {
+				var argument = arguments[i];
+				callArguments.push(argument);
+			}
 			var call = {
-				id: 1,
-				method: 'getAllPlayerStats',
-				arguments: []
+				id: 0,
+				method: method,
+				arguments: callArguments
 			};
 			var message = JSON.stringify(call);
 			socket.send(message);
+		}
+		
+		socket.onopen = function() {
+			console.log('Connected');
+			call('getAllPlayerStats');
+			call('getPlayerWeaponStats', 10);
 		};
+		
 		socket.onmessage = function(event) {
 			var result = JSON.parse(event.data);
 			console.log(result);
 		};
+		
 		socket.onclose = function() {
 			console.log('Disconnected');
 		};
 	}
-
 	runTest();
 	</script>
 </body>

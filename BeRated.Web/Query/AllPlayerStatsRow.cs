@@ -9,6 +9,7 @@ namespace BeRated.Query
 		public string Name;
 		public int Kills;
 		public int Deaths;
+		// Only set if Deaths > 0
 		public Decimal? KillDeathRatio;
 	}
 }

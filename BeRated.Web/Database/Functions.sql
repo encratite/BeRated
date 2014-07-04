@@ -31,6 +31,15 @@ begin
 	end if;
 end $$ language 'plpgsql';
 
+create or replace function convert_weapon(weapon text) returns text as $$
+begin
+	if weapon = 'knife_t' or weapon = 'knife_default_ct' then
+		return 'knife';
+	else
+		return weapon;
+	end if;
+end $$ language 'plpgsql';
+
 create or replace function process_kill(kill_time timestamp, killer_name text, killer_steam_id text, killer_team text, killer_x integer, killer_y integer, killer_z integer, victim_name text, victim_steam_id text, victim_team text, victim_x integer, victim_y integer, victim_z integer, weapon text, headshot boolean) returns void as $$
 declare
 	killer_id integer;
@@ -63,7 +72,7 @@ begin
 			victim_id,
 			victim_team_enum,
 			array[victim_x, victim_y, victim_z],
-			weapon,
+			convert_weapon(weapon),
 			headshot
 		);
 	exception when unique_violation then
@@ -96,7 +105,7 @@ begin
 	if deaths = 0 then
 		return null;
 	end if;
-	return (kills::numeric) / deaths;
+	return kills::numeric / deaths;
 end $$ language 'plpgsql';
 
 create or replace function get_all_player_stats() returns table
@@ -107,13 +116,59 @@ create or replace function get_all_player_stats() returns table
 	kills integer,
 	deaths integer,
 	kill_death_ratio numeric
-) as $$ begin
+) as $$
+begin
 	return query select
 		player.id,
 		player.steam_id,
 		player.name,
-		get_player_kills(player.id),
-		get_player_deaths(player.id),
-		round(get_player_kill_death_ratio(player.id), 2)
+		get_player_kills(player.id) as kills,
+		get_player_deaths(player.id) as deaths,
+		round(get_player_kill_death_ratio(player.id), 2) as kill_death_ratio
 	from player;
+end $$ language 'plpgsql';
+
+create or replace function get_player_weapon_kills(player_id integer, weapon text, headshots_only boolean) returns integer as $$
+declare
+	kills integer;
+begin
+	select count(*)
+	from kill
+	where
+		killer_id = player_id and
+		kill.weapon = get_player_weapon_kills.weapon and
+		(not headshots_only or headshot = true)
+	into kills;
+	return kills;
+end $$ language 'plpgsql';
+
+create or replace function get_player_weapon_headshot_percentage(player_id integer, weapon text) returns numeric as $$
+declare
+	kills integer;
+	headshots integer;
+begin
+	select get_player_weapon_kills(player_id, weapon, false) into kills;
+	select get_player_weapon_kills(player_id, weapon, true) into headshots;
+	return headshots::numeric / kills;
+end $$ language 'plpgsql';
+
+create or replace function get_player_weapon_stats(player_id integer) returns table
+(
+	weapon text,
+	kills integer,
+	headshots integer,
+	headshot_percentage numeric
+) as $$
+begin
+	if not exists (select 1 from player where id = player_id) then
+		raise exception 'Invalid player ID';
+	end if;
+	return query select
+		kill.weapon,
+		get_player_weapon_kills(player_id, kill.weapon, false) as kills,
+		get_player_weapon_kills(player_id, kill.weapon, true) as headshots,
+		round(get_player_weapon_headshot_percentage(player_id, kill.weapon) * 100, 1) as headshot_percentage
+	from kill
+	where killer_id = player_id
+	group by kill.weapon;
 end $$ language 'plpgsql';
