@@ -111,7 +111,6 @@ end $$ language 'plpgsql';
 create or replace function get_all_player_stats() returns table
 (
 	id integer,
-	steam_id text,
 	name text,
 	kills integer,
 	deaths integer,
@@ -120,7 +119,6 @@ create or replace function get_all_player_stats() returns table
 begin
 	return query select
 		player.id,
-		player.steam_id,
 		player.name,
 		get_player_kills(player.id) as kills,
 		get_player_deaths(player.id) as deaths,
@@ -152,6 +150,13 @@ begin
 	return headshots::numeric / kills;
 end $$ language 'plpgsql';
 
+create or replace function check_player_id(player_id integer) returns void as $$
+begin
+	if not exists (select 1 from player where id = player_id) then
+		raise exception 'Invalid player ID';
+	end if;
+end $$ language 'plpgsql';
+
 create or replace function get_player_weapon_stats(player_id integer) returns table
 (
 	weapon text,
@@ -160,9 +165,7 @@ create or replace function get_player_weapon_stats(player_id integer) returns ta
 	headshot_percentage numeric
 ) as $$
 begin
-	if not exists (select 1 from player where id = player_id) then
-		raise exception 'Invalid player ID';
-	end if;
+	perform check_player_id(player_id);
 	return query select
 		kill.weapon,
 		get_player_weapon_kills(player_id, kill.weapon, false) as kills,
@@ -171,4 +174,54 @@ begin
 	from kill
 	where killer_id = player_id
 	group by kill.weapon;
+end $$ language 'plpgsql';
+
+create or replace function get_matchup_kills(killer_id integer, victim_id integer) returns int as $$
+declare
+	kills integer;
+begin
+	select count(*)
+	from kill
+	where
+		kill.killer_id = get_matchup_kills.killer_id and
+		kill.victim_id = get_matchup_kills.victim_id
+	into kills;
+	return kills;
+end $$ language 'plpgsql';
+
+create or replace function get_encounter_win_percentage(player_id integer, opponent_id integer) returns numeric as $$
+declare
+	kills integer;
+	deaths integer;
+	encounters integer;
+begin
+	select get_matchup_kills(player_id, opponent_id) into kills;
+	select get_matchup_kills(opponent_id, player_id) into deaths;
+	encounters := kills + deaths;
+	if encounters = 0 then
+		return null;
+	end if;
+	return round(kills::numeric / encounters * 100, 1);
+end $$ language 'plpgsql';
+
+create or replace function get_player_encounter_stats(player_id integer) returns table
+(
+	opponent_id integer,
+	opponent_name text,
+	kills integer,
+	deaths integer,
+	win_percentage numeric
+) as $$
+begin
+	perform check_player_id(player_id);
+	return query select
+		id as opponent_id,
+		name as opponent_name,
+		get_matchup_kills(player_id, id) as kills,
+		get_matchup_kills(id, player_id) as deaths,
+		get_encounter_win_percentage(player_id, id) as win_percentage
+	from player
+	where
+		id != player_id and
+		get_encounter_win_percentage(player_id, id) is not null;
 end $$ language 'plpgsql';

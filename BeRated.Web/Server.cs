@@ -48,13 +48,19 @@ namespace BeRated
 		}
 
 		[WebSocketServerMethod]
-		List<PlayerWeaponStatsRow> GetPlayerWeaponStats(int playerId)
+		PlayerStats GetPlayerStats(int playerId)
 		{
-			using (var reader = _Database.ReadFunction("get_player_weapon_stats", new CommandParameter("player_id", playerId)))
+			var playerStats = new PlayerStats();
+			var idParameter = new CommandParameter("player_id", playerId);
+			using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter))
 			{
-				var weaponStats = reader.ReadAll<PlayerWeaponStatsRow>();
-				return weaponStats;
+				playerStats.Weapons = reader.ReadAll<PlayerWeaponStatsRow>();
 			}
+			using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter))
+			{
+				playerStats.Encounters = reader.ReadAll<PlayerEncounterStatsRow>();
+			}
+			return playerStats;
 		}
 
 		#endregion

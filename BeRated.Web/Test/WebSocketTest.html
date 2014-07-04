@@ -11,14 +11,17 @@
 		console.log('Connecting');
 		var socket = new WebSocket(url);
 		
-		function call(method) {
+		var allPlayerStatsId = 1;
+		var playerStatsId = 2;
+		
+		function call(method, id) {
 			var callArguments = [];
-			for(var i = 1; i < arguments.length; i++) {
+			for(var i = 2; i < arguments.length; i++) {
 				var argument = arguments[i];
 				callArguments.push(argument);
 			}
 			var call = {
-				id: 0,
+				id: id,
 				method: method,
 				arguments: callArguments
 			};
@@ -26,21 +29,34 @@
 			socket.send(message);
 		}
 		
+		function getRandomInteger(min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+		
 		socket.onopen = function() {
 			console.log('Connected');
-			call('getAllPlayerStats');
-			call('getPlayerWeaponStats', 10);
+			call('getAllPlayerStats', allPlayerStatsId);
 		};
 		
 		socket.onmessage = function(event) {
-			var result = JSON.parse(event.data);
-			console.log(result);
+			var message = JSON.parse(event.data);
+			if(message.error == null)
+				console.log(message.result);
+			else
+				console.error(message.error);
+			if(message.id === allPlayerStatsId && message.error == null) {
+				var result = message.result;
+				var randomIndex = getRandomInteger(0, message.result.length - 1);
+				var randomPlayer = message.result[randomIndex]
+				call('getPlayerStats', playerStatsId, randomPlayer.id);
+			}
 		};
 		
 		socket.onclose = function() {
-			console.log('Disconnected');
+			console.error('Disconnected');
 		};
 	}
+	
 	runTest();
 	</script>
 </body>

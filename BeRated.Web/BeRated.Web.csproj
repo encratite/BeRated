@@ -73,7 +73,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
+    <Compile Include="PlayerStats.cs" />
     <Compile Include="Query\AllPlayerStatsRow.cs" />
+    <Compile Include="Query\PlayerEncounterStatsRow.cs" />
     <Compile Include="Query\PlayerWeaponStatsRow.cs" />
     <Compile Include="Server.cs" />
   </ItemGroup>
