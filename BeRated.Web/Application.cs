@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace BeRated
 {
@@ -7,7 +8,11 @@ namespace BeRated
 		[STAThread]
 		static void Main()
 		{
-			System.Windows.Forms.Application.Run();
+			using (var server = new Server(65080, ""))
+			{
+				server.Run();
+				System.Windows.Forms.Application.Run();
+			}
 		}
 	}
 }

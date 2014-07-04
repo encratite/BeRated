@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeRated.Web.Logs", "BeRated
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ashod", "..\Ashod\Ashod\Ashod.csproj", "{9659019C-3181-4C5C-BD0D-0117456328A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ashod.WebSocket", "..\Ashod\Ashod.WebSocket\Ashod.WebSocket.csproj", "{7B4923D9-8607-4B59-93FD-E2A4327A11BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,16 @@ Global
 		{9659019C-3181-4C5C-BD0D-0117456328A6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{9659019C-3181-4C5C-BD0D-0117456328A6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{9659019C-3181-4C5C-BD0D-0117456328A6}.Release|Win32.ActiveCfg = Release|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

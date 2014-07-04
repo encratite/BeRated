@@ -22,7 +22,6 @@ drop table if exists kill cascade;
 
 create table kill
 (
-	id serial primary key,
 	time timestamp not null,
 	killer_id integer references player (id) not null,
 	killer_team team_type not null,
@@ -32,7 +31,7 @@ create table kill
 	victim_vector integer[3],
 	weapon text not null,
 	headshot boolean not null,
-	unique (time, killer_id, victim_id)
+	primary key (time, killer_id, victim_id)
 );
 
 drop table if exists round cascade;
@@ -54,7 +53,6 @@ create table round_player
 	round_id integer references round (id) not null,
 	player_id integer references player (id) not null,
 	team team_type not null,
-	
 	primary key (round_id, player_id)
 );
 

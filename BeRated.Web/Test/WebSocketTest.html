@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>WebSocket test</title>
+</head>
+<body>
+	<script>
+	function runTest() {
+		var url = 'ws://127.0.0.1:65080/';
+		console.log('Connecting');
+		var socket = new WebSocket(url);
+		socket.onopen = function() {
+			console.log('Connected');
+			var call = {
+				id: 1,
+				Method: 'test',
+				arguments: [173, 'A string']
+			};
+			var message = JSON.stringify(call);
+			socket.send(message);
+		};
+		socket.onmessage = function(event) {
+			var result = JSON.parse(event.data);
+			console.log(result);
+		};
+		socket.onclose = function() {
+			console.log('Disconnected');
+		};
+	}
+
+	runTest();
+	</script>
+</body>
+</html>
