@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BeRated.Web
+namespace BeRated
 {
 	static class Application
 	{

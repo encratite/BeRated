@@ -7,7 +7,7 @@
     <ProjectGuid>{15309ED6-CBEB-4EE5-B84B-E849D3DECFB0}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BeRated.Web.Logs</RootNamespace>
+    <RootNamespace>BeRated</RootNamespace>
     <AssemblyName>BeRated.Web.Logs</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Mono.Security">
+      <HintPath>..\packages\Npgsql.2.1.3\lib\net45\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\packages\Npgsql.2.1.3\lib\net45\Npgsql.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,12 +49,20 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Uploader.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">
+      <Project>{9659019c-3181-4c5c-bd0d-0117456328a6}</Project>
+      <Name>Ashod</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BeRated.Common\BeRated.Common.csproj">
       <Project>{37fb6e96-ea93-4368-96e2-370d538735d5}</Project>
       <Name>BeRated.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
