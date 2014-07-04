@@ -6,8 +6,9 @@ namespace BeRated
 	static class Application
 	{
 		[STAThread]
-		static void Main()
+		static void Main(string[] arguments)
 		{
+
 			using (var server = new Server(65080, ""))
 			{
 				server.Run();
