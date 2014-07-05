@@ -92,7 +92,7 @@ module BeRated {
 
 		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
 			var columns: Array<DataTableColumn> = [
-				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderPlayer.bind(this), true),
+				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderPlayerStatsName.bind(this), true),
 				new DataTableColumn('Kills', (record: IAllPlayerStats) => record.kills),
 				new DataTableColumn('Deaths', (record: IAllPlayerStats) => record.deaths),
 				new DataTableColumn('Kill/death ratio', (record: IAllPlayerStats) => record.killDeathRatio),
@@ -106,7 +106,7 @@ module BeRated {
 				new DataTableColumn('Rounds won (CT)', (record: IAllPlayerStats) => record.winPercentageCounterTerrorist, this.renderPercentage.bind(this))
 			];
 			var header = document.createElement('h1');
-			header.className = 'indexHeader';
+			header.className = 'header';
 			header.textContent = 'CS:GO Statistics';
 			var dataTable = new DataTable(allPlayerStats, columns);
 			document.body.appendChild(header);
@@ -123,7 +123,7 @@ module BeRated {
 			];
 			var weaponTable = new DataTable(playerStats.weapons, weaponColumns);
 			var encounterColumns: Array<DataTableColumn> = [
-				new DataTableColumn('Opponent', (record: IPlayerEncounterStats) => record.opponentName, this.renderPlayer.bind(this), true),
+				new DataTableColumn('Opponent', (record: IPlayerEncounterStats) => record.opponentName, this.renderEncounterStatsName.bind(this), true),
 				new DataTableColumn('Encounters', (record: IPlayerEncounterStats) => record.encounters),
 				new DataTableColumn('Kills', (record: IPlayerEncounterStats) => record.kills),
 				new DataTableColumn('Deaths', (record: IPlayerEncounterStats) => record.deaths),
@@ -141,7 +141,7 @@ module BeRated {
 			link.textContent = 'Return to index';
 			paragraph.appendChild(link);
 			var header = document.createElement('h1');
-			header.className = 'playerName';
+			header.className = 'header';
 			header.textContent = playerStats.name;
 			document.body.appendChild(paragraph);
 			document.body.appendChild(header);
@@ -153,6 +153,16 @@ module BeRated {
 			var node = document.createElement('a');
 			node.href = '/Player/' + id;
 			node.textContent = name;
+			return node;
+		}
+
+		private renderPlayerStatsName(name: string, record: IAllPlayerStats): Node {
+			var node = this.renderPlayer(record.name, record.id);
+			return node;
+		}
+
+		private renderEncounterStatsName(name: string, record: IPlayerEncounterStats): Node {
+			var node = this.renderPlayer(record.opponentName, record.opponentId);
 			return node;
 		}
 
