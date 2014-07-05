@@ -51,8 +51,15 @@ module BeRated {
 				var row = document.createElement('tr');
 				this.columns.forEach(((column: DataTableColumn) => {
 					var cell = document.createElement('td');
-					var value = column.selector(record);
-					cell.innerText = value;
+					var render = column.render;
+					if (render == null) {
+						var value = column.select(record);
+						cell.innerText = value;
+					}
+					else {
+						var node = render(record);
+						cell.appendChild(node);
+					}
 					row.appendChild(cell);
 				}).bind(this));
 				this.table.appendChild(row);
@@ -64,7 +71,7 @@ module BeRated {
 			if (sortColumn == null)
 				sortColumn = this.defaultSortColumn;
 			this.data.sort(((record1: any, record2: any) => {
-				var selector = sortColumn.selector;
+				var selector = sortColumn.select;
 				var property1 = selector(record1);
 				var property2 = selector(record2);
 				var output = 0;

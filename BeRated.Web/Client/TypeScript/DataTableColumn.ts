@@ -1,12 +1,15 @@
 ﻿module BeRated {
 	export class DataTableColumn {
-		selector: (any) => any;
 		description: string;
+		select: (any) => any;
+		render: (any) => Node = null;
 		defaultSort: boolean = false;
 
-		constructor(selector: (any) => any, description: string, defaultSort?: boolean) {
-			this.selector = selector;
+		constructor(description: string, select: (any) => any, render: (any) => Node = null, defaultSort?: boolean) {
 			this.description = description;
+			this.select = select;
+			if (render !== undefined)
+				this.render = render;
 			if (defaultSort !== undefined)
 				this.defaultSort = defaultSort;
 		}

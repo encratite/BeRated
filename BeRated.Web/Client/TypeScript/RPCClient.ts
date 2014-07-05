@@ -1,4 +1,5 @@
-﻿/// <reference path="IResultMessage.ts"/>
+﻿/// <reference path="CallMessage.ts"/>
+/// <reference path="IResultMessage.ts"/>
 
 module BeRated {
 	export class RpcClient {

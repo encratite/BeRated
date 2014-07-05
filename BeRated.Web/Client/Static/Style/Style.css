@@ -1,0 +1,49 @@
+* {
+	font-family: "Palatino Linotype", serif;
+}
+
+body {
+	padding: 2em;
+}
+
+a:link {
+	color: #0645ad;
+	text-decoration: none;
+}
+
+a:active {
+	color: #faa700;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:visited {
+	color: #0c008a;
+}
+
+.dataTable {
+	border-collapse: collapse;
+	background-color: #f9f9f9;
+}
+
+.dataTable th {
+	text-align: left;
+	background-color: #f2f2f2;
+	border: 1px solid rgb(170, 170, 170);
+	padding-left: 0.4em;
+	padding-right: 0.4em;
+	cursor: pointer;
+}
+
+.dataTable td {
+	text-align: right;
+	border: 1px solid rgb(170, 170, 170);
+	padding-left: 0.4em;
+	padding-right: 0.4em;
+}
+
+.dataTable td:first-child {
+	text-align: left;
+}

@@ -79,10 +79,10 @@ module BeRated {
 
 		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
 			var columns: Array<DataTableColumn> = [
-				new DataTableColumn((record: IAllPlayerStats) => record.name, 'Name', true),
-				new DataTableColumn((record: IAllPlayerStats) => record.kills, 'Kills'),
-				new DataTableColumn((record: IAllPlayerStats) => record.deaths, 'Deaths'),
-				new DataTableColumn((record: IAllPlayerStats) => record.killDeathRatio, 'Kill/death ratio')
+				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderName.bind(this), true),
+				new DataTableColumn('Kills', (record: IAllPlayerStats) => record.kills),
+				new DataTableColumn('Deaths', (record: IAllPlayerStats) => record.deaths),
+				new DataTableColumn('Kill/death ratio', (record: IAllPlayerStats) => record.killDeathRatio)
 			];
 			var dataTable = new DataTable(allPlayerStats, columns);
 			document.body.appendChild(dataTable.table);
@@ -90,6 +90,13 @@ module BeRated {
 
 		private onGetPlayerStats(playerStats: IPlayerStats) {
 			console.log(playerStats);
+		}
+
+		private renderName(record: IAllPlayerStats): Node {
+			var node = document.createElement('a');
+			node.href = '/Player/' + record.id;
+			node.innerText = record.name;
+			return node;
 		}
 	}
 }
