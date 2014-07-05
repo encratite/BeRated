@@ -225,10 +225,10 @@ create function get_all_player_stats() returns table
 	kill_death_ratio numeric,
 	rounds_played integer,
 	win_percentage numeric,
-	rounds_played_t integer,
-	win_percentage_t numeric,
-	rounds_played_ct integer,
-	win_percentage_ct numeric
+	rounds_played_terrorist integer,
+	win_percentage_terrorist numeric,
+	rounds_played_counter_terrorist integer,
+	win_percentage_counter_terrorist numeric
 ) as $$
 begin
 	return query select
@@ -239,10 +239,10 @@ begin
 		round(get_player_kill_death_ratio(player.id), 2) as kill_death_ratio,
 		get_player_rounds(player.id) as rounds_played,
 		get_player_round_win_percentage(player.id) as win_percentage,
-		get_player_rounds(player.id, 'terrorist'::team_type) as rounds_played_t,
-		get_player_round_win_percentage(player.id, 'terrorist'::team_type) as win_percentage_t,
-		get_player_rounds(player.id, 'counter_terrorist'::team_type) as rounds_played_ct,
-		get_player_round_win_percentage(player.id, 'counter_terrorist'::team_type) as win_percentage_ct
+		get_player_rounds(player.id, 'terrorist'::team_type) as rounds_played_terrorist,
+		get_player_round_win_percentage(player.id, 'terrorist'::team_type) as win_percentage_terrorist,
+		get_player_rounds(player.id, 'counter_terrorist'::team_type) as rounds_played_counter_terrorist,
+		get_player_round_win_percentage(player.id, 'counter_terrorist'::team_type) as win_percentage_counter_terrorist
 	from player;
 end $$ language 'plpgsql';
 
@@ -382,6 +382,9 @@ declare
 	sfui_notice_enum sfui_notice_type;
 	round_id integer;
 begin
+	if exists (select 1 from round where time = end_of_round_time) then
+		return;
+	end if;
 	select get_team(triggering_team) into triggering_team_enum;
 	select get_sfui_notice(sfui_notice) into sfui_notice_enum;
 	insert into round

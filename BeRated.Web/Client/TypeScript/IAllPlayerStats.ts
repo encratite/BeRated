@@ -6,5 +6,11 @@
 		deaths: number;
 		// null if deaths == 0
 		killDeathRatio: number;
+		roundsPlayed: number;
+		winPercentage: number;
+		roundsPlayedTerrorist: number;
+		winPercentageTerrorist: number;
+		roundsPlayedCounterTerrorist: number;
+		winPercentageCounterTerrorist: number;
 	}
 } 

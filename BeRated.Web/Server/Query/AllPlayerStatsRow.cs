@@ -10,5 +10,11 @@ namespace BeRated.Query
 		public int Deaths { get; set; }
 		// Only set if Deaths > 0
 		public Decimal? KillDeathRatio { get; set; }
+		public int RoundsPlayed { get; set; }
+		public Decimal WinPercentage { get; set; }
+		public int RoundsPlayedTerrorist { get; set; }
+		public Decimal WinPercentageTerrorist { get; set; }
+		public int RoundsPlayedCounterTerrorist { get; set; }
+		public Decimal WinPercentageCounterTerrorist { get; set; }
 	}
 }

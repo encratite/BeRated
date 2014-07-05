@@ -95,7 +95,13 @@ module BeRated {
 				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderPlayerStatsName.bind(this), true),
 				new DataTableColumn('Kills', (record: IAllPlayerStats) => record.kills),
 				new DataTableColumn('Deaths', (record: IAllPlayerStats) => record.deaths),
-				new DataTableColumn('Kill/death ratio', (record: IAllPlayerStats) => record.killDeathRatio)
+				new DataTableColumn('Kill/death ratio', (record: IAllPlayerStats) => record.killDeathRatio),
+				new DataTableColumn('Rounds', (record: IAllPlayerStats) => record.roundsPlayed),
+				new DataTableColumn('Rounds (CT)', (record: IAllPlayerStats) => record.roundsPlayedCounterTerrorist),
+				new DataTableColumn('Rounds (T)', (record: IAllPlayerStats) => record.roundsPlayedTerrorist),
+				new DataTableColumn('Rounds won', (record: IAllPlayerStats) => record.winPercentage, this.renderRoundWinPercentage.bind(this)),
+				new DataTableColumn('Rounds won (T)', (record: IAllPlayerStats) => record.winPercentageTerrorist, this.renderRoundWinPercentageTerrorist.bind(this)),
+				new DataTableColumn('Rounds won (CT)', (record: IAllPlayerStats) => record.winPercentageCounterTerrorist, this.renderRoundWinPercentageCounterTerrorist.bind(this))
 			];
 			var dataTable = new DataTable(allPlayerStats, columns);
 			document.body.appendChild(dataTable.table);
@@ -163,6 +169,21 @@ module BeRated {
 
 		private renderWinPercentage(record: IPlayerEncounterStats): Node {
 			var node = this.renderPercentage(record.winPercentage);
+			return node;
+		}
+
+		private renderRoundWinPercentage(record: IAllPlayerStats): Node {
+			var node = this.renderPercentage(record.winPercentage);
+			return node;
+		}
+
+		private renderRoundWinPercentageTerrorist(record: IAllPlayerStats): Node {
+			var node = this.renderPercentage(record.winPercentageTerrorist);
+			return node;
+		}
+
+		private renderRoundWinPercentageCounterTerrorist(record: IAllPlayerStats): Node {
+			var node = this.renderPercentage(record.winPercentageCounterTerrorist);
 			return node;
 		}
 	}
