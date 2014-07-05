@@ -51,7 +51,9 @@ namespace BeRated
 		PlayerStats GetPlayerStats(int playerId)
 		{
 			var playerStats = new PlayerStats();
+			playerStats.Id = playerId;
 			var idParameter = new CommandParameter("player_id", playerId);
+			playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
 			using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter))
 			{
 				playerStats.Weapons = reader.ReadAll<PlayerWeaponStatsRow>();

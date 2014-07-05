@@ -9,6 +9,22 @@ begin
 	lock purchase;
 end $$ language 'plpgsql';
 
+create or replace function check_player_id(player_id integer) returns void as $$
+begin
+	if not exists (select 1 from player where id = player_id) then
+		raise exception 'Invalid player ID';
+	end if;
+end $$ language 'plpgsql';
+
+create or replace function get_player_name(player_id integer) returns text as $$
+declare
+	name text;
+begin
+	perform check_player_id(player_id);
+	select player.name from player where id = player_id into name;
+	return name;
+end $$ language 'plpgsql';
+
 create or replace function update_player(name text, steam_id text) returns integer as $$
 declare
 	player_id integer;
@@ -148,13 +164,6 @@ begin
 	select get_player_weapon_kills(player_id, weapon, false) into kills;
 	select get_player_weapon_kills(player_id, weapon, true) into headshots;
 	return headshots::numeric / kills;
-end $$ language 'plpgsql';
-
-create or replace function check_player_id(player_id integer) returns void as $$
-begin
-	if not exists (select 1 from player where id = player_id) then
-		raise exception 'Invalid player ID';
-	end if;
 end $$ language 'plpgsql';
 
 create or replace function get_player_weapon_stats(player_id integer) returns table

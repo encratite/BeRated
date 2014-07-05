@@ -100,7 +100,15 @@
     <Content Include="Client\Static\Index.html" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Client\TypeScript\RPCClient.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\Client.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\Configuration.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\IAllPlayerStats.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\IPlayerEncounterStats.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\IPlayerStats.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\IPlayerWeaponStats.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\Main.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\Route.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\RpcClient.ts" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Client\TypeScript\CallMessage.ts" />

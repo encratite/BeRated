@@ -62,7 +62,7 @@ create table purchase
 (
 	player_id integer references player (id) not null,
 	-- The line in the log file the purchase was extracted from
-	-- Required for unique constraint
+	-- Hack to make the primary key work
 	line integer not null,
 	time timestamp not null,
 	team team_type not null,
