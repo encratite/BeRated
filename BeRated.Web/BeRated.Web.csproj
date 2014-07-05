@@ -97,11 +97,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Client\Static\Index.html" />
-  </ItemGroup>
-  <ItemGroup>
     <TypeScriptCompile Include="Client\TypeScript\Client.ts" />
     <TypeScriptCompile Include="Client\TypeScript\Configuration.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\DataTable.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\DataTableColumn.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IAllPlayerStats.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IPlayerEncounterStats.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IPlayerStats.ts" />
@@ -115,6 +114,9 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Client\TypeScript\IResultMessage.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Client\Static\Frame.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

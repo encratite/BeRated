@@ -1,6 +1,7 @@
 ﻿/// <reference path="Configuration.ts"/>
 /// <reference path="Route.ts"/>
 /// <reference path="RpcClient.ts"/>
+/// <reference path="DataTable.ts"/>
 /// <reference path="IAllPlayerStats.ts"/>
 /// <reference path="IPlayerStats.ts"/>
 
@@ -76,8 +77,15 @@ module BeRated {
 			this.rpcClient.call('getPlayerStats', [playerId], this.onGetAllPlayerStats.bind(this));
 		}
 
-		private onGetAllPlayerStats(allPlayerStats: IAllPlayerStats) {
-			console.log(allPlayerStats);
+		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
+			var columns: Array<DataTableColumn> = [
+				new DataTableColumn((record: IAllPlayerStats) => record.name, 'Name', true),
+				new DataTableColumn((record: IAllPlayerStats) => record.kills, 'Kills'),
+				new DataTableColumn((record: IAllPlayerStats) => record.deaths, 'Deaths'),
+				new DataTableColumn((record: IAllPlayerStats) => record.killDeathRatio, 'Kill/death ratio')
+			];
+			var dataTable = new DataTable(allPlayerStats, columns);
+			document.body.appendChild(dataTable.table);
 		}
 
 		private onGetPlayerStats(playerStats: IPlayerStats) {

@@ -10,5 +10,5 @@ for %%f in (TypeScript\*.ts) do (
 	)
 )
 set sourceFiles=%sourceFiles% %main%
-tsc --out %output% %sourceFiles%
+tsc --out %output% --removeComments %sourceFiles%
 @echo on
