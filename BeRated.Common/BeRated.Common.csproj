@@ -39,10 +39,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Disconnect.cs" />
+    <Compile Include="EndOfRound.cs" />
     <Compile Include="LogParser.cs" />
+    <Compile Include="MatchReader.cs" />
     <Compile Include="PlayerIdentity.cs" />
     <Compile Include="PlayerInformation.cs" />
     <Compile Include="PlayerKill.cs" />
+    <Compile Include="TeamSwitch.cs" />
     <Compile Include="Vector.cs" />
   </ItemGroup>
   <ItemGroup>

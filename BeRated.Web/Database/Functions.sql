@@ -47,6 +47,27 @@ begin
 	end if;
 end $$ language 'plpgsql';
 
+create or replace function get_sfui_notice(sfui_notice text) returns sfui_notice_type as $$
+begin
+	if sfui_notice = 'SFUI_Notice_All_Hostages_Rescued' then
+		return 'all_hostages_rescued'::sfui_notice_type;
+	elsif sfui_notice = 'SFUI_Notice_Bomb_Defused' then
+		return 'bomb_defused'::sfui_notice_type;
+	elsif sfui_notice = 'SFUI_Notice_CTs_Win' then
+		return 'cts_win'::sfui_notice_type;
+	elsif sfui_notice = 'SFUI_Notice_Hostages_Not_Rescued' then
+		return 'hostages_not_rescued'::sfui_notice_type;
+	elsif sfui_notice = 'SFUI_Notice_Target_Bombed' then
+		return 'notice_target_bombed'::sfui_notice_type;
+	elsif sfui_notice = 'SFUI_Notice_Target_Saved' then
+		return 'target_saved'::sfui_notice_type;
+	elsif sfui_notice = 'SFUI_Notice_Terrorists_Win' then
+		return 'terrorists_win'::sfui_notice_type;
+	else
+		raise exception 'Invalid SFUI notice: %s', sfui_notice;
+	end if;
+end $$ language 'plpgsql';
+
 create or replace function convert_weapon(weapon text) returns text as $$
 begin
 	if weapon = 'knife_t' or weapon = 'knife_default_ct' then
@@ -235,4 +256,65 @@ begin
 	where
 		id != player_id and
 		get_encounter_win_percentage(player_id, id) is not null;
+end $$ language 'plpgsql';
+
+create or replace function get_player_id_by_steam_id(steam_id text) returns integer as $$
+declare
+	player_id integer;
+begin
+	select id from player where steam_id = get_player_id_by_steam_id.steam_id into player_id;
+	return player_id;
+end $$ language 'plpgsql';
+
+create or replace function add_players_to_team(round_id integer, team team_type, steam_ids_string text) returns void as $$
+declare
+	steam_ids text[];
+	steam_id text;
+	player_id integer;
+begin
+	select string_to_array(steam_ids_string, ',') into steam_ids;
+	foreach steam_id in array steam_ids loop
+		select get_player_id_by_steam_id(player_steam_id) into player_id;
+		insert into round_player
+		(
+			round_id,
+			player_id,
+			team
+		)
+		values
+		(
+			round_id,
+			player_id,
+			team_type
+		);
+	end loop;
+end $$ language 'plpgsql';
+
+create or replace function process_end_of_round(end_of_round_time timestamp, triggering_team team_type, sfui_notice text, terrorist_score integer, counter_terrorist_score integer, max_rounds integer, terrorist_steam_ids text, counter_terrorist_steam_ids text) returns void as $$
+declare
+	sfui_notice_enum sfui_notice_type;
+	round_id integer;
+begin
+	select get_sfui_notice(sfui_notice) into sfui_notice_enum;
+	insert into round
+	(
+		time,
+		triggering_team,
+		sfui_notice,
+		terrorist_score,
+		counter_terrorist_score,
+		max_rounds
+	)
+	values
+	(
+		end_of_round_time,
+		triggering_team,
+		sfui_notice_enum,
+		terrorist_score,
+		counter_terrorist_score,
+		max_rounds
+	)
+	returning id into round_id;
+	perform add_players_to_team(round_id, 'terrorist'::team_type, terrorist_player_ids);
+	perform add_players_to_team(round_id, 'counter_terrorist'::team_type, counter_terrorist_player_ids);
 end $$ language 'plpgsql';

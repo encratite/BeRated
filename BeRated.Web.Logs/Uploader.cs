@@ -1,8 +1,10 @@
 ﻿using Ashod.Database;
 using Npgsql;
 using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 
 namespace BeRated
 {
@@ -11,6 +13,8 @@ namespace BeRated
 		string _LogPath;
 		string _ConnectionString;
 		DatabaseCommander _Database;
+		int? _MaxRounds = null;
+		Dictionary<string, string> _Players = new Dictionary<string, string>();
 
 		public Uploader(string logPath, string connectionString)
 		{
@@ -43,6 +47,9 @@ namespace BeRated
 
 		void ProcessLog(string path)
 		{
+			_MaxRounds = null;
+			_Players = new Dictionary<string, string>();
+			_Players.Clear();
 			Console.WriteLine(path);
 			var lines = File.ReadLines(path);
 			foreach (var line in lines)
@@ -77,6 +84,56 @@ namespace BeRated
 				_Database.NonQueryFunction("process_kill", parameters);
 				return;
 			}
+			int? maxRounds = LogParser.ReadMaxRounds(line);
+			if (maxRounds != null)
+			{
+				_MaxRounds = maxRounds;
+				return;
+			}
+			var teamSwitch = LogParser.ReadTeamSwitch(line);
+			if (teamSwitch != null)
+			{
+				string steamId = teamSwitch.Player.SteamId;
+				string team = teamSwitch.CurrentTeam;
+				if (steamId == LogParser.BotId || (team != LogParser.TerroristTeam && team != LogParser.CounterTerroristTeam))
+					return;
+				_Players[steamId] = team;
+				return;
+			}
+			var disconnect = LogParser.ReadDisconnect(line);
+			if (disconnect != null)
+			{
+				string steamId = disconnect.Player.SteamId;
+				if (steamId == LogParser.BotId)
+					return;
+				_Players.Remove(steamId);
+			}
+			var endOfRound = LogParser.ReadEndOfRound(line);
+			if (endOfRound != null)
+			{
+				string terroristIds = GetSteamIdsString(LogParser.TerroristTeam);
+				string counterTerroristIds = GetSteamIdsString(LogParser.CounterTerroristTeam);
+				var parameters = new[]
+				{
+					new CommandParameter("end_of_round_time", endOfRound.Time),
+					new CommandParameter("triggering_team", endOfRound.TriggeringTeam),
+					new CommandParameter("sfui_notice", endOfRound.SfuiNotice),
+					new CommandParameter("terrorist_score", endOfRound.TerroristScore),
+					new CommandParameter("counter_terrorist_score", endOfRound.CounterTerroristScore),
+					new CommandParameter("max_rounds", _MaxRounds),
+					new CommandParameter("terrorist_steam_ids", terroristIds),
+					new CommandParameter("counter_terrorist_steam_ids", counterTerroristIds),
+				};
+				_Database.NonQueryFunction("process_end_of_round", parameters);
+				return;
+			}
+		}
+
+		string GetSteamIdsString(string team)
+		{
+			var players = _Players.Where(pair => pair.Value == team).Select(pair => pair.Key).ToArray();
+			string output = string.Join(",", players);
+			return output;
 		}
 	}
 }

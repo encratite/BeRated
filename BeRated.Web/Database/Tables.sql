@@ -1,5 +1,26 @@
 set client_min_messages to warning;
 
+drop type if exists team_type cascade;
+
+create type team_type as enum
+(
+	'terrorist',
+	'counter_terrorist'
+);
+
+drop type if exists sfui_notice cascade;
+
+create type sfui_notice_type as enum
+(
+	'all_hostages_rescued',
+	'bomb_defused',
+	'cts_win',
+	'hostages_not_rescued',
+	'target_bombed',
+	'target_saved',
+	'terrorists_win'
+);
+
 drop table if exists player cascade;
 
 create table player
@@ -8,14 +29,6 @@ create table player
 	-- The latest name of the player
 	name text not null,
 	steam_id text unique not null
-);
-
-drop type if exists team_type cascade;
-
-create type team_type as enum
-(
-	'terrorist',
-	'counter_terrorist'
 );
 
 drop table if exists kill cascade;
@@ -40,10 +53,11 @@ create table round
 (
 	id serial primary key,
 	time timestamp unique not null,
-	winner team_type not null,
-	final_round boolean not null,
+	triggering_team team_type not null,
+	sfui_notice sfui_notice_type not null,
 	terrorist_score integer not null,
-	counter_terrorist_score integer not null
+	counter_terrorist_score integer not null,
+	max_rounds integer not null
 );
 
 drop table if exists round_player cascade;
