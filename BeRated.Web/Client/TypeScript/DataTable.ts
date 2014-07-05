@@ -35,7 +35,7 @@ module BeRated {
 				}
 				var header = document.createElement('th');
 				header.onclick = (event: any) => this.onSortClick(column);
-				header.innerText = column.description;
+				header.textContent = column.description;
 				this.headerRow.appendChild(header);
 			}).bind(this));
 			if (this.sortColumn == null)
@@ -47,7 +47,7 @@ module BeRated {
 					var render = column.render;
 					if (render == null) {
 						var value = column.select(record);
-						cell.innerText = value;
+						cell.textContent = value;
 					}
 					else {
 						var node = render(record);
@@ -64,7 +64,8 @@ module BeRated {
 
 		private refresh() {
 			this.sortRows();
-			this.table.innerHTML = '';
+			while (this.table.firstChild)
+				this.table.removeChild(this.table.firstChild);
 			this.table.appendChild(this.headerRow);
 			this.rows.forEach(((row: DataTableRow) => {
 				this.table.appendChild(row.row);

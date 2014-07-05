@@ -44,7 +44,7 @@ module BeRated {
 			document.body.innerHTML = '';
 			var error = document.createElement('p');
 			error.className = 'error';
-			error.innerText = 'Failed to connect to Web Socket server.';
+			error.textContent = 'Failed to connect to Web Socket server.';
 			document.body.appendChild(error);
 		}
 
@@ -118,14 +118,25 @@ module BeRated {
 				new DataTableColumn('Win percentage', (record: IPlayerEncounterStats) => record.winPercentage, this.renderWinPercentage.bind(this))
 			];
 			var encounterTable = new DataTable(playerStats.encounters, encounterColumns);
-			document.body.appendChild(weaponTable.table);
-			document.body.appendChild(encounterTable.table);
+			var addTable = (table: HTMLTableElement) => {
+				table.classList.add('individualPlayerStatsTable');
+				document.body.appendChild(table);
+			};
+			var paragraph = document.createElement('p');
+			paragraph.className = 'returnLink';
+			var link = document.createElement('a');
+			link.href = '/';
+			link.textContent = 'Return to overview';
+			paragraph.appendChild(link);
+			document.body.appendChild(paragraph);
+			addTable(weaponTable.table);
+			addTable(encounterTable.table);
 		}
 
 		private renderPlayer(name: string, id: number): Node {
 			var node = document.createElement('a');
 			node.href = '/Player/' + id;
-			node.innerText = name;
+			node.textContent = name;
 			return node;
 		}
 

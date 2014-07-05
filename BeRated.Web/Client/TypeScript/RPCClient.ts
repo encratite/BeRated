@@ -38,9 +38,10 @@ module BeRated {
 			socket.onopen = this.onOpen.bind(this);
 			socket.onmessage = this.onMessage.bind(this);
 			socket.onclose = this.onClose.bind(this);
+			socket.onerror = this.onError.bind(this);
 		}
 
-		private onOpen(event: any) {
+		private onOpen(event: Event) {
 			this.onConnect();
 		}
 
@@ -60,7 +61,7 @@ module BeRated {
 			callback(message.result);
 		}
 
-		private onClose() {
+		private onClose(event: CloseEvent) {
 			if (this.automaticReconnect) {
 				console.error('Disconnected from server, attempting to reconnect');
 				window.setTimeout(this.connect.bind(this), 5000);
@@ -69,6 +70,10 @@ module BeRated {
 				console.error('Disconnected from server');
 			if(this.onDisconnect != null)
 				this.onDisconnect();
+		}
+
+		private onError(event: ErrorEvent) {
+			console.error(event.message);
 		}
 	}
 }

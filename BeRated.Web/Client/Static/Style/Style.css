@@ -30,7 +30,7 @@ a:visited {
 }
 
 .dataTable th {
-	text-align: left;
+	text-align: center;
 	background-color: #f2f2f2;
 	border: 1px solid rgb(170, 170, 170);
 	padding-left: 0.4em;
@@ -53,4 +53,12 @@ a:visited {
 	font-size: 1.5em;
 	font-weight: bold;
 	color: red;
+}
+
+.individualPlayerStatsTable {
+	width: 35em;
+}
+
+.returnLink {
+	margin-bottom: 1em;
 }
