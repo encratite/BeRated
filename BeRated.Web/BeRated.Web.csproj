@@ -72,12 +72,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Application.cs" />
-    <Compile Include="PlayerStats.cs" />
-    <Compile Include="Query\AllPlayerStatsRow.cs" />
-    <Compile Include="Query\PlayerEncounterStatsRow.cs" />
-    <Compile Include="Query\PlayerWeaponStatsRow.cs" />
-    <Compile Include="Server.cs" />
+    <Compile Include="Server\Application.cs" />
+    <Compile Include="Server\PlayerStats.cs" />
+    <Compile Include="Server\Query\AllPlayerStatsRow.cs" />
+    <Compile Include="Server\Query\PlayerEncounterStatsRow.cs" />
+    <Compile Include="Server\Query\PlayerWeaponStatsRow.cs" />
+    <Compile Include="Server\Server.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -95,6 +95,18 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Client\Static\Index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="Client\TypeScript\RPCClient.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="Client\TypeScript\CallMessage.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="Client\TypeScript\IResultMessage.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
