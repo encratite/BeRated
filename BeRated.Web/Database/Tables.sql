@@ -8,7 +8,7 @@ create type team_type as enum
 	'counter_terrorist'
 );
 
-drop type if exists sfui_notice cascade;
+drop type if exists sfui_notice_type cascade;
 
 create type sfui_notice_type as enum
 (

@@ -10,10 +10,12 @@ namespace BeRated
 {
 	class Uploader: IDisposable
 	{
+		const int MaxRoundsDefault = 30;
+
 		string _LogPath;
 		string _ConnectionString;
 		DatabaseCommander _Database;
-		int? _MaxRounds = null;
+		int _MaxRounds = MaxRoundsDefault;
 		Dictionary<string, string> _Players = new Dictionary<string, string>();
 
 		public Uploader(string logPath, string connectionString)
@@ -47,7 +49,7 @@ namespace BeRated
 
 		void ProcessLog(string path)
 		{
-			_MaxRounds = null;
+			_MaxRounds = MaxRoundsDefault;
 			_Players = new Dictionary<string, string>();
 			_Players.Clear();
 			Console.WriteLine(path);
@@ -66,13 +68,11 @@ namespace BeRated
 				var parameters = new []
 				{
 					new CommandParameter("kill_time", kill.Time),
-					new CommandParameter("killer_name", kill.Killer.Name),
 					new CommandParameter("killer_steam_id", kill.Killer.SteamId),
 					new CommandParameter("killer_team", kill.KillerTeam),
 					new CommandParameter("killer_x", kill.KillerPosition.X),
 					new CommandParameter("killer_y", kill.KillerPosition.Y),
 					new CommandParameter("killer_z", kill.KillerPosition.Z),
-					new CommandParameter("victim_name", kill.Victim.Name),
 					new CommandParameter("victim_steam_id", kill.Victim.SteamId),
 					new CommandParameter("victim_team", kill.VictimTeam),
 					new CommandParameter("victim_x", kill.VictimPosition.X),
@@ -87,7 +87,7 @@ namespace BeRated
 			int? maxRounds = LogParser.ReadMaxRounds(line);
 			if (maxRounds != null)
 			{
-				_MaxRounds = maxRounds;
+				_MaxRounds = maxRounds.Value;
 				return;
 			}
 			var teamSwitch = LogParser.ReadTeamSwitch(line);
@@ -98,6 +98,12 @@ namespace BeRated
 				if (steamId == LogParser.BotId || (team != LogParser.TerroristTeam && team != LogParser.CounterTerroristTeam))
 					return;
 				_Players[steamId] = team;
+				var parameters = new[]
+				{
+					new CommandParameter("name", teamSwitch.Player.Name),
+					new CommandParameter("steam_id", steamId),
+				};
+				_Database.NonQueryFunction("update_player", parameters);
 				return;
 			}
 			var disconnect = LogParser.ReadDisconnect(line);
@@ -111,6 +117,8 @@ namespace BeRated
 			var endOfRound = LogParser.ReadEndOfRound(line);
 			if (endOfRound != null)
 			{
+				if (endOfRound.TerroristScore == 0 && endOfRound.CounterTerroristScore == 0)
+					return;
 				string terroristIds = GetSteamIdsString(LogParser.TerroristTeam);
 				string counterTerroristIds = GetSteamIdsString(LogParser.CounterTerroristTeam);
 				var parameters = new[]

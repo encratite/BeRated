@@ -12,7 +12,7 @@ end $$ language 'plpgsql';
 create or replace function check_player_id(player_id integer) returns void as $$
 begin
 	if not exists (select 1 from player where id = player_id) then
-		raise exception 'Invalid player ID';
+		raise exception 'Invalid player ID: %', player_id;
 	end if;
 end $$ language 'plpgsql';
 
@@ -43,7 +43,7 @@ begin
 	elsif team = 'CT' then
 		return 'counter_terrorist'::team_type;
 	else
-		raise exception 'Invalid team identifier: %s', team;
+		raise exception 'Invalid team identifier: %', team;
 	end if;
 end $$ language 'plpgsql';
 
@@ -58,13 +58,13 @@ begin
 	elsif sfui_notice = 'SFUI_Notice_Hostages_Not_Rescued' then
 		return 'hostages_not_rescued'::sfui_notice_type;
 	elsif sfui_notice = 'SFUI_Notice_Target_Bombed' then
-		return 'notice_target_bombed'::sfui_notice_type;
+		return 'target_bombed'::sfui_notice_type;
 	elsif sfui_notice = 'SFUI_Notice_Target_Saved' then
 		return 'target_saved'::sfui_notice_type;
 	elsif sfui_notice = 'SFUI_Notice_Terrorists_Win' then
 		return 'terrorists_win'::sfui_notice_type;
 	else
-		raise exception 'Invalid SFUI notice: %s', sfui_notice;
+		raise exception 'Invalid SFUI notice: %', sfui_notice;
 	end if;
 end $$ language 'plpgsql';
 
@@ -77,15 +77,15 @@ begin
 	end if;
 end $$ language 'plpgsql';
 
-create or replace function process_kill(kill_time timestamp, killer_name text, killer_steam_id text, killer_team text, killer_x integer, killer_y integer, killer_z integer, victim_name text, victim_steam_id text, victim_team text, victim_x integer, victim_y integer, victim_z integer, weapon text, headshot boolean) returns void as $$
+create or replace function process_kill(kill_time timestamp, killer_steam_id text, killer_team text, killer_x integer, killer_y integer, killer_z integer, victim_steam_id text, victim_team text, victim_x integer, victim_y integer, victim_z integer, weapon text, headshot boolean) returns void as $$
 declare
 	killer_id integer;
 	killer_team_enum team_type;
 	victim_id integer;
 	victim_team_enum team_type;
 begin
-	select update_player(killer_name, killer_steam_id) into killer_id;
-	select update_player(victim_name, victim_steam_id) into victim_id;
+	select get_player_id_by_steam_id(killer_steam_id) into killer_id;
+	select get_player_id_by_steam_id(victim_steam_id) into victim_id;
 	select get_team(killer_team) into killer_team_enum;
 	select get_team(victim_team) into victim_team_enum;
 	begin
@@ -262,19 +262,22 @@ create or replace function get_player_id_by_steam_id(steam_id text) returns inte
 declare
 	player_id integer;
 begin
-	select id from player where steam_id = get_player_id_by_steam_id.steam_id into player_id;
+	select id from player where player.steam_id = get_player_id_by_steam_id.steam_id into player_id;
+	if not found then
+		raise exception 'Unable to find player with Steam ID %', steam_id;
+	end if;
 	return player_id;
 end $$ language 'plpgsql';
 
 create or replace function add_players_to_team(round_id integer, team team_type, steam_ids_string text) returns void as $$
 declare
 	steam_ids text[];
-	steam_id text;
+	loop_steam_id text;
 	player_id integer;
 begin
 	select string_to_array(steam_ids_string, ',') into steam_ids;
-	foreach steam_id in array steam_ids loop
-		select get_player_id_by_steam_id(player_steam_id) into player_id;
+	foreach loop_steam_id in array steam_ids loop
+		select get_player_id_by_steam_id(loop_steam_id) into player_id;
 		insert into round_player
 		(
 			round_id,
@@ -285,16 +288,18 @@ begin
 		(
 			round_id,
 			player_id,
-			team_type
+			team
 		);
 	end loop;
 end $$ language 'plpgsql';
 
-create or replace function process_end_of_round(end_of_round_time timestamp, triggering_team team_type, sfui_notice text, terrorist_score integer, counter_terrorist_score integer, max_rounds integer, terrorist_steam_ids text, counter_terrorist_steam_ids text) returns void as $$
+create or replace function process_end_of_round(end_of_round_time timestamp, triggering_team text, sfui_notice text, terrorist_score integer, counter_terrorist_score integer, max_rounds integer, terrorist_steam_ids text, counter_terrorist_steam_ids text) returns void as $$
 declare
+	triggering_team_enum team_type;
 	sfui_notice_enum sfui_notice_type;
 	round_id integer;
 begin
+	select get_team(triggering_team) into triggering_team_enum;
 	select get_sfui_notice(sfui_notice) into sfui_notice_enum;
 	insert into round
 	(
@@ -308,13 +313,13 @@ begin
 	values
 	(
 		end_of_round_time,
-		triggering_team,
+		triggering_team_enum,
 		sfui_notice_enum,
 		terrorist_score,
 		counter_terrorist_score,
 		max_rounds
 	)
 	returning id into round_id;
-	perform add_players_to_team(round_id, 'terrorist'::team_type, terrorist_player_ids);
-	perform add_players_to_team(round_id, 'counter_terrorist'::team_type, counter_terrorist_player_ids);
+	perform add_players_to_team(round_id, 'terrorist'::team_type, terrorist_steam_ids);
+	perform add_players_to_team(round_id, 'counter_terrorist'::team_type, counter_terrorist_steam_ids);
 end $$ language 'plpgsql';
