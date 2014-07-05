@@ -5,6 +5,7 @@
 		private onConnect: () => void;
 		private callbacks: { [id: number]: Function } = {};
 		private id: number = 0;
+		private automaticReconnect: boolean = false;
 
 		constructor(url: string, onConnect: () => void) {
 			this.url = url;
@@ -55,8 +56,12 @@
 		}
 
 		private onClose() {
-			console.error('Disconnected from WebSocket server, attempting to reconnect');
-			window.setTimeout(this.connect.bind(this), 5000);
+			if (this.automaticReconnect) {
+				console.error('Disconnected from server, attempting to reconnect');
+				window.setTimeout(this.connect.bind(this), 5000);
+			}
+			else
+				console.error('Disconnected from server');
 		}
 	}
 }

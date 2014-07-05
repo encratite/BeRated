@@ -1,7 +1,7 @@
 @echo off
 title TypeScript
 setlocal enabledelayedexpansion
-set output=Static\Client.js
+set output=Static\Script\Client.js
 set main=TypeScript\Main.ts
 set sourceFiles=
 for %%f in (TypeScript\*.ts) do (
