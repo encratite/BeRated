@@ -16,5 +16,7 @@ namespace BeRated.Query
 		public Decimal WinPercentageTerrorist { get; set; }
 		public int RoundsPlayedCounterTerrorist { get; set; }
 		public Decimal WinPercentageCounterTerrorist { get; set; }
+		public int GamesPlayed { get; set; }
+		public Decimal GameWinPercentage { get; set; }
 	}
 }

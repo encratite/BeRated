@@ -50,7 +50,8 @@ module BeRated {
 						cell.textContent = value;
 					}
 					else {
-						var node = render(record);
+						var value = column.select(record);
+						var node = render(value, record);
 						cell.appendChild(node);
 					}
 					row.appendChild(cell);

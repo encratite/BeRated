@@ -92,16 +92,18 @@ module BeRated {
 
 		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
 			var columns: Array<DataTableColumn> = [
-				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderPlayerStatsName.bind(this), true),
+				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderPlayer.bind(this), true),
 				new DataTableColumn('Kills', (record: IAllPlayerStats) => record.kills),
 				new DataTableColumn('Deaths', (record: IAllPlayerStats) => record.deaths),
 				new DataTableColumn('Kill/death ratio', (record: IAllPlayerStats) => record.killDeathRatio),
+				new DataTableColumn('Games', (record: IAllPlayerStats) => record.gamesPlayed),
 				new DataTableColumn('Rounds', (record: IAllPlayerStats) => record.roundsPlayed),
 				new DataTableColumn('Rounds (CT)', (record: IAllPlayerStats) => record.roundsPlayedCounterTerrorist),
 				new DataTableColumn('Rounds (T)', (record: IAllPlayerStats) => record.roundsPlayedTerrorist),
-				new DataTableColumn('Rounds won', (record: IAllPlayerStats) => record.winPercentage, this.renderRoundWinPercentage.bind(this)),
-				new DataTableColumn('Rounds won (T)', (record: IAllPlayerStats) => record.winPercentageTerrorist, this.renderRoundWinPercentageTerrorist.bind(this)),
-				new DataTableColumn('Rounds won (CT)', (record: IAllPlayerStats) => record.winPercentageCounterTerrorist, this.renderRoundWinPercentageCounterTerrorist.bind(this))
+				new DataTableColumn('Games won', (record: IAllPlayerStats) => record.gameWinPercentage, this.renderPercentage.bind(this)),
+				new DataTableColumn('Rounds won', (record: IAllPlayerStats) => record.winPercentage, this.renderPercentage.bind(this)),
+				new DataTableColumn('Rounds won (T)', (record: IAllPlayerStats) => record.winPercentageTerrorist, this.renderPercentage.bind(this)),
+				new DataTableColumn('Rounds won (CT)', (record: IAllPlayerStats) => record.winPercentageCounterTerrorist, this.renderPercentage.bind(this))
 			];
 			var header = document.createElement('h1');
 			header.className = 'indexHeader';
@@ -117,15 +119,15 @@ module BeRated {
 				new DataTableColumn('Weapon', (record: IPlayerWeaponStats) => record.weapon),
 				new DataTableColumn('Kills', (record: IPlayerWeaponStats) => record.kills, null, true, SortMode.Descending),
 				new DataTableColumn('Headshot kills', (record: IPlayerWeaponStats) => record.headshots),
-				new DataTableColumn('Headshot kill percentage', (record: IPlayerWeaponStats) => record.headshotPercentage, this.renderHeadhshotPercentage.bind(this))
+				new DataTableColumn('Headshot kill percentage', (record: IPlayerWeaponStats) => record.headshotPercentage, this.renderPercentage.bind(this))
 			];
 			var weaponTable = new DataTable(playerStats.weapons, weaponColumns);
 			var encounterColumns: Array<DataTableColumn> = [
-				new DataTableColumn('Opponent', (record: IPlayerEncounterStats) => record.opponentName, this.renderEncounterStatsName.bind(this), true),
+				new DataTableColumn('Opponent', (record: IPlayerEncounterStats) => record.opponentName, this.renderPlayer.bind(this), true),
 				new DataTableColumn('Encounters', (record: IPlayerEncounterStats) => record.encounters),
 				new DataTableColumn('Kills', (record: IPlayerEncounterStats) => record.kills),
 				new DataTableColumn('Deaths', (record: IPlayerEncounterStats) => record.deaths),
-				new DataTableColumn('Win percentage', (record: IPlayerEncounterStats) => record.winPercentage, this.renderWinPercentage.bind(this))
+				new DataTableColumn('Win percentage', (record: IPlayerEncounterStats) => record.winPercentage, this.renderPercentage.bind(this))
 			];
 			var encounterTable = new DataTable(playerStats.encounters, encounterColumns);
 			var addTable = (table: HTMLTableElement) => {
@@ -154,44 +156,9 @@ module BeRated {
 			return node;
 		}
 
-		private renderPlayerStatsName(record: IAllPlayerStats): Node {
-			var node = this.renderPlayer(record.name, record.id);
-			return node;
-		}
-
-		private renderEncounterStatsName(record: IPlayerEncounterStats): Node {
-			var node = this.renderPlayer(record.opponentName, record.opponentId);
-			return node;
-		}
-
 		private renderPercentage(percentage: number): Node {
 			var text = percentage + '%';
 			var node = document.createTextNode(text);
-			return node;
-		}
-
-		private renderHeadhshotPercentage(record: IPlayerWeaponStats): Node {
-			var node = this.renderPercentage(record.headshotPercentage);
-			return node;
-		}
-
-		private renderWinPercentage(record: IPlayerEncounterStats): Node {
-			var node = this.renderPercentage(record.winPercentage);
-			return node;
-		}
-
-		private renderRoundWinPercentage(record: IAllPlayerStats): Node {
-			var node = this.renderPercentage(record.winPercentage);
-			return node;
-		}
-
-		private renderRoundWinPercentageTerrorist(record: IAllPlayerStats): Node {
-			var node = this.renderPercentage(record.winPercentageTerrorist);
-			return node;
-		}
-
-		private renderRoundWinPercentageCounterTerrorist(record: IAllPlayerStats): Node {
-			var node = this.renderPercentage(record.winPercentageCounterTerrorist);
 			return node;
 		}
 	}

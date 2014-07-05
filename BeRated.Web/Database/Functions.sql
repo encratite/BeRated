@@ -180,7 +180,20 @@ begin
 	return kills::numeric / deaths;
 end $$ language 'plpgsql';
 
-create function get_player_rounds(player_id integer, team team_type default null, get_rounds_won boolean default null) returns integer as $$
+create function is_end_of_game(score integer, max_rounds integer) returns boolean as $$
+begin
+	return score > (max_rounds / 2);
+end $$ language 'plpgsql';
+
+create function is_end_of_game(score1 integer, score2 integer, max_rounds integer) returns boolean as $$
+begin
+	return
+		is_end_of_game(score1, max_rounds) or
+		is_end_of_game(score2, max_rounds) or
+		score1 + score2 >= max_rounds;
+end $$ language 'plpgsql';
+
+create function get_player_rounds(player_id integer, team team_type default null, get_rounds_won boolean default null, end_of_game boolean default false) returns integer as $$
 declare
 	rounds_won integer;
 begin
@@ -199,21 +212,38 @@ begin
 		(
 			get_player_rounds.team is null or
 			get_player_rounds.team = round_player.team
+		) and
+		(
+			not end_of_game or
+			is_end_of_game(round.terrorist_score, round.counter_terrorist_score, round.max_rounds)
 		)
 	into rounds_won;
 	return rounds_won;
 end $$ language 'plpgsql';
 
+create function get_percentage(x integer, y integer) returns numeric as $$
+begin
+	return round(x::numeric / y * 100, 1);
+end $$ language 'plpgsql';
+
+create function get_player_game_win_percentage(player_id integer) returns numeric as $$
+declare
+	wins integer;
+	games integer;
+begin
+	select get_player_rounds(player_id, null, true, true) into wins;
+	select get_player_rounds(player_id, null, null, true) into games;
+	return get_percentage(wins, games);
+end $$ language 'plpgsql';
+
 create function get_player_round_win_percentage(player_id integer, team team_type default null) returns numeric as $$
 declare
 	wins integer;
-	losses integer;
 	games integer;
 begin
 	select get_player_rounds(player_id, team, true) into wins;
-	select get_player_rounds(player_id, team, false) into losses;
-	games := wins + losses;
-	return round(wins::numeric / games * 100, 1);
+	select get_player_rounds(player_id, team) into games;
+	return get_percentage(wins, games);
 end $$ language 'plpgsql';
 
 create function get_all_player_stats() returns table
@@ -228,7 +258,9 @@ create function get_all_player_stats() returns table
 	rounds_played_terrorist integer,
 	win_percentage_terrorist numeric,
 	rounds_played_counter_terrorist integer,
-	win_percentage_counter_terrorist numeric
+	win_percentage_counter_terrorist numeric,
+	games_played integer,
+	game_win_percentage numeric
 ) as $$
 begin
 	return query select
@@ -242,7 +274,9 @@ begin
 		get_player_rounds(player.id, 'terrorist'::team_type) as rounds_played_terrorist,
 		get_player_round_win_percentage(player.id, 'terrorist'::team_type) as win_percentage_terrorist,
 		get_player_rounds(player.id, 'counter_terrorist'::team_type) as rounds_played_counter_terrorist,
-		get_player_round_win_percentage(player.id, 'counter_terrorist'::team_type) as win_percentage_counter_terrorist
+		get_player_round_win_percentage(player.id, 'counter_terrorist'::team_type) as win_percentage_counter_terrorist,
+		get_player_rounds(player.id, null, null, true) as games_played,
+		get_player_game_win_percentage(player.id) as game_win_percentage
 	from player;
 end $$ language 'plpgsql';
 
@@ -267,7 +301,7 @@ declare
 begin
 	select get_player_weapon_kills(player_id, weapon, false) into kills;
 	select get_player_weapon_kills(player_id, weapon, true) into headshots;
-	return headshots::numeric / kills;
+	return get_percentage(headshots, kills);
 end $$ language 'plpgsql';
 
 create function get_player_weapon_stats(player_id integer) returns table
@@ -283,7 +317,7 @@ begin
 		kill.weapon,
 		get_player_weapon_kills(player_id, kill.weapon, false) as kills,
 		get_player_weapon_kills(player_id, kill.weapon, true) as headshots,
-		round(get_player_weapon_headshot_percentage(player_id, kill.weapon) * 100, 1) as headshot_percentage
+		get_player_weapon_headshot_percentage(player_id, kill.weapon) as headshot_percentage
 	from kill
 	where killer_id = player_id
 	group by kill.weapon;
@@ -314,7 +348,7 @@ begin
 	if encounters = 0 then
 		return null;
 	end if;
-	return round(kills::numeric / encounters * 100, 1);
+	return get_percentage(kills, encounters);
 end $$ language 'plpgsql';
 
 create function get_player_encounter_stats(player_id integer) returns table

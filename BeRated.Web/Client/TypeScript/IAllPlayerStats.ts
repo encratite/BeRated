@@ -12,5 +12,7 @@
 		winPercentageTerrorist: number;
 		roundsPlayedCounterTerrorist: number;
 		winPercentageCounterTerrorist: number;
+		gamesPlayed: number;
+		gameWinPercentage: number;
 	}
 } 
