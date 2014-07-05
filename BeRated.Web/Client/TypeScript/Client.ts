@@ -1,4 +1,10 @@
-﻿module BeRated {
+﻿/// <reference path="Configuration.ts"/>
+/// <reference path="Route.ts"/>
+/// <reference path="RpcClient.ts"/>
+/// <reference path="IAllPlayerStats.ts"/>
+/// <reference path="IPlayerStats.ts"/>
+
+module BeRated {
 	var client: Client = null;
 
 	export class Client {

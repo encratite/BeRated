@@ -1,4 +1,6 @@
-﻿module BeRated {
+﻿/// <reference path="IResultMessage.ts"/>
+
+module BeRated {
 	export class RpcClient {
 		private url: string;
 		private webSocket: WebSocket;
