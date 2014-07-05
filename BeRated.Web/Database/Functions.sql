@@ -1,6 +1,20 @@
 set client_min_messages to warning;
 
-create or replace function lock_tables() returns void as $$
+create or replace function drop_functions() returns void as $$
+declare
+	function_record record;
+	drop_command text;
+begin
+	for function_record in select * from pg_proc inner join pg_namespace ns on (pg_proc.pronamespace = ns.oid) where ns.nspname = 'public' order by proname loop
+		drop_command := 'drop function ' || function_record.nspname || '.' || function_record.proname || '(' || oidvectortypes(function_record.proargtypes) || ');';
+		--raise warning '%', drop_command;
+		execute drop_command;
+	end loop;
+end $$ language 'plpgsql';
+
+select drop_functions();
+
+create function lock_tables() returns void as $$
 begin
 	lock player;
 	lock kill;
@@ -9,14 +23,14 @@ begin
 	lock purchase;
 end $$ language 'plpgsql';
 
-create or replace function check_player_id(player_id integer) returns void as $$
+create function check_player_id(player_id integer) returns void as $$
 begin
 	if not exists (select 1 from player where id = player_id) then
 		raise exception 'Invalid player ID: %', player_id;
 	end if;
 end $$ language 'plpgsql';
 
-create or replace function get_player_name(player_id integer) returns text as $$
+create function get_player_name(player_id integer) returns text as $$
 declare
 	name text;
 begin
@@ -25,7 +39,7 @@ begin
 	return name;
 end $$ language 'plpgsql';
 
-create or replace function update_player(name text, steam_id text) returns integer as $$
+create function update_player(name text, steam_id text) returns integer as $$
 declare
 	player_id integer;
 begin
@@ -36,7 +50,7 @@ begin
 	return player_id;
 end $$ language 'plpgsql';
 
-create or replace function get_team(team text) returns team_type as $$
+create function get_team(team text) returns team_type as $$
 begin
 	if team = 'TERRORIST' then
 		return 'terrorist'::team_type;
@@ -47,7 +61,7 @@ begin
 	end if;
 end $$ language 'plpgsql';
 
-create or replace function get_sfui_notice(sfui_notice text) returns sfui_notice_type as $$
+create function get_sfui_notice(sfui_notice text) returns sfui_notice_type as $$
 begin
 	if sfui_notice = 'SFUI_Notice_All_Hostages_Rescued' then
 		return 'all_hostages_rescued'::sfui_notice_type;
@@ -68,7 +82,28 @@ begin
 	end if;
 end $$ language 'plpgsql';
 
-create or replace function convert_weapon(weapon text) returns text as $$
+create function get_winning_team(sfui_notice sfui_notice_type) returns team_type as $$
+begin
+	if sfui_notice = 'all_hostages_rescued'::sfui_notice_type then
+		return 'counter_terrorist'::team_type;
+	elsif sfui_notice = 'bomb_defused'::sfui_notice_type then
+		return 'counter_terrorist'::team_type;
+	elsif sfui_notice = 'cts_win'::sfui_notice_type then
+		return 'counter_terrorist'::team_type;
+	elsif sfui_notice = 'hostages_not_rescued'::sfui_notice_type then
+		return 'terrorist'::team_type;
+	elsif sfui_notice = 'target_bombed'::sfui_notice_type then
+		return 'terrorist'::team_type;
+	elsif sfui_notice = 'target_saved'::sfui_notice_type then
+		return 'counter_terrorist'::team_type;
+	elsif sfui_notice = 'terrorists_win'::sfui_notice_type then
+		return 'terrorist'::team_type;
+	else
+		raise exception 'Unknown SFUI notice enum: %', sfui_notice;
+	end if;
+end $$ language 'plpgsql';
+
+create function convert_weapon(weapon text) returns text as $$
 begin
 	if weapon = 'knife_t' or weapon = 'knife_default_ct' then
 		return 'knife';
@@ -77,7 +112,7 @@ begin
 	end if;
 end $$ language 'plpgsql';
 
-create or replace function process_kill(kill_time timestamp, killer_steam_id text, killer_team text, killer_x integer, killer_y integer, killer_z integer, victim_steam_id text, victim_team text, victim_x integer, victim_y integer, victim_z integer, weapon text, headshot boolean) returns void as $$
+create function process_kill(kill_time timestamp, killer_steam_id text, killer_team text, killer_x integer, killer_y integer, killer_z integer, victim_steam_id text, victim_team text, victim_x integer, victim_y integer, victim_z integer, weapon text, headshot boolean) returns void as $$
 declare
 	killer_id integer;
 	killer_team_enum team_type;
@@ -116,7 +151,7 @@ begin
 	end;
 end $$ language 'plpgsql';
 
-create or replace function get_player_kills(player_id integer) returns int as $$
+create function get_player_kills(player_id integer) returns int as $$
 declare
 	kills integer;
 begin
@@ -124,7 +159,7 @@ begin
 	return kills;
 end $$ language 'plpgsql';
 
-create or replace function get_player_deaths(player_id integer) returns int as $$
+create function get_player_deaths(player_id integer) returns int as $$
 declare
 	deaths integer;
 begin
@@ -132,7 +167,7 @@ begin
 	return deaths;
 end $$ language 'plpgsql';
 
-create or replace function get_player_kill_death_ratio(player_id integer) returns numeric as $$
+create function get_player_kill_death_ratio(player_id integer) returns numeric as $$
 declare
 	kills integer;
 	deaths integer;
@@ -145,13 +180,55 @@ begin
 	return kills::numeric / deaths;
 end $$ language 'plpgsql';
 
-create or replace function get_all_player_stats() returns table
+create function get_player_rounds(player_id integer, team team_type default null, get_rounds_won boolean default null) returns integer as $$
+declare
+	rounds_won integer;
+begin
+	select count(*)
+	from round, round_player
+	where
+		round.id = round_player.round_id and
+		round_player.player_id = get_player_rounds.player_id and
+		(
+			get_rounds_won is null or
+			(
+				(get_rounds_won and get_winning_team(round.sfui_notice) = round_player.team) or
+				(not get_rounds_won and get_winning_team(round.sfui_notice) != round_player.team)
+			)
+		) and
+		(
+			get_player_rounds.team is null or
+			get_player_rounds.team = round_player.team
+		)
+	into rounds_won;
+	return rounds_won;
+end $$ language 'plpgsql';
+
+create function get_player_round_win_percentage(player_id integer, team team_type default null) returns numeric as $$
+declare
+	wins integer;
+	losses integer;
+	games integer;
+begin
+	select get_player_rounds(player_id, team, true) into wins;
+	select get_player_rounds(player_id, team, false) into losses;
+	games := wins + losses;
+	return round(wins::numeric / games * 100, 1);
+end $$ language 'plpgsql';
+
+create function get_all_player_stats() returns table
 (
 	id integer,
 	name text,
 	kills integer,
 	deaths integer,
-	kill_death_ratio numeric
+	kill_death_ratio numeric,
+	rounds_played integer,
+	win_percentage numeric,
+	rounds_played_t integer,
+	win_percentage_t numeric,
+	rounds_played_ct integer,
+	win_percentage_ct numeric
 ) as $$
 begin
 	return query select
@@ -159,11 +236,17 @@ begin
 		player.name,
 		get_player_kills(player.id) as kills,
 		get_player_deaths(player.id) as deaths,
-		round(get_player_kill_death_ratio(player.id), 2) as kill_death_ratio
+		round(get_player_kill_death_ratio(player.id), 2) as kill_death_ratio,
+		get_player_rounds(player.id) as rounds_played,
+		get_player_round_win_percentage(player.id) as win_percentage,
+		get_player_rounds(player.id, 'terrorist'::team_type) as rounds_played_t,
+		get_player_round_win_percentage(player.id, 'terrorist'::team_type) as win_percentage_t,
+		get_player_rounds(player.id, 'counter_terrorist'::team_type) as rounds_played_ct,
+		get_player_round_win_percentage(player.id, 'counter_terrorist'::team_type) as win_percentage_ct
 	from player;
 end $$ language 'plpgsql';
 
-create or replace function get_player_weapon_kills(player_id integer, weapon text, headshots_only boolean) returns integer as $$
+create function get_player_weapon_kills(player_id integer, weapon text, headshots_only boolean) returns integer as $$
 declare
 	kills integer;
 begin
@@ -177,7 +260,7 @@ begin
 	return kills;
 end $$ language 'plpgsql';
 
-create or replace function get_player_weapon_headshot_percentage(player_id integer, weapon text) returns numeric as $$
+create function get_player_weapon_headshot_percentage(player_id integer, weapon text) returns numeric as $$
 declare
 	kills integer;
 	headshots integer;
@@ -187,7 +270,7 @@ begin
 	return headshots::numeric / kills;
 end $$ language 'plpgsql';
 
-create or replace function get_player_weapon_stats(player_id integer) returns table
+create function get_player_weapon_stats(player_id integer) returns table
 (
 	weapon text,
 	kills integer,
@@ -206,7 +289,7 @@ begin
 	group by kill.weapon;
 end $$ language 'plpgsql';
 
-create or replace function get_matchup_kills(killer_id integer, victim_id integer) returns int as $$
+create function get_matchup_kills(killer_id integer, victim_id integer) returns int as $$
 declare
 	kills integer;
 begin
@@ -219,7 +302,7 @@ begin
 	return kills;
 end $$ language 'plpgsql';
 
-create or replace function get_encounter_win_percentage(player_id integer, opponent_id integer) returns numeric as $$
+create function get_encounter_win_percentage(player_id integer, opponent_id integer) returns numeric as $$
 declare
 	kills integer;
 	deaths integer;
@@ -234,7 +317,7 @@ begin
 	return round(kills::numeric / encounters * 100, 1);
 end $$ language 'plpgsql';
 
-create or replace function get_player_encounter_stats(player_id integer) returns table
+create function get_player_encounter_stats(player_id integer) returns table
 (
 	opponent_id integer,
 	opponent_name text,
@@ -258,7 +341,7 @@ begin
 		get_encounter_win_percentage(player_id, id) is not null;
 end $$ language 'plpgsql';
 
-create or replace function get_player_id_by_steam_id(steam_id text) returns integer as $$
+create function get_player_id_by_steam_id(steam_id text) returns integer as $$
 declare
 	player_id integer;
 begin
@@ -269,7 +352,7 @@ begin
 	return player_id;
 end $$ language 'plpgsql';
 
-create or replace function add_players_to_team(round_id integer, team team_type, steam_ids_string text) returns void as $$
+create function add_players_to_team(round_id integer, team team_type, steam_ids_string text) returns void as $$
 declare
 	steam_ids text[];
 	loop_steam_id text;
@@ -293,7 +376,7 @@ begin
 	end loop;
 end $$ language 'plpgsql';
 
-create or replace function process_end_of_round(end_of_round_time timestamp, triggering_team text, sfui_notice text, terrorist_score integer, counter_terrorist_score integer, max_rounds integer, terrorist_steam_ids text, counter_terrorist_steam_ids text) returns void as $$
+create function process_end_of_round(end_of_round_time timestamp, triggering_team text, sfui_notice text, terrorist_score integer, counter_terrorist_score integer, max_rounds integer, terrorist_steam_ids text, counter_terrorist_steam_ids text) returns void as $$
 declare
 	triggering_team_enum team_type;
 	sfui_notice_enum sfui_notice_type;
