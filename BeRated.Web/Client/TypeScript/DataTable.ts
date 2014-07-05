@@ -1,4 +1,5 @@
 ﻿/// <reference path="DataTableColumn.ts"/>
+/// <reference path="DataTableRow.ts"/>
 
 module BeRated {
 	enum SortMode {
@@ -7,7 +8,7 @@ module BeRated {
 	}
 
 	export class DataTable {
-		private data: Array<any> = null;
+		private rows: Array<DataTableRow> = [];
 		private columns: Array<DataTableColumn>;
 		private sortMode: SortMode = null;
 		private defaultSortColumn: DataTableColumn = null;
@@ -17,12 +18,11 @@ module BeRated {
 		headerRow: HTMLTableRowElement = null;
 
 		constructor(data: Array<any>, columns: Array<DataTableColumn>) {
-			this.data = data;
 			this.columns = columns;
-			this.createTable();
+			this.createTable(data);
 		}
 
-		private createTable() {
+		private createTable(data: Array<any>) {
 			var table = document.createElement('table');
 			table.className = 'dataTable';
 			this.table = table;
@@ -40,14 +40,7 @@ module BeRated {
 				header.innerText = column.description;
 				this.headerRow.appendChild(header);
 			}).bind(this));
-			this.refresh();
-		}
-
-		private refresh() {
-			this.sortData();
-			this.table.innerHTML = '';
-			this.table.appendChild(this.headerRow);
-			this.data.forEach(((record: any) => {
+			data.forEach(((record: any) => {
 				var row = document.createElement('tr');
 				this.columns.forEach(((column: DataTableColumn) => {
 					var cell = document.createElement('td');
@@ -63,17 +56,29 @@ module BeRated {
 					row.appendChild(cell);
 				}).bind(this));
 				this.table.appendChild(row);
+				var dataTableRow = new DataTableRow(record, row);
+				this.rows.push(dataTableRow);
+			}).bind(this));
+			this.refresh();
+		}
+
+		private refresh() {
+			this.sortRows();
+			this.table.innerHTML = '';
+			this.table.appendChild(this.headerRow);
+			this.rows.forEach(((row: DataTableRow) => {
+				this.table.appendChild(row.row);
 			}).bind(this));
 		}
 
-		private sortData() {
+		private sortRows() {
 			var sortColumn = this.sortColumn;
 			if (sortColumn == null)
 				sortColumn = this.defaultSortColumn;
-			this.data.sort(((record1: any, record2: any) => {
-				var selector = sortColumn.select;
-				var property1 = selector(record1);
-				var property2 = selector(record2);
+			this.rows.sort(((row1: DataTableRow, row2: DataTableRow) => {
+				var select = sortColumn.select;
+				var property1 = select(row1.record);
+				var property2 = select(row2.record);
 				var output = 0;
 				if (property1 < property2)
 					output = -1;
