@@ -103,7 +103,11 @@ module BeRated {
 				new DataTableColumn('Rounds won (T)', (record: IAllPlayerStats) => record.winPercentageTerrorist, this.renderRoundWinPercentageTerrorist.bind(this)),
 				new DataTableColumn('Rounds won (CT)', (record: IAllPlayerStats) => record.winPercentageCounterTerrorist, this.renderRoundWinPercentageCounterTerrorist.bind(this))
 			];
+			var header = document.createElement('h1');
+			header.className = 'indexHeader';
+			header.textContent = 'CS:GO Statistics';
 			var dataTable = new DataTable(allPlayerStats, columns);
+			document.body.appendChild(header);
 			document.body.appendChild(dataTable.table);
 		}
 
@@ -132,9 +136,13 @@ module BeRated {
 			paragraph.className = 'returnLink';
 			var link = document.createElement('a');
 			link.href = '/';
-			link.textContent = 'Return to overview';
+			link.textContent = 'Return to index';
 			paragraph.appendChild(link);
+			var header = document.createElement('h1');
+			header.className = 'playerName';
+			header.textContent = playerStats.name;
 			document.body.appendChild(paragraph);
+			document.body.appendChild(header);
 			addTable(weaponTable.table);
 			addTable(encounterTable.table);
 		}

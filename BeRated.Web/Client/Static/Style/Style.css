@@ -3,7 +3,12 @@
 }
 
 body {
-	padding: 2em;
+	padding-left: 2em;
+	padding-right: 2em;
+}
+
+h1 {
+	font-size: 1.3 em;
 }
 
 a:link {
@@ -61,4 +66,10 @@ a:visited {
 
 .returnLink {
 	margin-bottom: 1em;
+}
+
+.playerName {
+}
+
+.indexHeader {
 }
