@@ -2,7 +2,7 @@
 /// <reference path="DataTableRow.ts"/>
 
 module BeRated {
-	enum SortMode {
+	export enum SortMode {
 		Ascending,
 		Descending
 	}
@@ -31,15 +31,15 @@ module BeRated {
 					if (this.sortColumn != null)
 						throw new Error('There cannot be more than one default sort column');
 					this.sortColumn = column;
-					this.sortMode = SortMode.Ascending;
+					this.sortMode = column.defaultSortMode;
 				}
-				if (this.sortColumn == null)
-					throw new Error('No default sort column has been specified');
 				var header = document.createElement('th');
 				header.onclick = (event: any) => this.onSortClick(column);
 				header.innerText = column.description;
 				this.headerRow.appendChild(header);
 			}).bind(this));
+			if (this.sortColumn == null)
+				throw new Error('No default sort column has been specified');
 			data.forEach(((record: any) => {
 				var row = document.createElement('tr');
 				this.columns.forEach(((column: DataTableColumn) => {

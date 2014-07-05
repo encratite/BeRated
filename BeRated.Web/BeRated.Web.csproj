@@ -101,6 +101,7 @@
     <TypeScriptCompile Include="Client\TypeScript\Configuration.ts" />
     <TypeScriptCompile Include="Client\TypeScript\DataTable.ts" />
     <TypeScriptCompile Include="Client\TypeScript\DataTableColumn.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\DataTableRow.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IAllPlayerStats.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IPlayerEncounterStats.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IPlayerStats.ts" />

@@ -6,13 +6,15 @@ module BeRated {
 		private url: string;
 		private webSocket: WebSocket;
 		private onConnect: () => void;
+		private onDisconnect: () => void;
 		private callbacks: { [id: number]: Function } = {};
 		private id: number = 0;
 		private automaticReconnect: boolean = false;
 
-		constructor(url: string, onConnect: () => void) {
+		constructor(url: string, onConnect: () => void, onDisconnect?: () => void) {
 			this.url = url;
 			this.onConnect = onConnect;
+			this.onDisconnect = onDisconnect;
 			this.connect();
 		}
 
@@ -65,6 +67,8 @@ module BeRated {
 			}
 			else
 				console.error('Disconnected from server');
+			if(this.onDisconnect != null)
+				this.onDisconnect();
 		}
 	}
 }

@@ -3,6 +3,8 @@
 
 module BeRated {
 	export interface IPlayerStats {
+		id: number;
+		name: string;
 		weapons: Array<IPlayerWeaponStats>;
 		encounters: Array<IPlayerEncounterStats>;
 	}

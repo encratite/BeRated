@@ -26,6 +26,7 @@ a:visited {
 .dataTable {
 	border-collapse: collapse;
 	background-color: #f9f9f9;
+	margin-bottom: 2em;
 }
 
 .dataTable th {
@@ -46,4 +47,10 @@ a:visited {
 
 .dataTable td:first-child {
 	text-align: left;
+}
+
+.error {
+	font-size: 1.5em;
+	font-weight: bold;
+	color: red;
 }

@@ -217,6 +217,7 @@ create or replace function get_player_encounter_stats(player_id integer) returns
 (
 	opponent_id integer,
 	opponent_name text,
+	encounters integer,
 	kills integer,
 	deaths integer,
 	win_percentage numeric
@@ -226,6 +227,7 @@ begin
 	return query select
 		id as opponent_id,
 		name as opponent_name,
+		get_matchup_kills(player_id, id) + get_matchup_kills(id, player_id) as encounters,
 		get_matchup_kills(player_id, id) as kills,
 		get_matchup_kills(id, player_id) as deaths,
 		get_encounter_win_percentage(player_id, id) as win_percentage

@@ -40,6 +40,14 @@ module BeRated {
 			this.routeRequest();
 		}
 
+		private onDisconnect() {
+			document.body.innerHTML = '';
+			var error = document.createElement('p');
+			error.className = 'error';
+			error.innerText = 'Failed to connect to Web Socket server.';
+			document.body.appendChild(error);
+		}
+
 		private initialiseRpcClient() {
 			var pattern = /^\w+:\/\/([^\/:]+)/;
 			var match = pattern.exec(window.location.href);
@@ -48,7 +56,7 @@ module BeRated {
 			var host = match[1];
 			var port = Configuration.webSocketPort;
 			var url = 'ws://' + host + ':' + port + '/';
-			this.rpcClient = new RpcClient(url, this.onConnect.bind(this));
+			this.rpcClient = new RpcClient(url, this.onConnect.bind(this), this.onDisconnect.bind(this));
 		}
 
 		private routeRequest() {
@@ -68,18 +76,23 @@ module BeRated {
 			throw new Error('Invalid path');
 		}
 
+		private setTitle(title: string) {
+			document.title = Configuration.titlePrefix + title;
+		}
+
 		private routeIndex() {
+			this.setTitle('Index');
 			this.rpcClient.call('getAllPlayerStats', [], this.onGetAllPlayerStats.bind(this));
 		}
 
 		private routePlayer(playerIdString: string) {
 			var playerId = parseInt(playerIdString);
-			this.rpcClient.call('getPlayerStats', [playerId], this.onGetAllPlayerStats.bind(this));
+			this.rpcClient.call('getPlayerStats', [playerId], this.onGetPlayerStats.bind(this));
 		}
 
 		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
 			var columns: Array<DataTableColumn> = [
-				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderName.bind(this), true),
+				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderPlayerStatsName.bind(this), true),
 				new DataTableColumn('Kills', (record: IAllPlayerStats) => record.kills),
 				new DataTableColumn('Deaths', (record: IAllPlayerStats) => record.deaths),
 				new DataTableColumn('Kill/death ratio', (record: IAllPlayerStats) => record.killDeathRatio)
@@ -89,13 +102,56 @@ module BeRated {
 		}
 
 		private onGetPlayerStats(playerStats: IPlayerStats) {
-			console.log(playerStats);
+			this.setTitle(playerStats.name);
+			var weaponColumns: Array<DataTableColumn> = [
+				new DataTableColumn('Weapon', (record: IPlayerWeaponStats) => record.weapon),
+				new DataTableColumn('Kills', (record: IPlayerWeaponStats) => record.kills, null, true, SortMode.Descending),
+				new DataTableColumn('Headshot kills', (record: IPlayerWeaponStats) => record.headshots),
+				new DataTableColumn('Headshot kill percentage', (record: IPlayerWeaponStats) => record.headshotPercentage, this.renderHeadhshotPercentage.bind(this))
+			];
+			var weaponTable = new DataTable(playerStats.weapons, weaponColumns);
+			var encounterColumns: Array<DataTableColumn> = [
+				new DataTableColumn('Opponent', (record: IPlayerEncounterStats) => record.opponentName, this.renderEncounterStatsName.bind(this), true),
+				new DataTableColumn('Encounters', (record: IPlayerEncounterStats) => record.encounters),
+				new DataTableColumn('Kills', (record: IPlayerEncounterStats) => record.kills),
+				new DataTableColumn('Deaths', (record: IPlayerEncounterStats) => record.deaths),
+				new DataTableColumn('Win percentage', (record: IPlayerEncounterStats) => record.winPercentage, this.renderWinPercentage.bind(this))
+			];
+			var encounterTable = new DataTable(playerStats.encounters, encounterColumns);
+			document.body.appendChild(weaponTable.table);
+			document.body.appendChild(encounterTable.table);
 		}
 
-		private renderName(record: IAllPlayerStats): Node {
+		private renderPlayer(name: string, id: number): Node {
 			var node = document.createElement('a');
-			node.href = '/Player/' + record.id;
-			node.innerText = record.name;
+			node.href = '/Player/' + id;
+			node.innerText = name;
+			return node;
+		}
+
+		private renderPlayerStatsName(record: IAllPlayerStats): Node {
+			var node = this.renderPlayer(record.name, record.id);
+			return node;
+		}
+
+		private renderEncounterStatsName(record: IPlayerEncounterStats): Node {
+			var node = this.renderPlayer(record.opponentName, record.opponentId);
+			return node;
+		}
+
+		private renderPercentage(percentage: number): Node {
+			var text = percentage + '%';
+			var node = document.createTextNode(text);
+			return node;
+		}
+
+		private renderHeadhshotPercentage(record: IPlayerWeaponStats): Node {
+			var node = this.renderPercentage(record.headshotPercentage);
+			return node;
+		}
+
+		private renderWinPercentage(record: IPlayerEncounterStats): Node {
+			var node = this.renderPercentage(record.winPercentage);
 			return node;
 		}
 	}
