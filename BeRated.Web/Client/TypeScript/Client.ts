@@ -109,6 +109,7 @@ module BeRated {
 			header.className = 'header';
 			header.textContent = 'CS:GO Statistics';
 			var dataTable = new DataTable(allPlayerStats, columns);
+			dataTable.table.classList.add('indexTable');
 			document.body.appendChild(header);
 			document.body.appendChild(dataTable.table);
 		}
