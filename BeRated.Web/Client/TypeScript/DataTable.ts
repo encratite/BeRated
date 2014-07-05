@@ -11,7 +11,6 @@ module BeRated {
 		private rows: Array<DataTableRow> = [];
 		private columns: Array<DataTableColumn>;
 		private sortMode: SortMode = null;
-		private defaultSortColumn: DataTableColumn = null;
 		private sortColumn: DataTableColumn = null;
 
 		table: HTMLTableElement = null;
@@ -29,14 +28,15 @@ module BeRated {
 			this.headerRow = document.createElement('tr');
 			this.columns.forEach(((column: DataTableColumn) => {
 				if (column.defaultSort) {
-					if (this.defaultSortColumn != null)
+					if (this.sortColumn != null)
 						throw new Error('There cannot be more than one default sort column');
-					this.defaultSortColumn = column;
+					this.sortColumn = column;
 					this.sortMode = SortMode.Ascending;
 				}
-				if (this.defaultSortColumn == null)
+				if (this.sortColumn == null)
 					throw new Error('No default sort column has been specified');
 				var header = document.createElement('th');
+				header.onclick = (event: any) => this.onSortClick(column);
 				header.innerText = column.description;
 				this.headerRow.appendChild(header);
 			}).bind(this));
@@ -72,11 +72,8 @@ module BeRated {
 		}
 
 		private sortRows() {
-			var sortColumn = this.sortColumn;
-			if (sortColumn == null)
-				sortColumn = this.defaultSortColumn;
 			this.rows.sort(((row1: DataTableRow, row2: DataTableRow) => {
-				var select = sortColumn.select;
+				var select = this.sortColumn.select;
 				var property1 = select(row1.record);
 				var property2 = select(row2.record);
 				var output = 0;
@@ -88,6 +85,26 @@ module BeRated {
 					output = - output;
 				return output;
 			}).bind(this));
+		}
+
+		private onSortClick(column: DataTableColumn) {
+			if (this.sortColumn == column) {
+				if (this.sortMode === SortMode.Ascending)
+					this.sortMode = SortMode.Descending;
+				else
+					this.sortMode = SortMode.Ascending;
+			}
+			else {
+				this.sortColumn = column;
+				this.sortMode = SortMode.Ascending;
+				if (this.rows.length > 0) {
+					var firstRecord = this.rows[0].record;
+					var firstValue = column.select(firstRecord);
+					if (typeof firstValue === 'number')
+						this.sortMode = SortMode.Descending;
+				}
+			}
+			this.refresh();
 		}
 	}
 } 
