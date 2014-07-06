@@ -13,6 +13,7 @@ module BeRated {
 		private routes: Array<Route>;
 
 		private windowHasBeenLoaded: boolean = false;
+		private loadingContent: boolean = true;
 
 		constructor() {
 			if (client != null) {
@@ -22,12 +23,13 @@ module BeRated {
 			this.initialiseRpcClient();
 			this.setRoutes();
 			window.onload = this.onLoad.bind(this);
+			window.onhashchange = this.onHashChange.bind(this);
 		}
 
 		private setRoutes() {
 			this.routes = [
-				new Route(/^\/$/, this.routeIndex.bind(this)),
-				new Route(new RegExp('^\\/' + Configuration.playerRoute + '\\/(\\d+)$'), this.routePlayer.bind(this))
+				new Route(/^#?$/, this.routeIndex.bind(this)),
+				new Route(new RegExp('^#?' + Configuration.playerRoute + '\\/(\\d+)$'), this.routePlayer.bind(this))
 			];
 		}
 
@@ -41,8 +43,7 @@ module BeRated {
 		}
 
 		private onDisconnect(wasConnected: boolean) {
-			while (document.body.firstChild)
-				document.body.removeChild(document.body.firstChild);
+			this.clearBody();
 			var message;
 			if (wasConnected)
 				message = 'Disconnected from server';
@@ -64,14 +65,18 @@ module BeRated {
 			this.rpcClient = new RpcClient(url, this.onConnect.bind(this), this.onDisconnect.bind(this));
 		}
 
+		private onHashChange(event: Event) {
+			if(!this.loadingContent)
+				this.routeRequest();
+		}
+
 		private routeRequest() {
 			if (!this.windowHasBeenLoaded || !this.rpcClient.isConnected())
 				return;
-			var pattern = /^\w+:\/\/.+?(\/.*)/;
-			var path = '';
-			var match = pattern.exec(window.location.href);
-			if (match != null)
-				path = match[1];
+			this.startLoadingContent();
+			var pattern = /^#?(.*)/;
+			var match = pattern.exec(window.location.hash);
+			var path = match[1];
 			for (var i = 0; i < this.routes.length; i++) {
 				var route = this.routes[i];
 				var requestHasBeenRouted = route.match(path);
@@ -96,6 +101,7 @@ module BeRated {
 		}
 
 		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
+			this.clearBody();
 			var columns: Array<DataTableColumn> = [
 				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderPlayerStatsName.bind(this), true),
 				new DataTableColumn('Kills', (record: IAllPlayerStats) => record.kills),
@@ -115,9 +121,11 @@ module BeRated {
 			dataTable.table.classList.add('indexTable');
 			document.body.appendChild(header);
 			document.body.appendChild(dataTable.table);
+			this.doneLoadingContent();
 		}
 
 		private onGetPlayerStats(playerStats: IPlayerStats) {
+			this.clearBody();
 			this.setTitle(playerStats.name);
 			var weaponColumns: Array<DataTableColumn> = [
 				new DataTableColumn('Weapon', (record: IPlayerWeaponStats) => record.weapon),
@@ -147,16 +155,17 @@ module BeRated {
 			};
 			var header = this.createHeader(Configuration.playerIcon, playerStats.name);
 			header.classList.add('playerHeader');
-			header.onclick = () => location.href = '/';
+			header.onclick = () => window.location.hash = '';
 			document.body.appendChild(header);
 			addTable(weaponTable.table);
 			addTable(encounterTable.table);
 			addTable(purchasesTable.table);
+			this.doneLoadingContent();
 		}
 
 		private renderPlayer(name: string, id: number): Node {
 			var node = document.createElement('a');
-			node.href = '/' + Configuration.playerRoute + '/' + id;
+			node.href = '#' + Configuration.playerRoute + '/' + id;
 			node.textContent = name;
 			return node;
 		}
@@ -185,6 +194,28 @@ module BeRated {
 			header.appendChild(icon);
 			header.appendChild(titleNode);
 			return header;
+		}
+
+		private clearBody() {
+			while (document.body.firstChild)
+				document.body.removeChild(document.body.firstChild);
+		}
+
+		private startLoadingContent() {
+			this.loadingContent = true;
+			document.onclick = this.blockClickEvent.bind(this);
+		}
+
+		private doneLoadingContent() {
+			document.onclick = () => { };
+			this.loadingContent = false;
+		}
+
+		private blockClickEvent(event: MouseEvent) {
+			event.stopPropagation();
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			return false;
 		}
 	}
 }
