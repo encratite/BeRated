@@ -105,9 +105,7 @@ module BeRated {
 				new DataTableColumn('Rounds won (T)', (record: IAllPlayerStats) => record.winPercentageTerrorist, this.renderPercentage.bind(this)),
 				new DataTableColumn('Rounds won (CT)', (record: IAllPlayerStats) => record.winPercentageCounterTerrorist, this.renderPercentage.bind(this))
 			];
-			var header = document.createElement('h1');
-			header.className = 'header';
-			header.textContent = 'CS:GO Statistics';
+			var header = this.createHeader(Configuration.indexIcon, 'CS:GO Statistics');
 			var dataTable = new DataTable(allPlayerStats, columns);
 			dataTable.table.classList.add('indexTable');
 			document.body.appendChild(header);
@@ -142,16 +140,9 @@ module BeRated {
 				table.classList.add('individualPlayerStatsTable');
 				document.body.appendChild(table);
 			};
-			var paragraph = document.createElement('p');
-			paragraph.className = 'returnLink';
-			var link = document.createElement('a');
-			link.href = '/';
-			link.textContent = 'Return to index';
-			paragraph.appendChild(link);
-			var header = document.createElement('h1');
-			header.className = 'header';
-			header.textContent = playerStats.name;
-			document.body.appendChild(paragraph);
+			var header = this.createHeader(Configuration.playerIcon, playerStats.name);
+			header.classList.add('playerHeader');
+			header.onclick = () => location.href = '/';
 			document.body.appendChild(header);
 			addTable(weaponTable.table);
 			addTable(encounterTable.table);
@@ -179,6 +170,16 @@ module BeRated {
 			var text = percentage + '%';
 			var node = document.createTextNode(text);
 			return node;
+		}
+
+		private createHeader(iconClass: string, title: string) {
+			var header = document.createElement('h1');
+			header.className = 'header';
+			var icon = Utility.createIcon(iconClass);
+			var titleNode = document.createTextNode(title);
+			header.appendChild(icon);
+			header.appendChild(titleNode);
+			return header;
 		}
 	}
 }

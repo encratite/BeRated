@@ -1,5 +1,6 @@
 ﻿/// <reference path="DataTableColumn.ts"/>
 /// <reference path="DataTableRow.ts"/>
+/// <reference path="Utility.ts"/>
 
 module BeRated {
 	export enum SortMode {
@@ -41,8 +42,9 @@ module BeRated {
 				this.headerRow.appendChild(header);
 				column.header = header;
 			}).bind(this));
-			if (this.sortColumn == null)
+			if (this.sortColumn == null) {
 				throw new Error('No default sort column has been specified');
+			}
 			data.forEach(((record: any) => {
 				var row = document.createElement('tr');
 				this.columns.forEach(((column: DataTableColumn) => {
@@ -71,10 +73,8 @@ module BeRated {
 			while (this.table.firstChild)
 				this.table.removeChild(this.table.firstChild);
 			this.table.appendChild(this.headerRow);
-			var icon = document.createElement('i');
-			icon.classList.add('fa');
 			var iconClass = this.sortMode === SortMode.Ascending ? Configuration.sortIconAscending : Configuration.sortIconDescending;
-			icon.classList.add(iconClass);
+			var icon = Utility.createIcon(iconClass);
 			this.sortColumn.header.appendChild(icon);
 			this.rows.forEach(((row: DataTableRow) => {
 				this.table.appendChild(row.row);
