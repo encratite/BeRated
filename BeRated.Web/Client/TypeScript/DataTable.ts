@@ -39,6 +39,7 @@ module BeRated {
 				header.onclick = (event: any) => this.onSortClick(column);
 				header.textContent = column.description;
 				this.headerRow.appendChild(header);
+				column.header = header;
 			}).bind(this));
 			if (this.sortColumn == null)
 				throw new Error('No default sort column has been specified');
@@ -62,14 +63,19 @@ module BeRated {
 				var dataTableRow = new DataTableRow(record, row);
 				this.rows.push(dataTableRow);
 			}).bind(this));
-			this.refresh();
+			this.render();
 		}
 
-		private refresh() {
+		private render() {
 			this.sortRows();
 			while (this.table.firstChild)
 				this.table.removeChild(this.table.firstChild);
 			this.table.appendChild(this.headerRow);
+			var icon = document.createElement('i');
+			icon.classList.add('fa');
+			var iconClass = this.sortMode === SortMode.Ascending ? Configuration.sortIconAscending : Configuration.sortIconDescending;
+			icon.classList.add(iconClass);
+			this.sortColumn.header.appendChild(icon);
 			this.rows.forEach(((row: DataTableRow) => {
 				this.table.appendChild(row.row);
 			}).bind(this));
@@ -92,6 +98,12 @@ module BeRated {
 		}
 
 		private onSortClick(column: DataTableColumn) {
+			var container = this.sortColumn.header;
+			var icons = container.getElementsByTagName('i');
+			for (var i = 0; i < icons.length; i++) {
+				var icon = icons[i];
+				container.removeChild(icon);
+			}
 			if (this.sortColumn == column) {
 				if (this.sortMode === SortMode.Ascending)
 					this.sortMode = SortMode.Descending;
@@ -109,10 +121,11 @@ module BeRated {
 							this.sortMode = SortMode.Descending;
 					}
 				}
-				else
+				else {
 					this.sortMode = column.defaultSortMode;
 				}
-			this.refresh();
+			}
+			this.render();
 		}
 	}
 } 

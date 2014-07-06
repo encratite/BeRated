@@ -8,6 +8,8 @@ module BeRated {
 		defaultSort: boolean = false;
 		defaultSortMode: SortMode = null;
 
+		header: HTMLTableHeaderCellElement = null;
+
 		constructor(description: string, select: (record: any) => any, render: (value: any, record: any) => Node = null, defaultSort?: boolean, defaultSortMode?: SortMode) {
 			this.description = description;
 			this.select = select;
