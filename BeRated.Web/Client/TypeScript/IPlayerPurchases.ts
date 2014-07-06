@@ -3,5 +3,6 @@
 		item: string;
 		timesPurchased: number;
 		purchasesPerRound: number;
+		killsPerPurchase: number;
 	}
 } 

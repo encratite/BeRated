@@ -506,11 +506,25 @@ begin
 	return round(purchases::numeric / rounds, 2);
 end $$ language 'plpgsql';
 
+create function get_player_kills_per_purchase(player_id integer, weapon text) returns numeric as $$
+declare
+	kills integer;
+	purchases integer;
+begin
+	select count(*) from kill where killer_id = player_id and kill.weapon = get_player_kills_per_purchase.weapon into kills;
+	if kills = 0 then
+		return null;
+	end if;
+	select count(*) from purchase where purchase.player_id = get_player_kills_per_purchase.player_id and purchase.item = get_player_kills_per_purchase.weapon into purchases;
+	return round(kills::numeric / purchases, 2);
+end $$ language 'plpgsql';
+
 create function get_player_purchases(player_id integer) returns table
 (
 	item text,
 	times_purchased integer,
-	purchases_per_round numeric
+	purchases_per_round numeric,
+	kills_per_purchase numeric
 ) as $$
 declare
 	rounds_played integer;
@@ -519,7 +533,8 @@ begin
 	return query select
 		purchase.item,
 		count(*)::integer as times_purchased,
-		get_player_purchases_per_round(get_player_purchases.player_id, purchase.item) as purchases_per_round
+		get_player_purchases_per_round(get_player_purchases.player_id, purchase.item) as purchases_per_round,
+		get_player_kills_per_purchase(get_player_purchases.player_id, purchase.item) as kills_per_purchase
 	from purchase
 	where purchase.player_id = get_player_purchases.player_id
 	group by purchase.item;

@@ -134,7 +134,8 @@ module BeRated {
 			var purchasesColumns: Array<DataTableColumn> = [
 				new DataTableColumn('Item', (record: IPlayerPurchases) => record.item),
 				new DataTableColumn('Purchases', (record: IPlayerPurchases) => record.timesPurchased),
-				new DataTableColumn('Purchases per round', (record: IPlayerPurchases) => record.purchasesPerRound, null, true, SortMode.Descending)
+				new DataTableColumn('Purchases per round', (record: IPlayerPurchases) => record.purchasesPerRound, null, true, SortMode.Descending),
+				new DataTableColumn('Kills per purchase', (record: IPlayerPurchases) => record.killsPerPurchase)
 			];
 			var purchasesTable = new DataTable(playerStats.purchases, purchasesColumns);
 			var addTable = (table: HTMLTableElement) => {
