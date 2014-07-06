@@ -1,10 +1,12 @@
-﻿module BeRated {
+﻿/// <reference path="DataTable.ts"/>
+
+module BeRated {
 	export class DataTableColumn {
 		description: string;
 		select: (record: any) => any;
 		render: (value: any, record: any) => Node = null;
 		defaultSort: boolean = false;
-		defaultSortMode: SortMode = SortMode.Ascending;
+		defaultSortMode: SortMode = null;
 
 		constructor(description: string, select: (record: any) => any, render: (value: any, record: any) => Node = null, defaultSort?: boolean, defaultSortMode?: SortMode) {
 			this.description = description;

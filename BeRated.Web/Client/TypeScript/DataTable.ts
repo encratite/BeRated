@@ -31,7 +31,9 @@ module BeRated {
 					if (this.sortColumn != null)
 						throw new Error('There cannot be more than one default sort column');
 					this.sortColumn = column;
-					this.sortMode = column.defaultSortMode;
+					this.sortMode = SortMode.Ascending;
+					if (column.defaultSortMode != null)
+						this.sortMode = column.defaultSortMode;
 				}
 				var header = document.createElement('th');
 				header.onclick = (event: any) => this.onSortClick(column);
@@ -98,14 +100,18 @@ module BeRated {
 			}
 			else {
 				this.sortColumn = column;
-				this.sortMode = SortMode.Ascending;
-				if (this.rows.length > 0) {
-					var firstRecord = this.rows[0].record;
-					var firstValue = column.select(firstRecord);
-					if (typeof firstValue === 'number')
-						this.sortMode = SortMode.Descending;
+				if (column.defaultSortMode == null) {
+					this.sortMode = SortMode.Ascending;
+					if (this.rows.length > 0) {
+						var firstRecord = this.rows[0].record;
+						var firstValue = column.select(firstRecord);
+						if (typeof firstValue === 'number')
+							this.sortMode = SortMode.Descending;
+					}
 				}
-			}
+				else
+					this.sortMode = column.defaultSortMode;
+				}
 			this.refresh();
 		}
 	}

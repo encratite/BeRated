@@ -2,3 +2,4 @@
 -Grenades thrown per round
 -Recent wins/losses
 -Recent kills
+-Kills per purchase evaluation does not take into account pickups but that can hardly be fixed
