@@ -66,12 +66,6 @@ a:hover {
 	text-align: left;
 }
 
-.error {
-	font-size: 1.5em;
-	font-weight: bold;
-	color: red;
-}
-
 .indexTable {
 	min-width: 80em;
 }
@@ -99,23 +93,188 @@ a:hover {
 }
 
 .fa-gear {
-	-webkit-animation-name: spin;
-    -webkit-animation-duration: 10s;
-    -webkit-animation-iteration-count: infinite;
-    -webkit-animation-timing-function: linear;
+	-webkit-animation-name: rotate;
+	-webkit-animation-duration: 10s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-timing-function: linear;
 	
-    -moz-animation-name: spin;
-    -moz-animation-duration: 10s;
-    -moz-animation-iteration-count: infinite;
-    -moz-animation-timing-function: linear;
+	-moz-animation-name: rotate;
+	-moz-animation-duration: 10s;
+	-moz-animation-iteration-count: infinite;
+	-moz-animation-timing-function: linear;
 	
-    -ms-animation-name: spin;
-    -ms-animation-duration: 10s;
-    -ms-animation-iteration-count: infinite;
-    -ms-animation-timing-function: linear;
+	-ms-animation-name: rotate;
+	-ms-animation-duration: 10s;
+	-ms-animation-iteration-count: infinite;
+	-ms-animation-timing-function: linear;
 	
-	animation-name: spin;
-    animation-duration: 10s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
+	animation-name: rotate;
+	animation-duration: 10s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+}
+
+.fa-male {
+	-webkit-animation-name: blink;
+	-webkit-animation-duration: 2s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-timing-function: linear;
+	
+	-moz-animation-name: blink;
+	-moz-animation-duration: 2s;
+	-moz-animation-iteration-count: infinite;
+	-moz-animation-timing-function: linear;
+	
+	-ms-animation-name: blink;
+	-ms-animation-duration: 2s;
+	-ms-animation-iteration-count: infinite;
+	-ms-animation-timing-function: linear;
+	
+	animation-name: blink;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+}
+
+.header .fa-exclamation-circle {
+	color: #ff7373;
+}
+
+.error {
+	-webkit-animation: fade 1s;
+	-moz-animation: fade 1s
+	-ms-animation: fade 1s;
+	animation: fade 1s;
+}
+
+@-webkit-keyframes rotate {
+	from {
+		-webkit-transform: rotate(0deg);
+	}
+	to {
+		-webkit-transform: rotate(360deg);
+	}
+}
+
+@-moz-keyframes rotate {
+	from {
+		-moz-transform: rotate(0deg);
+	}
+	to {
+		-moz-transform: rotate(360deg);
+	}
+}
+
+@-ms-keyframes rotate {
+	from {
+		-ms-transform: rotate(0deg);
+	}
+	to {
+		-ms-transform: rotate(360deg);
+	}
+}
+
+@keyframes rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@-webkit-keyframes fade {
+	from {
+		opacity: 0;
+	}
+	
+	to {
+		opacity: 1;
+	}
+}
+
+@-moz-keyframes fade {
+	from {
+		opacity: 0;
+	}
+	
+	to {
+		opacity: 1;
+	}
+}
+
+@-ms-keyframes fade {
+	from {
+		opacity: 0;
+	}
+	
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fade {
+	from {
+		opacity: 0;
+	}
+	
+	to {
+		opacity: 1;
+	}
+}
+
+@-webkit-keyframes blink {
+	0% {
+		opacity: 0.7;
+	}
+	
+	50% {
+		opacity: 1;
+	}
+	
+	100% {
+		opacity: 0.7;
+	}
+}
+
+@-moz-keyframes blink {
+	0% {
+		opacity: 0.7;
+	}
+	
+	50% {
+		opacity: 1;
+	}
+	
+	100% {
+		opacity: 0.7;
+	}
+}
+
+@-ms-keyframes blink {
+	0% {
+		opacity: 0.7;
+	}
+	
+	50% {
+		opacity: 1;
+	}
+	
+	100% {
+		opacity: 0.7;
+	}
+}
+
+@keyframes blink {
+	0% {
+		opacity: 0.7;
+	}
+	
+	50% {
+		opacity: 1;
+	}
+	
+	100% {
+		opacity: 0.7;
+	}
 }

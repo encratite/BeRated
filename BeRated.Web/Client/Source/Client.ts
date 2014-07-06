@@ -40,11 +40,16 @@ module BeRated {
 			this.routeRequest();
 		}
 
-		private onDisconnect() {
-			document.body.innerHTML = '';
-			var error = document.createElement('p');
-			error.className = 'error';
-			error.textContent = 'Failed to connect to Web Socket server.';
+		private onDisconnect(wasConnected: boolean) {
+			while (document.body.firstChild)
+				document.body.removeChild(document.body.firstChild);
+			var message;
+			if (wasConnected)
+				message = 'Disconnected from server';
+			else
+				message = 'Unable to connect';
+			var error = this.createHeader(Configuration.errorIcon, message);
+			error.classList.add('error');
 			document.body.appendChild(error);
 		}
 
@@ -105,7 +110,7 @@ module BeRated {
 				new DataTableColumn('Rounds won (T)', (record: IAllPlayerStats) => record.winPercentageTerrorist, this.renderPercentage.bind(this)),
 				new DataTableColumn('Rounds won (CT)', (record: IAllPlayerStats) => record.winPercentageCounterTerrorist, this.renderPercentage.bind(this))
 			];
-			var header = this.createHeader(Configuration.indexIcon, 'CS:GO Statistics');
+			var header = this.createHeader(Configuration.indexIcon, Configuration.title);
 			var dataTable = new DataTable(allPlayerStats, columns);
 			dataTable.table.classList.add('indexTable');
 			document.body.appendChild(header);
