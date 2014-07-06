@@ -40,33 +40,39 @@ namespace BeRated
 		[WebSocketServerMethod]
 		List<AllPlayerStatsRow> GetAllPlayerStats()
 		{
-			using (var reader = _Database.ReadFunction("get_all_player_stats"))
+			lock (_Database)
 			{
-				var players = reader.ReadAll<AllPlayerStatsRow>();
-				return players;
+				using (var reader = _Database.ReadFunction("get_all_player_stats"))
+				{
+					var players = reader.ReadAll<AllPlayerStatsRow>();
+					return players;
+				}
 			}
 		}
 
 		[WebSocketServerMethod]
 		PlayerStats GetPlayerStats(int playerId)
 		{
-			var playerStats = new PlayerStats();
-			playerStats.Id = playerId;
-			var idParameter = new CommandParameter("player_id", playerId);
-			playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
-			using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter))
+			lock (_Database)
 			{
-				playerStats.Weapons = reader.ReadAll<PlayerWeaponStatsRow>();
+				var playerStats = new PlayerStats();
+				playerStats.Id = playerId;
+				var idParameter = new CommandParameter("player_id", playerId);
+				playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
+				using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter))
+				{
+					playerStats.Weapons = reader.ReadAll<PlayerWeaponStatsRow>();
+				}
+				using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter))
+				{
+					playerStats.Encounters = reader.ReadAll<PlayerEncounterStatsRow>();
+				}
+				using (var reader = _Database.ReadFunction("get_player_purchases", idParameter))
+				{
+					playerStats.Purchases = reader.ReadAll<PlayerPurchasesRow>();
+				}
+				return playerStats;
 			}
-			using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter))
-			{
-				playerStats.Encounters = reader.ReadAll<PlayerEncounterStatsRow>();
-			}
-			using (var reader = _Database.ReadFunction("get_player_purchases", idParameter))
-			{
-				playerStats.Purchases = reader.ReadAll<PlayerPurchasesRow>();
-			}
-			return playerStats;
 		}
 
 		#endregion
