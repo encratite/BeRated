@@ -54,11 +54,15 @@ namespace BeRated
 			_Players.Clear();
 			Console.WriteLine(path);
 			var lines = File.ReadLines(path);
+			int lineCounter = 1;
 			foreach (var line in lines)
-				ProcessLine(line);
+			{
+				ProcessLine(line, lineCounter);
+				lineCounter++;
+			}
 		}
 
-		void ProcessLine(string line)
+		void ProcessLine(string line, int lineCounter)
 		{
 			var kill = LogParser.ReadPlayerKill(line);
 			if (kill != null)
@@ -133,6 +137,24 @@ namespace BeRated
 					new CommandParameter("counter_terrorist_steam_ids", counterTerroristIds),
 				};
 				_Database.NonQueryFunction("process_end_of_round", parameters);
+				return;
+			}
+			var purchase = LogParser.ReadPurchase(line);
+			if (purchase != null)
+			{
+				string steamId = purchase.Player.SteamId;
+				if (steamId == LogParser.BotId)
+					return;
+				string team = _Players[steamId];
+				var parameters = new[]
+				{
+					new CommandParameter("steam_id", steamId),
+					new CommandParameter("line", lineCounter),
+					new CommandParameter("purchase_time", purchase.Time),
+					new CommandParameter("team", team),
+					new CommandParameter("item", purchase.Item),
+				};
+				_Database.NonQueryFunction("process_purchase", parameters);
 				return;
 			}
 		}

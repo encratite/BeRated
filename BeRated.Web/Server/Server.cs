@@ -62,6 +62,10 @@ namespace BeRated
 			{
 				playerStats.Encounters = reader.ReadAll<PlayerEncounterStatsRow>();
 			}
+			using (var reader = _Database.ReadFunction("get_player_purchases", idParameter))
+			{
+				playerStats.Purchases = reader.ReadAll<PlayerPurchasesRow>();
+			}
 			return playerStats;
 		}
 

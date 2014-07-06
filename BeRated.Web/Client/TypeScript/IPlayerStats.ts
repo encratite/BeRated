@@ -1,5 +1,6 @@
 ﻿/// <reference path="IPlayerWeaponStats.ts"/>
 /// <reference path="IPlayerEncounterStats.ts"/>
+/// <reference path="IPlayerPurchases.ts"/>
 
 module BeRated {
 	export interface IPlayerStats {
@@ -7,5 +8,6 @@ module BeRated {
 		name: string;
 		weapons: Array<IPlayerWeaponStats>;
 		encounters: Array<IPlayerEncounterStats>;
+		purchases: Array<IPlayerPurchases>;
 	}
 } 

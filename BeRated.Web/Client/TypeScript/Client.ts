@@ -27,7 +27,7 @@ module BeRated {
 		private setRoutes() {
 			this.routes = [
 				new Route(/^\/$/, this.routeIndex.bind(this)),
-				new Route(/^\/Player\/(\d+)$/, this.routePlayer.bind(this))
+				new Route(new RegExp('^\\/' + Configuration.playerRoute + '\\/(\\d+)$'), this.routePlayer.bind(this))
 			];
 		}
 
@@ -131,6 +131,12 @@ module BeRated {
 				new DataTableColumn('Win percentage', (record: IPlayerEncounterStats) => record.winPercentage, this.renderPercentage.bind(this))
 			];
 			var encounterTable = new DataTable(playerStats.encounters, encounterColumns);
+			var purchasesColumns: Array<DataTableColumn> = [
+				new DataTableColumn('Item', (record: IPlayerPurchases) => record.item),
+				new DataTableColumn('Purchases', (record: IPlayerPurchases) => record.timesPurchased),
+				new DataTableColumn('Purchases per round', (record: IPlayerPurchases) => record.purchasesPerRound, null, true, SortMode.Descending)
+			];
+			var purchasesTable = new DataTable(playerStats.purchases, purchasesColumns);
 			var addTable = (table: HTMLTableElement) => {
 				table.classList.add('individualPlayerStatsTable');
 				document.body.appendChild(table);
@@ -148,11 +154,12 @@ module BeRated {
 			document.body.appendChild(header);
 			addTable(weaponTable.table);
 			addTable(encounterTable.table);
+			addTable(purchasesTable.table);
 		}
 
 		private renderPlayer(name: string, id: number): Node {
 			var node = document.createElement('a');
-			node.href = '/Player/' + id;
+			node.href = '/' + Configuration.playerRoute + '/' + id;
 			node.textContent = name;
 			return node;
 		}

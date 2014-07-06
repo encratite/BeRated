@@ -443,3 +443,84 @@ begin
 	perform add_players_to_team(round_id, 'terrorist'::team_type, terrorist_steam_ids);
 	perform add_players_to_team(round_id, 'counter_terrorist'::team_type, counter_terrorist_steam_ids);
 end $$ language 'plpgsql';
+
+create function process_purchase(steam_id text, line integer, purchase_time timestamp, team text, item text) returns void as $$
+begin
+	if exists (select 1 from purchase where time = purchase_time and purchase.line = process_purchase.line) then
+		return;
+	end if;
+	insert into purchase
+	(
+		player_id,
+		line,
+		time,
+		team,
+		item
+	)
+	values
+	(
+		get_player_id_by_steam_id(steam_id),
+		line,
+		purchase_time,
+		get_team(team),
+		item
+	);
+end $$ language 'plpgsql';
+
+create function get_player_purchases_in_team(player_id integer, item text, team team_type) returns integer as $$
+declare
+	purchases integer;
+begin
+	select count(*) from purchase
+	where
+		purchase.player_id = get_player_purchases_in_team.player_id and
+		purchase.item = get_player_purchases_in_team.item and
+		purchase.team = get_player_purchases_in_team.team
+	into purchases;
+	return purchases;
+end $$ language 'plpgsql';
+
+create function get_player_purchases_per_round(player_id integer, item text, team team_type) returns integer[2] as $$
+declare
+	purchases integer := 0;
+	rounds integer := 0;
+begin
+	if exists(select 1 from purchase where purchase.item = get_player_purchases_per_round.item and purchase.team = get_player_purchases_per_round.team) then
+		select count(*) from purchase where purchase.player_id = get_player_purchases_per_round.player_id and purchase.item = get_player_purchases_per_round.item into purchases;
+		select get_player_rounds(player_id, get_player_purchases_per_round.team) into rounds;
+	end if;
+	return array[purchases, rounds];
+end $$ language 'plpgsql';
+
+create function get_player_purchases_per_round(player_id integer, item text) returns numeric as $$
+declare
+	terrorist_result integer[2];
+	counter_terrorist_result integer[2];
+	purchases integer;
+	rounds integer;
+begin
+	select get_player_purchases_per_round(player_id, item, 'terrorist'::team_type) into terrorist_result;
+	select get_player_purchases_per_round(player_id, item, 'counter_terrorist'::team_type) into counter_terrorist_result;
+	purchases := terrorist_result[1] + counter_terrorist_result[1];
+	rounds := terrorist_result[2] + counter_terrorist_result[2];
+	return round(purchases::numeric / rounds, 2);
+end $$ language 'plpgsql';
+
+create function get_player_purchases(player_id integer) returns table
+(
+	item text,
+	times_purchased integer,
+	purchases_per_round numeric
+) as $$
+declare
+	rounds_played integer;
+begin
+	select get_player_rounds(player_id) into rounds_played;
+	return query select
+		purchase.item,
+		count(*)::integer as times_purchased,
+		get_player_purchases_per_round(get_player_purchases.player_id, purchase.item) as purchases_per_round
+	from purchase
+	where purchase.player_id = get_player_purchases.player_id
+	group by purchase.item;
+end $$ language 'plpgsql';

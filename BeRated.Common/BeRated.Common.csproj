@@ -42,6 +42,7 @@
     <Compile Include="Log\Disconnect.cs" />
     <Compile Include="Log\EndOfRound.cs" />
     <Compile Include="LogParser.cs" />
+    <Compile Include="Log\Purchase.cs" />
     <Compile Include="MatchReader.cs" />
     <Compile Include="PlayerIdentity.cs" />
     <Compile Include="Log\PlayerKill.cs" />

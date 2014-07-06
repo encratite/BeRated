@@ -76,6 +76,7 @@
     <Compile Include="Server\PlayerStats.cs" />
     <Compile Include="Server\Query\AllPlayerStatsRow.cs" />
     <Compile Include="Server\Query\PlayerEncounterStatsRow.cs" />
+    <Compile Include="Server\Query\PlayerPurchasesRow.cs" />
     <Compile Include="Server\Query\PlayerWeaponStatsRow.cs" />
     <Compile Include="Server\Server.cs" />
   </ItemGroup>
@@ -104,6 +105,7 @@
     <TypeScriptCompile Include="Client\TypeScript\DataTableRow.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IAllPlayerStats.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IPlayerEncounterStats.ts" />
+    <TypeScriptCompile Include="Client\TypeScript\IPlayerPurchases.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IPlayerStats.ts" />
     <TypeScriptCompile Include="Client\TypeScript\IPlayerWeaponStats.ts" />
     <TypeScriptCompile Include="Client\TypeScript\Main.ts" />

@@ -1,0 +1,4 @@
+-Kill/death ratio development over time
+-Grenades thrown per round
+-Recent wins/losses
+-Recent kills

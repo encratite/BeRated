@@ -5,7 +5,7 @@
 		public readonly string SteamId;
 		public readonly string Name;
 
-		public PlayerIdentity(string steamId, string name)
+		public PlayerIdentity(string name, string steamId)
 		{
 			SteamId = steamId;
 			Name = name;

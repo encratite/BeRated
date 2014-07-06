@@ -19,6 +19,7 @@ namespace BeRated
 		static Regex EndOfRoundPattern = new Regex(DatePrefix + "Team \"(TERRORIST|CT)\" triggered \"(SFUI_Notice_All_Hostages_Rescued|SFUI_Notice_Bomb_Defused|SFUI_Notice_CTs_Win|SFUI_Notice_Hostages_Not_Rescued|SFUI_Notice_Target_Bombed|SFUI_Notice_Target_Saved|SFUI_Notice_Terrorists_Win)\" \\(CT \"(\\d+)\"\\) \\(T \"(\\d+)\"\\)");
 		static Regex TeamSwitchPattern = new Regex(DatePrefix + PlayerWithoutTeamPattern + " switched from team <(.+?)> to <(.+?)>");
 		static Regex DisconnectPattern = new Regex(DatePrefix + PlayerPattern + " disconnected \\(reason \"(.+?)\"\\)");
+		static Regex PurchasePattern = new Regex(DatePrefix + PlayerPattern + " purchased \"(.+?)\"");
 
 		static DateTime ReadDate(MatchReader reader)
 		{
@@ -56,10 +57,10 @@ namespace BeRated
 			var output = new PlayerKill
 			{
 				Time = time,
-				Killer = new PlayerIdentity(killerSteamId, killerName),
+				Killer = new PlayerIdentity(killerName, killerSteamId),
 				KillerTeam = killerTeam,
 				KillerPosition = new Vector(killerX, killerY, killerZ),
-				Victim = new PlayerIdentity(victimSteamId, victimName),
+				Victim = new PlayerIdentity(victimName, victimSteamId),
 				VictimTeam = victimTeam,
 				VictimPosition = new Vector(victimX, victimY, victimZ),
 				Headshot = headshot,
@@ -115,7 +116,7 @@ namespace BeRated
 			var output = new TeamSwitch
 			{
 				Time = time,
-				Player = new PlayerIdentity(steamId, name),
+				Player = new PlayerIdentity(name, steamId),
 				PreviousTeam = previousTeam,
 				CurrentTeam = currentTeam,
 			};
@@ -139,6 +140,27 @@ namespace BeRated
 				Player = new PlayerIdentity(name, steamId),
 				Team = team,
 				Reason = reason,
+			};
+			return output;
+		}
+
+		public static Purchase ReadPurchase(string line)
+		{
+			var match = PurchasePattern.Match(line);
+			if (!match.Success)
+				return null;
+			var reader = new MatchReader(match);
+			var time = ReadDate(reader);
+			string name = reader.String();
+			string steamId = reader.String();
+			string team = reader.String();
+			string item = reader.String();
+			var output = new Purchase
+			{
+				Time = time,
+				Player = new PlayerIdentity(name, steamId),
+				Team = team,
+				Item = item
 			};
 			return output;
 		}

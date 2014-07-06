@@ -9,5 +9,6 @@ namespace BeRated
 		public string Name { get; set; }
 		public List<PlayerWeaponStatsRow> Weapons { get; set; }
 		public List<PlayerEncounterStatsRow> Encounters { get; set; }
+		public List<PlayerPurchasesRow> Purchases { get; set; }
 	}
 }
