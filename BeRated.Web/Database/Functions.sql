@@ -486,7 +486,7 @@ declare
 	rounds integer := 0;
 begin
 	if exists(select 1 from purchase where purchase.item = get_player_purchases_per_round.item and purchase.team = get_player_purchases_per_round.team) then
-		select count(*) from purchase where purchase.player_id = get_player_purchases_per_round.player_id and purchase.item = get_player_purchases_per_round.item into purchases;
+		select count(*) from purchase where purchase.player_id = get_player_purchases_per_round.player_id and purchase.item = get_player_purchases_per_round.item and purchase.team =  get_player_purchases_per_round.team into purchases;
 		select get_player_rounds(player_id, get_player_purchases_per_round.team) into rounds;
 	end if;
 	return array[purchases, rounds];
