@@ -98,25 +98,26 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Client\TypeScript\Client.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\Configuration.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\DataTable.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\DataTableColumn.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\DataTableRow.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\IAllPlayerStats.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\IPlayerEncounterStats.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\IPlayerPurchases.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\IPlayerStats.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\IPlayerWeaponStats.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\Main.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\Route.ts" />
-    <TypeScriptCompile Include="Client\TypeScript\RpcClient.ts" />
+    <TypeScriptCompile Include="Client\Source\Client.ts" />
+    <TypeScriptCompile Include="Client\Source\Configuration.ts" />
+    <TypeScriptCompile Include="Client\Source\DataTable.ts" />
+    <TypeScriptCompile Include="Client\Source\DataTableColumn.ts" />
+    <TypeScriptCompile Include="Client\Source\DataTableRow.ts" />
+    <TypeScriptCompile Include="Client\Source\IAllPlayerStats.ts" />
+    <TypeScriptCompile Include="Client\Source\IPlayerEncounterStats.ts" />
+    <TypeScriptCompile Include="Client\Source\IPlayerPurchases.ts" />
+    <TypeScriptCompile Include="Client\Source\IPlayerStats.ts" />
+    <TypeScriptCompile Include="Client\Source\IPlayerWeaponStats.ts" />
+    <TypeScriptCompile Include="Client\Source\Main.ts" />
+    <TypeScriptCompile Include="Client\Source\Route.ts" />
+    <TypeScriptCompile Include="Client\Source\RpcClient.ts" />
+    <TypeScriptCompile Include="Client\Source\Utility.ts" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Client\TypeScript\CallMessage.ts" />
+    <TypeScriptCompile Include="Client\Source\CallMessage.ts" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Client\TypeScript\IResultMessage.ts" />
+    <TypeScriptCompile Include="Client\Source\IResultMessage.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Client\Static\Frame.html" />
