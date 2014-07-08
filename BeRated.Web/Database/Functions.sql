@@ -151,11 +151,11 @@ begin
 	end;
 end $$ language 'plpgsql';
 
-create function get_player_kills(player_id integer) returns int as $$
+create function get_player_kills(player_id integer, team_kills boolean default false) returns int as $$
 declare
 	kills integer;
 begin
-	select count(*) from kill where killer_id = player_id and killer_id != victim_id into kills;
+	select count(*) from kill where killer_id = player_id and killer_id != victim_id and (not team_kills or killer_team = victim_team) into kills;
 	return kills;
 end $$ language 'plpgsql';
 
@@ -252,6 +252,7 @@ create function get_all_player_stats() returns table
 	name text,
 	kills integer,
 	deaths integer,
+	team_kills integer,
 	kill_death_ratio numeric,
 	rounds_played integer,
 	win_percentage numeric,
@@ -268,6 +269,7 @@ begin
 		player.name,
 		get_player_kills(player.id) as kills,
 		get_player_deaths(player.id) as deaths,
+		get_player_kills(player.id, true) as kills,
 		round(get_player_kill_death_ratio(player.id), 2) as kill_death_ratio,
 		get_player_rounds(player.id) as rounds_played,
 		get_player_round_win_percentage(player.id) as win_percentage,

@@ -107,6 +107,7 @@ module BeRated {
 				new DataTableColumn('Kills', (record: IAllPlayerStats) => record.kills),
 				new DataTableColumn('Deaths', (record: IAllPlayerStats) => record.deaths),
 				new DataTableColumn('Kill/death ratio', (record: IAllPlayerStats) => record.killDeathRatio),
+				new DataTableColumn('Team kills', (record: IAllPlayerStats) => record.teamKills),
 				new DataTableColumn('Games', (record: IAllPlayerStats) => record.gamesPlayed),
 				new DataTableColumn('Rounds', (record: IAllPlayerStats) => record.roundsPlayed),
 				new DataTableColumn('Rounds (CT)', (record: IAllPlayerStats) => record.roundsPlayedCounterTerrorist),
