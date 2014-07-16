@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4D0D71AA-0357-4B85-A7A9-D61979896D85}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{613F152C-F73A-4642-AE7A-0BC443120D92}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BeRated</RootNamespace>
-    <AssemblyName>BeRated.Web</AssemblyName>
+    <AssemblyName>BeRated.Web.Common</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,19 +30,28 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>..\packages\Npgsql.2.1.3\lib\net45\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\packages\Npgsql.2.1.3\lib\net45\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="SuperSocket.Common">
       <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.Common.dll</HintPath>
     </Reference>
-    <Reference Include="SuperSocket.SocketBase, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SuperSocket.SocketBase">
       <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketBase.dll</HintPath>
     </Reference>
     <Reference Include="SuperSocket.SocketEngine">
       <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketEngine.dll</HintPath>
     </Reference>
-    <Reference Include="SuperWebSocket, Version=0.9.0.0, Culture=neutral, PublicKeyToken=7ba53b9a7cef5d1c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SuperWebSocket">
       <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperWebSocket.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -53,13 +60,40 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Application.cs" />
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="Client\Source\CallMessage.ts" />
+    <TypeScriptCompile Include="Client\Source\Client.ts" />
+    <TypeScriptCompile Include="Client\Source\Configuration.ts" />
+    <TypeScriptCompile Include="Client\Source\DataTable.ts" />
+    <TypeScriptCompile Include="Client\Source\DataTableColumn.ts" />
+    <TypeScriptCompile Include="Client\Source\DataTableRow.ts" />
+    <TypeScriptCompile Include="Client\Source\IAllPlayerStats.ts" />
+    <TypeScriptCompile Include="Client\Source\IPlayerEncounterStats.ts" />
+    <TypeScriptCompile Include="Client\Source\IPlayerPurchases.ts" />
+    <TypeScriptCompile Include="Client\Source\IPlayerStats.ts" />
+    <TypeScriptCompile Include="Client\Source\IPlayerWeaponStats.ts" />
+    <TypeScriptCompile Include="Client\Source\IResultMessage.ts" />
+    <TypeScriptCompile Include="Client\Source\Main.ts" />
+    <TypeScriptCompile Include="Client\Source\Route.ts" />
+    <TypeScriptCompile Include="Client\Source\RpcClient.ts" />
+    <TypeScriptCompile Include="Client\Source\Utility.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Client\Static\Frame.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Server\PlayerStats.cs" />
+    <Compile Include="Server\Query\AllPlayerStatsRow.cs" />
+    <Compile Include="Server\Query\PlayerEncounterStatsRow.cs" />
+    <Compile Include="Server\Query\PlayerPurchasesRow.cs" />
+    <Compile Include="Server\Query\PlayerWeaponStatsRow.cs" />
+    <Compile Include="Server\Server.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -69,13 +103,10 @@
       <Project>{7b4923d9-8607-4b59-93fd-e2a4327a11bf}</Project>
       <Name>Ashod.WebSocket</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BeRated.Web.Common\BeRated.Web.Common.csproj">
-      <Project>{613f152c-f73a-4642-ae7a-0bc443120d92}</Project>
-      <Name>BeRated.Web.Common</Name>
+    <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">
+      <Project>{9659019c-3181-4c5c-bd0d-0117456328a6}</Project>
+      <Name>Ashod</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace BeRated
 {
-	class Server : WebSocketServer, IDisposable
+	public class Server : WebSocketServer, IDisposable
 	{
 		string _ConnectionString;
 		DatabaseCommander _Database = null;

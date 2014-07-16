@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeRated.Analysis", "BeRated.Analysis\BeRated.Analysis.csproj", "{95CB2A81-8C73-46AC-9345-92914A163EB1}"
 EndProject
@@ -16,6 +16,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ashod", "..\Ashod\Ashod\Ashod.csproj", "{9659019C-3181-4C5C-BD0D-0117456328A6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ashod.WebSocket", "..\Ashod\Ashod.WebSocket\Ashod.WebSocket.csproj", "{7B4923D9-8607-4B59-93FD-E2A4327A11BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeRated.Web.Console", "BeRated.Web.Console\BeRated.Web.Console.csproj", "{13838978-5A93-4448-A886-D67672DDA6BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeRated.Web.Common", "BeRated.Web.Common\BeRated.Web.Common.csproj", "{613F152C-F73A-4642-AE7A-0BC443120D92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +101,26 @@ Global
 		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7B4923D9-8607-4B59-93FD-E2A4327A11BF}.Release|Win32.ActiveCfg = Release|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{13838978-5A93-4448-A886-D67672DDA6BE}.Release|Win32.ActiveCfg = Release|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{613F152C-F73A-4642-AE7A-0BC443120D92}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
