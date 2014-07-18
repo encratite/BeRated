@@ -557,6 +557,7 @@ var BeRated;
             document.body.appendChild(killDeathRatioHistory);
             document.body.appendChild(killDeathRatioDescription);
             killDeathRatioHistory.scrollLeft = killDeathRatioList.scrollWidth;
+            this.doneLoadingContent();
         };
 
         Client.prototype.getDateString = function (date) {

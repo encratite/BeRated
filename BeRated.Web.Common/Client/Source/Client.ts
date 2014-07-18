@@ -215,6 +215,7 @@ module BeRated {
 			document.body.appendChild(killDeathRatioHistory);
 			document.body.appendChild(killDeathRatioDescription);
 			killDeathRatioHistory.scrollLeft = killDeathRatioList.scrollWidth;
+			this.doneLoadingContent();
 		}
 
 		private getDateString(date: Date): string {
