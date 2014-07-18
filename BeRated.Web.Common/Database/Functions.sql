@@ -544,14 +544,26 @@ begin
 	group by purchase.item;
 end $$ language 'plpgsql';
 
-create function get_player_kill_death_ratio_for_window(player_id integer, window_offset integer, window_limit integer) returns numeric as $$
+drop type if exists player_kill_death_ratio_row;
+
+create type player_kill_death_ratio_row as
+(
+	time timestamp,
+	kill_death_ratio numeric
+);
+
+create function get_player_kill_death_ratio_for_window(player_id integer, window_offset integer, window_limit integer) returns player_kill_death_ratio_row as $$
 declare
 	kills integer := 0;
 	deaths integer := 0;
+	kill_time timestamp;
 	killer_id integer;
+	sample player_kill_death_ratio_row;
 begin
-	for killer_id in
-		select kill.killer_id
+	for kill_time, killer_id in
+		select
+			kill.time,
+			kill.killer_id
 		from kill
 		where
 			(kill.killer_id = player_id or victim_id = player_id) and
@@ -565,20 +577,13 @@ begin
 		else
 			deaths := deaths + 1;
 		end if;
+		sample.time := kill_time;
 	end loop;
 	if deaths > 0 then
-		return round(kills::numeric / deaths, 2);
-	else
-		return null;
+		sample.kill_death_ratio := round(kills::numeric / deaths, 2);
 	end if;
+	return sample;
 end $$ language 'plpgsql';
-
-drop type if exists player_kill_death_ratio_row;
-
-create type player_kill_death_ratio_row as
-(
-	kill_death_ratio numeric
-);
 
 create function get_player_kill_death_ratio_history(player_id integer, window_size integer) returns setof player_kill_death_ratio_row as $$
 declare
@@ -595,12 +600,10 @@ begin
 	into samples;
 	if samples >= window_size then
 		while i < samples - window_size loop
-			select get_player_kill_death_ratio_for_window(player_id, i, window_size) into current_row.kill_death_ratio;
-			return next current_row;
+			return next get_player_kill_death_ratio_for_window(player_id, i, window_size);
 			i := i + 1;
 		end loop;
 	elsif samples > 0 then
-		select get_player_kill_death_ratio_for_window(player_id, 0, samples) into current_row.kill_death_ratio;
-		return next current_row;
+		return next get_player_kill_death_ratio_for_window(player_id, 0, samples);
 	end if;
 end $$ language 'plpgsql';

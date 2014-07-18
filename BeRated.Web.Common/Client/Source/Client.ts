@@ -3,6 +3,7 @@
 /// <reference path="RpcClient.ts"/>
 /// <reference path="DataTable.ts"/>
 /// <reference path="IAllPlayerStats.ts"/>
+/// <reference path="IPlayerStats.ts"/>
 /// <reference path="IPlayerWeaponStats.ts"/>
 /// <reference path="IPlayerEncounterStats.ts"/>
 /// <reference path="IPlayerPurchaseStats.ts"/>
@@ -154,6 +155,51 @@ module BeRated {
 				new DataTableColumn('Kills/purchase', (record: IPlayerPurchaseStats) => record.killsPerPurchase, null, false, SortMode.Descending)
 			];
 			var purchasesTable = new DataTable(playerStats.purchases, purchasesColumns);
+			var killDeathRatioHistoryTitle = document.createElement('h1');
+			killDeathRatioHistoryTitle.textContent = 'Kill/death ratio history';
+			killDeathRatioHistoryTitle.className = 'dataHeader';
+			var killDeathRatioHistory = document.createElement('div');
+			killDeathRatioHistory.className = 'killDeathRatioHistory';
+			var killDeathRatioList = document.createElement('ul');
+			killDeathRatioList.className = 'killDeathRatioSamples';
+			var killDeathRatioDescription = document.createElement('ul');
+			var samples = playerStats.killDeathRatioHistory;
+			if (samples.length > 0) {
+				killDeathRatioDescription.className = 'sampleDescription';
+				var timeText = document.createElement('li');
+				var killDeathRatioText = document.createElement('li');
+				killDeathRatioDescription.appendChild(timeText);
+				killDeathRatioDescription.appendChild(killDeathRatioText);
+				var maximumSample = null;
+				samples.forEach((sample) => {
+					var ratio = sample.killDeathRatio;
+					if (maximumSample == null || ratio > maximumSample)
+						maximumSample = ratio;
+				});
+				var selectedClass = 'selectedSample';
+				samples.forEach((sample) => {
+					var ratio = sample.killDeathRatio / maximumSample;
+					var container = document.createElement('li');
+					var bar = document.createElement('div');
+					bar.style.height = (100 * ratio) + '%';
+					bar.onmouseover = () => {
+						container.classList.add(selectedClass);
+						var time = new Date(sample.time);
+						var timeString = this.getDateString(time);
+						timeText.textContent = 'Time: ' + timeString;
+						killDeathRatioText.textContent = 'Kill/death ratio: ' + sample.killDeathRatio;
+						killDeathRatioDescription.style.visibility = 'visible';
+					};
+					bar.onmouseout = () => {
+						container.classList.remove(selectedClass);
+						killDeathRatioDescription.style.visibility = 'hidden';
+					};
+					container.appendChild(bar);
+					killDeathRatioList.appendChild(container);
+				});
+				killDeathRatioList.scrollLeft = killDeathRatioList.clientWidth;
+				killDeathRatioHistory.appendChild(killDeathRatioList);
+			}
 			var addTable = (table: HTMLTableElement) => {
 				table.classList.add('individualPlayerStatsTable');
 				document.body.appendChild(table);
@@ -165,7 +211,27 @@ module BeRated {
 			addTable(weaponTable.table);
 			addTable(encounterTable.table);
 			addTable(purchasesTable.table);
-			this.doneLoadingContent();
+			document.body.appendChild(killDeathRatioHistoryTitle);
+			document.body.appendChild(killDeathRatioHistory);
+			document.body.appendChild(killDeathRatioDescription);
+			killDeathRatioHistory.scrollLeft = killDeathRatioList.scrollWidth;
+		}
+
+		private getDateString(date: Date): string {
+			var output: string = date.getUTCFullYear().toString();
+			output += '-' + this.addZero(date.getUTCMonth() + 1);
+			output += '-' + this.addZero(date.getUTCDate());
+			output += ' ' + this.addZero(date.getUTCHours());
+			output += ':' + this.addZero(date.getUTCMinutes());
+			output += ':' + this.addZero(date.getUTCSeconds());
+			return output;
+		}
+
+		private addZero(input: number): string {
+			if (input < 10)
+				return '0' + input;
+			else
+				return input.toString();
 		}
 
 		private renderPlayer(name: string, id: number): Node {
