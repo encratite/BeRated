@@ -388,7 +388,8 @@ var BeRated;
 
         Client.prototype.routePlayer = function (playerIdString) {
             var playerId = parseInt(playerIdString);
-            this.rpcClient.call('getPlayerStats', [playerId], this.onGetPlayerStats.bind(this));
+            var windowSize = 50;
+            this.rpcClient.call('getPlayerStats', [playerId, windowSize], this.onGetPlayerStats.bind(this));
         };
 
         Client.prototype.onGetAllPlayerStats = function (allPlayerStats) {

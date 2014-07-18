@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BeRated.Query
+﻿namespace BeRated.Query
 {
 	class PlayerEncounterStatsRow
 	{
@@ -9,6 +7,6 @@ namespace BeRated.Query
 		public int Encounters { get; set; }
 		public int Kills { get; set; }
 		public int Deaths { get; set; }
-		public Decimal WinPercentage { get; set; }
+		public decimal WinPercentage { get; set; }
 	}
 }

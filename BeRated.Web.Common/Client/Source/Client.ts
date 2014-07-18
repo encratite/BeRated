@@ -3,7 +3,10 @@
 /// <reference path="RpcClient.ts"/>
 /// <reference path="DataTable.ts"/>
 /// <reference path="IAllPlayerStats.ts"/>
-/// <reference path="IPlayerStats.ts"/>
+/// <reference path="IPlayerWeaponStats.ts"/>
+/// <reference path="IPlayerEncounterStats.ts"/>
+/// <reference path="IPlayerPurchaseStats.ts"/>
+/// <reference path="IKillDeathRatioHistory.ts"/>
 
 module BeRated {
 	var client: Client = null;
@@ -97,7 +100,8 @@ module BeRated {
 
 		private routePlayer(playerIdString: string) {
 			var playerId = parseInt(playerIdString);
-			this.rpcClient.call('getPlayerStats', [playerId], this.onGetPlayerStats.bind(this));
+			var windowSize = 50;
+			this.rpcClient.call('getPlayerStats', [playerId, windowSize], this.onGetPlayerStats.bind(this));
 		}
 
 		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
@@ -144,10 +148,10 @@ module BeRated {
 			];
 			var encounterTable = new DataTable(playerStats.encounters, encounterColumns);
 			var purchasesColumns: Array<DataTableColumn> = [
-				new DataTableColumn('Item', (record: IPlayerPurchases) => record.item),
-				new DataTableColumn('Purchases', (record: IPlayerPurchases) => record.timesPurchased),
-				new DataTableColumn('Purchases/round', (record: IPlayerPurchases) => record.purchasesPerRound, null, true, SortMode.Descending),
-				new DataTableColumn('Kills/purchase', (record: IPlayerPurchases) => record.killsPerPurchase, null, false, SortMode.Descending)
+				new DataTableColumn('Item', (record: IPlayerPurchaseStats) => record.item),
+				new DataTableColumn('Purchases', (record: IPlayerPurchaseStats) => record.timesPurchased),
+				new DataTableColumn('Purchases/round', (record: IPlayerPurchaseStats) => record.purchasesPerRound, null, true, SortMode.Descending),
+				new DataTableColumn('Kills/purchase', (record: IPlayerPurchaseStats) => record.killsPerPurchase, null, false, SortMode.Descending)
 			];
 			var purchasesTable = new DataTable(playerStats.purchases, purchasesColumns);
 			var addTable = (table: HTMLTableElement) => {

@@ -1,5 +1,5 @@
 ﻿module BeRated {
-	export interface IPlayerPurchases {
+	export interface IPlayerPurchaseStats {
 		item: string;
 		timesPurchased: number;
 		purchasesPerRound: number;

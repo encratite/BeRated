@@ -5,7 +5,9 @@ declare
 	function_record record;
 	drop_command text;
 begin
-	for function_record in select * from pg_proc inner join pg_namespace ns on (pg_proc.pronamespace = ns.oid) where ns.nspname = 'public' order by proname loop
+	for function_record in
+		select * from pg_proc inner join pg_namespace ns on (pg_proc.pronamespace = ns.oid) where ns.nspname = 'public' order by proname
+	loop
 		drop_command := 'drop function ' || function_record.nspname || '.' || function_record.proname || '(' || oidvectortypes(function_record.proargtypes) || ');';
 		--raise warning '%', drop_command;
 		execute drop_command;
@@ -540,4 +542,65 @@ begin
 	from purchase
 	where purchase.player_id = get_player_purchases.player_id
 	group by purchase.item;
+end $$ language 'plpgsql';
+
+create function get_player_kill_death_ratio_for_window(player_id integer, window_offset integer, window_limit integer) returns numeric as $$
+declare
+	kills integer := 0;
+	deaths integer := 0;
+	killer_id integer;
+begin
+	for killer_id in
+		select kill.killer_id
+		from kill
+		where
+			(kill.killer_id = player_id or victim_id = player_id) and
+			killer_team != victim_team
+		order by time
+		limit window_limit
+		offset window_offset
+	loop
+		if killer_id = player_id then
+			kills := kills + 1;
+		else
+			deaths := deaths + 1;
+		end if;
+	end loop;
+	if deaths > 0 then
+		return round(kills::numeric / deaths, 2);
+	else
+		return null;
+	end if;
+end $$ language 'plpgsql';
+
+drop type if exists player_kill_death_ratio_row;
+
+create type player_kill_death_ratio_row as
+(
+	kill_death_ratio numeric
+);
+
+create function get_player_kill_death_ratio_history(player_id integer, window_size integer) returns setof player_kill_death_ratio_row as $$
+declare
+	samples integer;
+	i integer := 0;
+	current_row player_kill_death_ratio_row;
+begin
+	perform check_player_id(player_id);
+	select count(*)
+	from kill
+	where
+		(killer_id = player_id or victim_id = player_id) and
+		killer_team != victim_team
+	into samples;
+	if samples >= window_size then
+		while i < samples - window_size loop
+			select get_player_kill_death_ratio_for_window(player_id, i, window_size) into current_row.kill_death_ratio;
+			return next current_row;
+			i := i + 1;
+		end loop;
+	elsif samples > 0 then
+		select get_player_kill_death_ratio_for_window(player_id, 0, samples) into current_row.kill_death_ratio;
+		return next current_row;
+	end if;
 end $$ language 'plpgsql';
