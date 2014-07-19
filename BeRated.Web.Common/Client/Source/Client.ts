@@ -215,6 +215,17 @@ module BeRated {
 			document.body.appendChild(killDeathRatioHistory);
 			document.body.appendChild(killDeathRatioDescription);
 			killDeathRatioHistory.scrollLeft = killDeathRatioList.scrollWidth;
+			if (samples.length > 0) {
+				var barWidth = 6;
+				var innerWidth = barWidth * samples.length;
+				var outerWidth = killDeathRatioHistory.clientWidth;
+				console.log([innerWidth, outerWidth]);
+				if (innerWidth < outerWidth) {
+					var margin = outerWidth - innerWidth;
+					console.log(margin);
+					killDeathRatioList.style.marginLeft = margin + 'px';
+				}
+			}
 			this.doneLoadingContent();
 		}
 
