@@ -533,41 +533,54 @@ var BeRated;
         };
 
         Client.prototype.addKillDeathRatioHistory = function (playerStats) {
-            debugger;
-            var canvas = document.createElement('canvas');
-            canvas.className = 'killDeathRatioGraph';
-            canvas.width = 1000;
-            canvas.height = 1000;
-            document.body.appendChild(canvas);
-            var context = canvas.getContext('2d');
-            var chart = new Chart(context);
-            var history = playerStats.killDeathRatioHistory;
-            var test = 1;
-            var labels = history.map(function (x) {
-                return test++;
+            var _this = this;
+            var header = document.createElement('h1');
+            header.className = 'dataHeader';
+            header.textContent = 'Kill/death ratio';
+            var container = document.createElement('div');
+            container.className = 'killDeathRatioGraph';
+            document.body.appendChild(header);
+            document.body.appendChild(container);
+            var data = [];
+            var lastDay = null;
+            playerStats.killDeathRatioHistory.forEach(function (x) {
+                var date = new Date(x.time);
+                if (lastDay == null || !_this.datesAreEqual(date, lastDay)) {
+                    var sample = [date, x.killDeathRatio];
+                    data.push(sample);
+                    lastDay = date;
+                }
             });
-            var values = history.map(function (x) {
-                return x.killDeathRatio;
-            });
-            var dataset = {
-                label: '',
-                data: values
+            var options = {
+                labels: [
+                    'Date',
+                    'KDR'
+                ],
+                colors: [
+                    'black'
+                ],
+                includeZero: true,
+                valueRange: [0, null],
+                axes: {
+                    x: {
+                        axisLabelFormatter: function (date) {
+                            return _this.getDateString(date);
+                        },
+                        valueFormatter: function (ms) {
+                            var date = new Date(ms);
+                            return _this.getDateString(date);
+                        }
+                    }
+                },
+                xAxisLabelWidth: 80
             };
-            var data = {
-                labels: labels,
-                datasets: [dataset]
-            };
-            var options = {};
-            var lineChart = chart.Line(data, options);
+            var graph = new Dygraph(container, data, options);
         };
 
         Client.prototype.getDateString = function (date) {
             var output = date.getUTCFullYear().toString();
             output += '-' + this.addZero(date.getUTCMonth() + 1);
             output += '-' + this.addZero(date.getUTCDate());
-            output += ' ' + this.addZero(date.getUTCHours());
-            output += ':' + this.addZero(date.getUTCMinutes());
-            output += ':' + this.addZero(date.getUTCSeconds());
             return output;
         };
 
@@ -575,7 +588,11 @@ var BeRated;
             if (input < 10)
                 return '0' + input;
             else
-                return input.toString();
+                return '' + input;
+        };
+
+        Client.prototype.datesAreEqual = function (date1, date2) {
+            return date1.getFullYear() == date2.getFullYear() && date1.getMonth() == date2.getMonth() && date1.getDate() == date2.getDate();
         };
 
         Client.prototype.renderPlayer = function (name, id) {

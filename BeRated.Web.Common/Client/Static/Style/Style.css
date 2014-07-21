@@ -71,7 +71,7 @@ a:hover {
 }
 
 .individualPlayerStatsTable {
-	width: 35em;
+	width: 40em;
 }
 
 .returnLink {
@@ -154,8 +154,9 @@ a:hover {
 }
 
 .killDeathRatioGraph {
-	width: 35em;
-	height: 10em;
+	width: 40em;
+	height: 15em;
+	border: 1px solid #a0a0a0;
 }
 
 @-webkit-keyframes rotate {
