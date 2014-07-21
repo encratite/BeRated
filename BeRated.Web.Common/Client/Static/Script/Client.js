@@ -300,6 +300,7 @@ var BeRated;
     })();
     BeRated.DataTable = DataTable;
 })(BeRated || (BeRated = {}));
+
 var BeRated;
 (function (BeRated) {
     var client = null;
@@ -394,6 +395,11 @@ var BeRated;
 
         Client.prototype.onGetAllPlayerStats = function (allPlayerStats) {
             this.clearBody();
+            this.addAllPlayerStatsTable(allPlayerStats);
+            this.doneLoadingContent();
+        };
+
+        Client.prototype.addAllPlayerStatsTable = function (allPlayerStats) {
             var columns = [
                 new BeRated.DataTableColumn('Name', function (record) {
                     return record.name;
@@ -440,13 +446,36 @@ var BeRated;
             dataTable.table.classList.add('indexTable');
             document.body.appendChild(header);
             document.body.appendChild(dataTable.table);
-            this.doneLoadingContent();
         };
 
         Client.prototype.onGetPlayerStats = function (playerStats) {
-            var _this = this;
             this.clearBody();
             this.setTitle(playerStats.name);
+            this.addHeader(playerStats);
+            this.addWeaponTable(playerStats);
+            this.addEncounterTable(playerStats);
+            this.addPurchases(playerStats);
+            this.addKillDeathRatioHistory(playerStats);
+            this.doneLoadingContent();
+        };
+
+        Client.prototype.addHeader = function (playerStats) {
+            var header = this.createHeader(BeRated.Configuration.playerIcon, playerStats.name);
+            header.classList.add('playerHeader');
+            header.onclick = function () {
+                return window.location.hash = '';
+            };
+            document.body.appendChild(header);
+        };
+
+        Client.prototype.addTable = function (data, columns) {
+            var dataTable = new BeRated.DataTable(data, columns);
+            var table = dataTable.table;
+            table.classList.add('individualPlayerStatsTable');
+            document.body.appendChild(table);
+        };
+
+        Client.prototype.addWeaponTable = function (playerStats) {
             var weaponColumns = [
                 new BeRated.DataTableColumn('Weapon', function (record) {
                     return record.weapon;
@@ -461,7 +490,10 @@ var BeRated;
                     return record.headshotPercentage;
                 }, this.renderPercentage.bind(this))
             ];
-            var weaponTable = new BeRated.DataTable(playerStats.weapons, weaponColumns);
+            this.addTable(playerStats.weapons, weaponColumns);
+        };
+
+        Client.prototype.addEncounterTable = function (playerStats) {
             var encounterColumns = [
                 new BeRated.DataTableColumn('Opponent', function (record) {
                     return record.opponentName;
@@ -479,7 +511,10 @@ var BeRated;
                     return record.winPercentage;
                 }, this.renderPercentage.bind(this))
             ];
-            var encounterTable = new BeRated.DataTable(playerStats.encounters, encounterColumns);
+            this.addTable(playerStats.encounters, encounterColumns);
+        };
+
+        Client.prototype.addPurchases = function (playerStats) {
             var purchasesColumns = [
                 new BeRated.DataTableColumn('Item', function (record) {
                     return record.item;
@@ -494,81 +529,36 @@ var BeRated;
                     return record.killsPerPurchase;
                 }, null, false, 1 /* Descending */)
             ];
-            var purchasesTable = new BeRated.DataTable(playerStats.purchases, purchasesColumns);
-            var killDeathRatioHistoryTitle = document.createElement('h1');
-            killDeathRatioHistoryTitle.textContent = 'Kill/death ratio history';
-            killDeathRatioHistoryTitle.className = 'dataHeader';
-            var killDeathRatioHistory = document.createElement('div');
-            killDeathRatioHistory.className = 'killDeathRatioHistory';
-            var killDeathRatioList = document.createElement('ul');
-            killDeathRatioList.className = 'killDeathRatioSamples';
-            var killDeathRatioDescription = document.createElement('ul');
-            var samples = playerStats.killDeathRatioHistory;
-            if (samples.length > 0) {
-                killDeathRatioDescription.className = 'sampleDescription';
-                var timeText = document.createElement('li');
-                var killDeathRatioText = document.createElement('li');
-                killDeathRatioDescription.appendChild(timeText);
-                killDeathRatioDescription.appendChild(killDeathRatioText);
-                var maximumSample = null;
-                samples.forEach(function (sample) {
-                    var ratio = sample.killDeathRatio;
-                    if (maximumSample == null || ratio > maximumSample)
-                        maximumSample = ratio;
-                });
-                var selectedClass = 'selectedSample';
-                samples.forEach(function (sample) {
-                    var ratio = sample.killDeathRatio / maximumSample;
-                    var container = document.createElement('li');
-                    var bar = document.createElement('div');
-                    bar.style.height = (100 * ratio) + '%';
-                    bar.onmouseover = function () {
-                        container.classList.add(selectedClass);
-                        var time = new Date(sample.time);
-                        var timeString = _this.getDateString(time);
-                        timeText.textContent = 'Time: ' + timeString;
-                        killDeathRatioText.textContent = 'Kill/death ratio: ' + sample.killDeathRatio;
-                        killDeathRatioDescription.style.visibility = 'visible';
-                    };
-                    bar.onmouseout = function () {
-                        container.classList.remove(selectedClass);
-                        killDeathRatioDescription.style.visibility = 'hidden';
-                    };
-                    container.appendChild(bar);
-                    killDeathRatioList.appendChild(container);
-                });
-                killDeathRatioList.scrollLeft = killDeathRatioList.clientWidth;
-                killDeathRatioHistory.appendChild(killDeathRatioList);
-            }
-            var addTable = function (table) {
-                table.classList.add('individualPlayerStatsTable');
-                document.body.appendChild(table);
+            this.addTable(playerStats.purchases, purchasesColumns);
+        };
+
+        Client.prototype.addKillDeathRatioHistory = function (playerStats) {
+            debugger;
+            var canvas = document.createElement('canvas');
+            canvas.className = 'killDeathRatioGraph';
+            canvas.width = 1000;
+            canvas.height = 1000;
+            document.body.appendChild(canvas);
+            var context = canvas.getContext('2d');
+            var chart = new Chart(context);
+            var history = playerStats.killDeathRatioHistory;
+            var test = 1;
+            var labels = history.map(function (x) {
+                return test++;
+            });
+            var values = history.map(function (x) {
+                return x.killDeathRatio;
+            });
+            var dataset = {
+                label: '',
+                data: values
             };
-            var header = this.createHeader(BeRated.Configuration.playerIcon, playerStats.name);
-            header.classList.add('playerHeader');
-            header.onclick = function () {
-                return window.location.hash = '';
+            var data = {
+                labels: labels,
+                datasets: [dataset]
             };
-            document.body.appendChild(header);
-            addTable(weaponTable.table);
-            addTable(encounterTable.table);
-            addTable(purchasesTable.table);
-            document.body.appendChild(killDeathRatioHistoryTitle);
-            document.body.appendChild(killDeathRatioHistory);
-            document.body.appendChild(killDeathRatioDescription);
-            killDeathRatioHistory.scrollLeft = killDeathRatioList.scrollWidth;
-            if (samples.length > 0) {
-                var barWidth = 6;
-                var innerWidth = barWidth * samples.length;
-                var outerWidth = killDeathRatioHistory.clientWidth;
-                console.log([innerWidth, outerWidth]);
-                if (innerWidth < outerWidth) {
-                    var margin = outerWidth - innerWidth;
-                    console.log(margin);
-                    killDeathRatioList.style.marginLeft = margin + 'px';
-                }
-            }
-            this.doneLoadingContent();
+            var options = {};
+            var lineChart = chart.Line(data, options);
         };
 
         Client.prototype.getDateString = function (date) {

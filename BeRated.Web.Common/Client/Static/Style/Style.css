@@ -153,51 +153,9 @@ a:hover {
 	animation: fade 1s;
 }
 
-.killDeathRatioHistory {
-	border: 1px solid black;
-	margin: 0;
-	padding: 0;
-	height: 15em;
-	overflow-x: scroll;
-	overflow-y: hidden;
+.killDeathRatioGraph {
 	width: 35em;
-	white-space: nowrap;
-}
-
-.killDeathRatioSamples {
-	margin: 0;
-	padding: 0;
-	height: 100%;
-}
-
-.killDeathRatioSamples li {
-	margin: 0;
-	padding: 0;
-	list-style-type: none;
-	display: inline;
-	height: 100%;
-	vertical-align: bottom;
-}
-
-.killDeathRatioHistory div {
-	margin: 0;
-	padding: 0;
-	display: inline-block;
-	background-color: #b0b0b0;
-	width: 6px;
-}
-
-.killDeathRatioSamples .selectedSample div {
-	background-color: #808080;
-}
-
-.sampleDescription {
-	list-style-type: none;
-	visibility: hidden;
-	margin: 0;
-	margin-top: 1em;
-	padding: 0;
-	height: 3em;
+	height: 10em;
 }
 
 @-webkit-keyframes rotate {

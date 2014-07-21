@@ -2,12 +2,15 @@
 /// <reference path="Route.ts"/>
 /// <reference path="RpcClient.ts"/>
 /// <reference path="DataTable.ts"/>
+
 /// <reference path="IAllPlayerStats.ts"/>
 /// <reference path="IPlayerStats.ts"/>
 /// <reference path="IPlayerWeaponStats.ts"/>
 /// <reference path="IPlayerEncounterStats.ts"/>
 /// <reference path="IPlayerPurchaseStats.ts"/>
 /// <reference path="IKillDeathRatioHistory.ts"/>
+
+declare var Chart: any;
 
 module BeRated {
 	var client: Client = null;
@@ -107,6 +110,11 @@ module BeRated {
 
 		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
 			this.clearBody();
+			this.addAllPlayerStatsTable(allPlayerStats);
+			this.doneLoadingContent();
+		}
+
+		private addAllPlayerStatsTable(allPlayerStats: Array<IAllPlayerStats>) {
 			var columns: Array<DataTableColumn> = [
 				new DataTableColumn('Name', (record: IAllPlayerStats) => record.name, this.renderPlayerStatsName.bind(this), true),
 				new DataTableColumn('Kills', (record: IAllPlayerStats) => record.kills),
@@ -127,19 +135,44 @@ module BeRated {
 			dataTable.table.classList.add('indexTable');
 			document.body.appendChild(header);
 			document.body.appendChild(dataTable.table);
-			this.doneLoadingContent();
 		}
 
 		private onGetPlayerStats(playerStats: IPlayerStats) {
 			this.clearBody();
 			this.setTitle(playerStats.name);
+			this.addHeader(playerStats);
+			this.addWeaponTable(playerStats);
+			this.addEncounterTable(playerStats);
+			this.addPurchases(playerStats);
+			this.addKillDeathRatioHistory(playerStats);
+			this.doneLoadingContent();
+		}
+
+		private addHeader(playerStats: IPlayerStats) {
+			var header = this.createHeader(Configuration.playerIcon, playerStats.name);
+			header.classList.add('playerHeader');
+			header.onclick = () => window.location.hash = '';
+			document.body.appendChild(header);
+		}
+
+		private addTable(data: Array<any>, columns: Array<DataTableColumn>) {
+			var dataTable = new DataTable(data, columns);
+			var table = dataTable.table;
+			table.classList.add('individualPlayerStatsTable');
+			document.body.appendChild(table);
+		}
+
+		private addWeaponTable(playerStats: IPlayerStats) {
 			var weaponColumns: Array<DataTableColumn> = [
 				new DataTableColumn('Weapon', (record: IPlayerWeaponStats) => record.weapon),
 				new DataTableColumn('Kills', (record: IPlayerWeaponStats) => record.kills, null, true, SortMode.Descending),
 				new DataTableColumn('Headshot kills', (record: IPlayerWeaponStats) => record.headshots),
 				new DataTableColumn('Headshot kill percentage', (record: IPlayerWeaponStats) => record.headshotPercentage, this.renderPercentage.bind(this))
 			];
-			var weaponTable = new DataTable(playerStats.weapons, weaponColumns);
+			this.addTable(playerStats.weapons, weaponColumns);
+		}
+
+		private addEncounterTable(playerStats: IPlayerStats) {
 			var encounterColumns: Array<DataTableColumn> = [
 				new DataTableColumn('Opponent', (record: IPlayerEncounterStats) => record.opponentName, this.renderEncounterStatsName.bind(this), true),
 				new DataTableColumn('Encounters', (record: IPlayerEncounterStats) => record.encounters),
@@ -147,86 +180,41 @@ module BeRated {
 				new DataTableColumn('Deaths', (record: IPlayerEncounterStats) => record.deaths),
 				new DataTableColumn('Win percentage', (record: IPlayerEncounterStats) => record.winPercentage, this.renderPercentage.bind(this))
 			];
-			var encounterTable = new DataTable(playerStats.encounters, encounterColumns);
+			this.addTable(playerStats.encounters, encounterColumns);
+		}
+
+		private addPurchases(playerStats: IPlayerStats) {
 			var purchasesColumns: Array<DataTableColumn> = [
 				new DataTableColumn('Item', (record: IPlayerPurchaseStats) => record.item),
 				new DataTableColumn('Purchases', (record: IPlayerPurchaseStats) => record.timesPurchased),
 				new DataTableColumn('Purchases/round', (record: IPlayerPurchaseStats) => record.purchasesPerRound, null, true, SortMode.Descending),
 				new DataTableColumn('Kills/purchase', (record: IPlayerPurchaseStats) => record.killsPerPurchase, null, false, SortMode.Descending)
 			];
-			var purchasesTable = new DataTable(playerStats.purchases, purchasesColumns);
-			var killDeathRatioHistoryTitle = document.createElement('h1');
-			killDeathRatioHistoryTitle.textContent = 'Kill/death ratio history';
-			killDeathRatioHistoryTitle.className = 'dataHeader';
-			var killDeathRatioHistory = document.createElement('div');
-			killDeathRatioHistory.className = 'killDeathRatioHistory';
-			var killDeathRatioList = document.createElement('ul');
-			killDeathRatioList.className = 'killDeathRatioSamples';
-			var killDeathRatioDescription = document.createElement('ul');
-			var samples = playerStats.killDeathRatioHistory;
-			if (samples.length > 0) {
-				killDeathRatioDescription.className = 'sampleDescription';
-				var timeText = document.createElement('li');
-				var killDeathRatioText = document.createElement('li');
-				killDeathRatioDescription.appendChild(timeText);
-				killDeathRatioDescription.appendChild(killDeathRatioText);
-				var maximumSample = null;
-				samples.forEach((sample) => {
-					var ratio = sample.killDeathRatio;
-					if (maximumSample == null || ratio > maximumSample)
-						maximumSample = ratio;
-				});
-				var selectedClass = 'selectedSample';
-				samples.forEach((sample) => {
-					var ratio = sample.killDeathRatio / maximumSample;
-					var container = document.createElement('li');
-					var bar = document.createElement('div');
-					bar.style.height = (100 * ratio) + '%';
-					bar.onmouseover = () => {
-						container.classList.add(selectedClass);
-						var time = new Date(sample.time);
-						var timeString = this.getDateString(time);
-						timeText.textContent = 'Time: ' + timeString;
-						killDeathRatioText.textContent = 'Kill/death ratio: ' + sample.killDeathRatio;
-						killDeathRatioDescription.style.visibility = 'visible';
-					};
-					bar.onmouseout = () => {
-						container.classList.remove(selectedClass);
-						killDeathRatioDescription.style.visibility = 'hidden';
-					};
-					container.appendChild(bar);
-					killDeathRatioList.appendChild(container);
-				});
-				killDeathRatioList.scrollLeft = killDeathRatioList.clientWidth;
-				killDeathRatioHistory.appendChild(killDeathRatioList);
-			}
-			var addTable = (table: HTMLTableElement) => {
-				table.classList.add('individualPlayerStatsTable');
-				document.body.appendChild(table);
+			this.addTable(playerStats.purchases, purchasesColumns);
+		}
+
+		private addKillDeathRatioHistory(playerStats: IPlayerStats) {
+			var canvas = document.createElement('canvas');
+			canvas.className = 'killDeathRatioGraph';
+			canvas.width = 1000;
+			canvas.height = 1000;
+			document.body.appendChild(canvas);
+			var context = canvas.getContext('2d');
+			var chart = new Chart(context);
+			var history = playerStats.killDeathRatioHistory;
+			var test = 1;
+			var labels = history.map((x) => test++);
+			var values = history.map((x) => x.killDeathRatio);
+			var dataset = {
+				label: '',
+				data: values
 			};
-			var header = this.createHeader(Configuration.playerIcon, playerStats.name);
-			header.classList.add('playerHeader');
-			header.onclick = () => window.location.hash = '';
-			document.body.appendChild(header);
-			addTable(weaponTable.table);
-			addTable(encounterTable.table);
-			addTable(purchasesTable.table);
-			document.body.appendChild(killDeathRatioHistoryTitle);
-			document.body.appendChild(killDeathRatioHistory);
-			document.body.appendChild(killDeathRatioDescription);
-			killDeathRatioHistory.scrollLeft = killDeathRatioList.scrollWidth;
-			if (samples.length > 0) {
-				var barWidth = 6;
-				var innerWidth = barWidth * samples.length;
-				var outerWidth = killDeathRatioHistory.clientWidth;
-				console.log([innerWidth, outerWidth]);
-				if (innerWidth < outerWidth) {
-					var margin = outerWidth - innerWidth;
-					console.log(margin);
-					killDeathRatioList.style.marginLeft = margin + 'px';
-				}
-			}
-			this.doneLoadingContent();
+			var data = {
+				labels: labels,
+				datasets: [dataset]
+			};
+			var options = {};
+			var lineChart = chart.Line(data, options);
 		}
 
 		private getDateString(date: Date): string {
