@@ -104,8 +104,7 @@ module BeRated {
 
 		private routePlayer(playerIdString: string) {
 			var playerId = parseInt(playerIdString);
-			var windowSize = 50;
-			this.rpcClient.call('getPlayerStats', [playerId, windowSize], this.onGetPlayerStats.bind(this));
+			this.rpcClient.call('getPlayerStats', [playerId], this.onGetPlayerStats.bind(this));
 		}
 
 		private onGetAllPlayerStats(allPlayerStats: Array<IAllPlayerStats>) {
@@ -204,7 +203,7 @@ module BeRated {
 			var data = [];
 			var lastDay: Date = null;
 			playerStats.killDeathRatioHistory.forEach((x) => {
-				var date = new Date(x.time);
+				var date = new Date(x.day);
 				if (lastDay == null || !this.datesAreEqual(date, lastDay)) {
 					var sample = [date, x.killDeathRatio];
 					data.push(sample);

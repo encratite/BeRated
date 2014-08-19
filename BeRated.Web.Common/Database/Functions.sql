@@ -544,66 +544,47 @@ begin
 	group by purchase.item;
 end $$ language 'plpgsql';
 
-drop type if exists player_kill_death_ratio_row;
-
-create type player_kill_death_ratio_row as
-(
-	time timestamp,
-	kill_death_ratio numeric
-);
-
-create function get_player_kill_death_ratio_for_window(player_id integer, window_offset integer, window_limit integer) returns player_kill_death_ratio_row as $$
+create function get_player_kills_on_day(player_id integer, day date) returns int as $$
 declare
-	kills integer := 0;
-	deaths integer := 0;
-	kill_time timestamp;
-	killer_id integer;
-	sample player_kill_death_ratio_row;
+	kills integer;
 begin
-	for kill_time, killer_id in
-		select
-			kill.time,
-			kill.killer_id
-		from kill
-		where
-			(kill.killer_id = player_id or victim_id = player_id) and
-			killer_team != victim_team
-		order by time
-		limit window_limit
-		offset window_offset
-	loop
-		if killer_id = player_id then
-			kills := kills + 1;
-		else
-			deaths := deaths + 1;
-		end if;
-		sample.time := kill_time;
-	end loop;
-	if deaths > 0 then
-		sample.kill_death_ratio := round(kills::numeric / deaths, 2);
-	end if;
-	return sample;
+	select count(*) from kill where killer_id = player_id and killer_id != victim_id and time::date = day into kills;
+	return kills;
 end $$ language 'plpgsql';
 
-create function get_player_kill_death_ratio_history(player_id integer, window_size integer) returns setof player_kill_death_ratio_row as $$
+create function get_player_deaths_on_day(player_id integer, day date) returns int as $$
 declare
-	samples integer;
-	i integer := 0;
-	current_row player_kill_death_ratio_row;
+	deaths integer;
+begin
+	select count(*) from kill where victim_id = player_id and time::date = day into deaths;
+	return deaths;
+end $$ language 'plpgsql';
+
+create function get_player_kill_death_ratio_on_day(player_id integer, day date) returns numeric as $$
+declare
+	kills integer;
+	deaths integer;
+begin
+	select get_player_kills_on_day(player_id, day) into kills;
+	select get_player_deaths_on_day(player_id, day) into deaths;
+	if deaths = 0 then
+		return null;
+	end if;
+	return kills::numeric / deaths;
+end $$ language 'plpgsql';
+
+create function get_player_kill_death_ratio_history(player_id integer) returns table
+(
+	day date,
+	kill_death_ratio numeric
+) as $$
 begin
 	perform check_player_id(player_id);
-	select count(*)
+	return query select
+		date(time) as day,
+		round(get_player_kill_death_ratio_on_day(player_id, time::date), 2) as kill_death_ratio
 	from kill
-	where
-		(killer_id = player_id or victim_id = player_id) and
-		killer_team != victim_team
-	into samples;
-	if samples >= window_size then
-		while i < samples - window_size loop
-			return next get_player_kill_death_ratio_for_window(player_id, i, window_size);
-			i := i + 1;
-		end loop;
-	elsif samples > 0 then
-		return next get_player_kill_death_ratio_for_window(player_id, 0, samples);
-	end if;
+	where victim_id = player_id
+	group by time::date
+	order by time::date;
 end $$ language 'plpgsql';

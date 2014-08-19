@@ -4,7 +4,7 @@ namespace BeRated.Query
 {
 	class KillDeathRatioHistoryRow
 	{
-		public DateTime Time { get; set; }
+		public DateTime Day { get; set; }
 		public decimal KillDeathRatio { get; set; }
 	}
 }

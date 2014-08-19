@@ -51,14 +51,13 @@ namespace BeRated
 		}
 
 		[WebSocketServerMethod]
-		PlayerStats GetPlayerStats(int playerId, int windowSize)
+		PlayerStats GetPlayerStats(int playerId)
 		{
 			lock (_Database)
 			{
 				var playerStats = new PlayerStats();
 				playerStats.Id = playerId;
 				var idParameter = new CommandParameter("player_id", playerId);
-				var windowSizeParameter = new CommandParameter("window_size", windowSize);
 				playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
 				using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter))
 				{
@@ -72,7 +71,7 @@ namespace BeRated
 				{
 					playerStats.Purchases = reader.ReadAll<PlayerPurchasesRow>();
 				}
-				using (var reader = _Database.ReadFunction("get_player_kill_death_ratio_history", idParameter, windowSizeParameter))
+				using (var reader = _Database.ReadFunction("get_player_kill_death_ratio_history", idParameter))
 				{
 					playerStats.KillDeathRatioHistory = reader.ReadAll<KillDeathRatioHistoryRow>();
 				}

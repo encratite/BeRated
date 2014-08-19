@@ -1,6 +1,6 @@
 ﻿module BeRated {
 	export interface IKillDeathRatioHistory {
-		time: string;
+		day: string;
 		killDeathRatio: number;
 	}
 } 

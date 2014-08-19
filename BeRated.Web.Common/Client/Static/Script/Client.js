@@ -389,8 +389,7 @@ var BeRated;
 
         Client.prototype.routePlayer = function (playerIdString) {
             var playerId = parseInt(playerIdString);
-            var windowSize = 50;
-            this.rpcClient.call('getPlayerStats', [playerId, windowSize], this.onGetPlayerStats.bind(this));
+            this.rpcClient.call('getPlayerStats', [playerId], this.onGetPlayerStats.bind(this));
         };
 
         Client.prototype.onGetAllPlayerStats = function (allPlayerStats) {
@@ -544,7 +543,7 @@ var BeRated;
             var data = [];
             var lastDay = null;
             playerStats.killDeathRatioHistory.forEach(function (x) {
-                var date = new Date(x.time);
+                var date = new Date(x.day);
                 if (lastDay == null || !_this.datesAreEqual(date, lastDay)) {
                     var sample = [date, x.killDeathRatio];
                     data.push(sample);
