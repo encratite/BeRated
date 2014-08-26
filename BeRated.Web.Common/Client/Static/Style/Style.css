@@ -159,6 +159,18 @@ a:hover {
 	border: 1px solid #a0a0a0;
 }
 
+.outcomeLoss {
+	color: #a20000;
+}
+
+.outcomeWin {
+	color: #00a908;
+}
+
+.outcomeDraw {
+	color: #b3b500;
+}
+
 @-webkit-keyframes rotate {
 	from {
 		-webkit-transform: rotate(0deg);

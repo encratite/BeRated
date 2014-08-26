@@ -606,7 +606,7 @@ begin
 	order by time::date;
 end $$ language 'plpgsql';
 
-create function get_player_game_history(player_id integer) returns table
+create function get_player_games(player_id integer) returns table
 (
 	game_time timestamp,
 	player_score integer,
@@ -678,11 +678,11 @@ begin
 		round_player
 	where
 		round.id = round_player.round_id and
-		round_player.player_id = get_player_game_history.player_id and
+		round_player.player_id = get_player_games.player_id and
 		(
 			round.terrorist_score >= round.max_rounds / 2.0 or
 			round.counter_terrorist_score >= round.max_rounds / 2.0 or
 			round.terrorist_score + round.counter_terrorist_score = round.max_rounds
 		)
-	order by round.time;
+	order by round.time desc;
 end $$ language 'plpgsql';

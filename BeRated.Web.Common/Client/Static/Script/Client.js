@@ -455,6 +455,7 @@ var BeRated;
             this.addEncounterTable(playerStats);
             this.addPurchases(playerStats);
             this.addKillDeathRatioHistory(playerStats);
+            this.addPlayerGames(playerStats);
             this.doneLoadingContent();
         };
 
@@ -467,11 +468,12 @@ var BeRated;
             document.body.appendChild(header);
         };
 
-        Client.prototype.addTable = function (data, columns) {
+        Client.prototype.addTable = function (data, columns, container) {
+            if (typeof container === "undefined") { container = document.body; }
             var dataTable = new BeRated.DataTable(data, columns);
             var table = dataTable.table;
             table.classList.add('individualPlayerStatsTable');
-            document.body.appendChild(table);
+            container.appendChild(table);
         };
 
         Client.prototype.addWeaponTable = function (playerStats) {
@@ -576,10 +578,56 @@ var BeRated;
             var graph = new Dygraph(container, data, options);
         };
 
+        Client.prototype.addPlayerGames = function (playerStats) {
+            var _this = this;
+            var header = document.createElement('h1');
+            header.className = 'dataHeader';
+            header.textContent = 'Games';
+            var columns = [
+                new BeRated.DataTableColumn('Time', function (record) {
+                    return new Date(record.gameTime);
+                }, this.renderGameTime.bind(this), true, 1 /* Descending */),
+                new BeRated.DataTableColumn('Outcome', function (record) {
+                    return record.outcome;
+                }, this.renderOutcome.bind(this)),
+                new BeRated.DataTableColumn('Score', function (record) {
+                    return record.playerScore * 100 + record.enemyScore;
+                }, this.renderScore.bind(this)),
+                new BeRated.DataTableColumn('Team', function (record) {
+                    return _this.getTeamValue(record.playerTeam);
+                }, function (value, record) {
+                    return _this.renderTeam(record.playerTeam);
+                }),
+                new BeRated.DataTableColumn('Enemy team', function (record) {
+                    return _this.getTeamValue(record.enemyTeam);
+                }, function (value, record) {
+                    return _this.renderTeam(record.enemyTeam);
+                })
+            ];
+            document.body.appendChild(header);
+            this.addTable(playerStats.games, columns);
+        };
+
+        Client.prototype.getTeamValue = function (players) {
+            var output = '';
+            players.forEach(function (player) {
+                return output += player.name + ', ';
+            });
+            return output;
+        };
+
         Client.prototype.getDateString = function (date) {
             var output = date.getUTCFullYear().toString();
             output += '-' + this.addZero(date.getUTCMonth() + 1);
             output += '-' + this.addZero(date.getUTCDate());
+            return output;
+        };
+
+        Client.prototype.getTimeString = function (date) {
+            var output = this.getDateString(date);
+            output += ' ' + this.addZero(date.getUTCHours());
+            output += ':' + this.addZero(date.getUTCMinutes());
+
             return output;
         };
 
@@ -615,6 +663,56 @@ var BeRated;
             var text = percentage + '%';
             var node = document.createTextNode(text);
             return node;
+        };
+
+        Client.prototype.renderGameTime = function (time, record) {
+            var text = this.getTimeString(time);
+            var node = document.createTextNode(text);
+            return node;
+        };
+
+        Client.prototype.renderScore = function (value, record) {
+            var text = record.playerScore + ' - ' + record.enemyScore;
+            var node = document.createTextNode(text);
+            return node;
+        };
+
+        Client.prototype.renderOutcome = function (outcome, record) {
+            var node = document.createElement('span');
+            switch (outcome) {
+                case 'loss':
+                    node.textContent = 'Loss';
+                    node.className = 'outcomeLoss';
+                    break;
+
+                case 'win':
+                    node.textContent = 'Win';
+                    node.className = 'outcomeWin';
+                    break;
+
+                case 'draw':
+                    node.textContent = 'Draw';
+                    node.className = 'outcomeDraw';
+                    break;
+            }
+            return node;
+        };
+
+        Client.prototype.renderTeam = function (players) {
+            var _this = this;
+            var container = document.createElement('div');
+            var first = true;
+            players.forEach(function (player) {
+                if (first) {
+                    first = false;
+                } else {
+                    var separator = document.createTextNode(', ');
+                    container.appendChild(separator);
+                }
+                var node = _this.renderPlayer(player.name, player.id);
+                container.appendChild(node);
+            });
+            return container;
         };
 
         Client.prototype.createHeader = function (iconClass, title) {

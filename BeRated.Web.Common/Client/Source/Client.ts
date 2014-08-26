@@ -144,6 +144,7 @@ module BeRated {
 			this.addEncounterTable(playerStats);
 			this.addPurchases(playerStats);
 			this.addKillDeathRatioHistory(playerStats);
+			this.addPlayerGames(playerStats);
 			this.doneLoadingContent();
 		}
 
@@ -154,11 +155,11 @@ module BeRated {
 			document.body.appendChild(header);
 		}
 
-		private addTable(data: Array<any>, columns: Array<DataTableColumn>) {
+		private addTable(data: Array<any>, columns: Array<DataTableColumn>, container: HTMLElement = document.body) {
 			var dataTable = new DataTable(data, columns);
 			var table = dataTable.table;
 			table.classList.add('individualPlayerStatsTable');
-			document.body.appendChild(table);
+			container.appendChild(table);
 		}
 
 		private addWeaponTable(playerStats: IPlayerStats) {
@@ -234,10 +235,39 @@ module BeRated {
 			var graph = new Dygraph(container, data, options);
 		}
 
+		private addPlayerGames(playerStats: IPlayerStats) {
+			var header = document.createElement('h1');
+			header.className = 'dataHeader';
+			header.textContent = 'Games';
+			var columns: Array<DataTableColumn> = [
+				new DataTableColumn('Time', (record: IPlayerGame) => new Date(record.gameTime), this.renderGameTime.bind(this), true, SortMode.Descending),
+				new DataTableColumn('Outcome', (record: IPlayerGame) => record.outcome, this.renderOutcome.bind(this)),
+				new DataTableColumn('Score', (record: IPlayerGame) => record.playerScore * 100 + record.enemyScore, this.renderScore.bind(this)),
+				new DataTableColumn('Team', (record: IPlayerGame) => this.getTeamValue(record.playerTeam), (value: string, record: IPlayerGame) => this.renderTeam(record.playerTeam)),
+				new DataTableColumn('Enemy team', (record: IPlayerGame) => this.getTeamValue(record.enemyTeam), (value: string, record: IPlayerGame) => this.renderTeam(record.enemyTeam))
+			];
+			document.body.appendChild(header);
+			this.addTable(playerStats.games, columns);
+		}
+
+		private getTeamValue(players: Array<IGamePlayer>) {
+			var output = '';
+			players.forEach((player) => output += player.name + ', ');
+			return output;
+		}
+
 		private getDateString(date: Date): string {
 			var output: string = date.getUTCFullYear().toString();
 			output += '-' + this.addZero(date.getUTCMonth() + 1);
 			output += '-' + this.addZero(date.getUTCDate());
+			return output;
+		}
+
+		private getTimeString(date: Date): string {
+			var output = this.getDateString(date);
+			output += ' ' + this.addZero(date.getUTCHours());
+			output += ':' + this.addZero(date.getUTCMinutes());
+			// output += ':' + this.addZero(date.getUTCSeconds());
 			return output;
 		}
 
@@ -273,6 +303,56 @@ module BeRated {
 			var text = percentage + '%';
 			var node = document.createTextNode(text);
 			return node;
+		}
+
+		private renderGameTime(time: Date, record: IPlayerGame): Node {
+			var text = this.getTimeString(time);
+			var node = document.createTextNode(text);
+			return node;
+		}
+
+		private renderScore(value: number, record: IPlayerGame): Node {
+			var text = record.playerScore + ' - ' + record.enemyScore;
+			var node = document.createTextNode(text);
+			return node;
+		}
+
+		private renderOutcome(outcome: string, record: IPlayerGame): Node {
+			var node = document.createElement('span');
+			switch (outcome) {
+				case 'loss':
+					node.textContent = 'Loss';
+					node.className = 'outcomeLoss';
+					break;
+
+				case 'win':
+					node.textContent = 'Win';
+					node.className = 'outcomeWin';
+					break;
+
+				case 'draw':
+					node.textContent = 'Draw';
+					node.className = 'outcomeDraw';
+					break;
+			}
+			return node;
+		}
+
+		private renderTeam(players: Array<IGamePlayer>): Node {
+			var container = document.createElement('div');
+			var first = true;
+			players.forEach((player) => {
+				if (first) {
+					first = false;
+				}
+				else {
+					var separator = document.createTextNode(', ');
+					container.appendChild(separator);
+				}
+				var node = this.renderPlayer(player.name, player.id);
+				container.appendChild(node);
+			});
+			return container;
 		}
 
 		private createHeader(iconClass: string, title: string) {

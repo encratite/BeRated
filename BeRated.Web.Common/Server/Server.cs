@@ -4,6 +4,7 @@ using BeRated.Query;
 using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BeRated
 {
@@ -74,6 +75,11 @@ namespace BeRated
 				using (var reader = _Database.ReadFunction("get_player_kill_death_ratio_history", idParameter))
 				{
 					playerStats.KillDeathRatioHistory = reader.ReadAll<KillDeathRatioHistoryRow>();
+				}
+				using (var reader = _Database.ReadFunction("get_player_games", idParameter))
+				{
+					var rows = reader.ReadAll<PlayerGameHistoryRow>();
+					playerStats.Games = rows.Select(row => new PlayerGame(row)).ToList();
 				}
 				return playerStats;
 			}
