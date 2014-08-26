@@ -588,3 +588,58 @@ begin
 	group by time::date
 	order by time::date;
 end $$ language 'plpgsql';
+
+create function get_player_game_history(player_id integer) returns table
+(
+	game_time timestamp,
+	player_score integer,
+	enemy_score integer,
+	outcome game_outcome
+) as $$
+begin
+	perform check_player_id(player_id);
+	return query select
+		round.time as time,
+		case
+			when round_player.team = 'terrorist'::team_type
+			then round.terrorist_score
+			else round.counter_terrorist_score end
+			as player_score,
+		case
+			when round_player.team = 'terrorist'::team_type
+			then round.counter_terrorist_score
+			else round.terrorist_score end
+			as enemy_score,
+			case
+				when
+					round.terrorist_score = round.counter_terrorist_score
+				then
+					'draw'::game_outcome
+				when
+					(
+						round.terrorist_score >= round.max_rounds / 2.0 and
+						round_player.team = 'terrorist'::team_type
+					) or
+					(
+						round.counter_terrorist_score >= round.max_rounds / 2.0 and
+						round_player.team = 'counter_terrorist'::team_type
+					)
+				then
+					'win'::game_outcome
+				else
+					'loss'::game_outcome
+				end
+			as win
+	from
+		round,
+		round_player
+	where
+		round.id = round_player.round_id and
+		round_player.player_id = get_player_game_history.player_id and
+		(
+			round.terrorist_score >= round.max_rounds / 2.0 or
+			round.counter_terrorist_score >= round.max_rounds / 2.0 or
+			round.terrorist_score + round.counter_terrorist_score = round.max_rounds
+		)
+	order by round.time;
+end $$ language 'plpgsql';

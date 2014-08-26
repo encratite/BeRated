@@ -51,7 +51,6 @@ namespace BeRated
 		{
 			_MaxRounds = MaxRoundsDefault;
 			_Players = new Dictionary<string, string>();
-			_Players.Clear();
 			Console.WriteLine(path);
 			var lines = File.ReadLines(path);
 			int lineCounter = 1;
