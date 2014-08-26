@@ -21,15 +21,6 @@ create type sfui_notice_type as enum
 	'terrorists_win'
 );
 
-drop type if exists game_outcome cascade;
-
-create type game_outcome as enum
-(
-	'loss',
-	'win',
-	'draw'
-);
-
 drop table if exists player cascade;
 
 create table player

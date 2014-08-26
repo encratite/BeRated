@@ -1,5 +1,22 @@
 set client_min_messages to warning;
 
+drop type if exists game_outcome cascade;
+
+create type game_outcome as enum
+(
+	'loss',
+	'win',
+	'draw'
+);
+
+drop type if exists player_information cascade;
+
+create type player_information as
+(
+	id integer,
+	name text
+);
+
 create or replace function drop_functions() returns void as $$
 declare
 	function_record record;
@@ -594,6 +611,8 @@ create function get_player_game_history(player_id integer) returns table
 	game_time timestamp,
 	player_score integer,
 	enemy_score integer,
+	player_team player_information[],
+	enemy_team player_information[],
 	outcome game_outcome
 ) as $$
 begin
@@ -603,33 +622,57 @@ begin
 		case
 			when round_player.team = 'terrorist'::team_type
 			then round.terrorist_score
-			else round.counter_terrorist_score end
-			as player_score,
+			else round.counter_terrorist_score
+		end
+		as player_score,
 		case
 			when round_player.team = 'terrorist'::team_type
 			then round.counter_terrorist_score
-			else round.terrorist_score end
-			as enemy_score,
-			case
-				when
-					round.terrorist_score = round.counter_terrorist_score
-				then
-					'draw'::game_outcome
-				when
-					(
-						round.terrorist_score >= round.max_rounds / 2.0 and
-						round_player.team = 'terrorist'::team_type
-					) or
-					(
-						round.counter_terrorist_score >= round.max_rounds / 2.0 and
-						round_player.team = 'counter_terrorist'::team_type
-					)
-				then
-					'win'::game_outcome
-				else
-					'loss'::game_outcome
-				end
-			as win
+			else round.terrorist_score
+		end
+		as enemy_score,
+		array
+		(
+			select
+				row(r.player_id, get_player_name(r.player_id))::player_information
+			from
+				round_player as r
+			where
+				r.round_id = round.id and
+				r.team = round_player.team
+		)
+		as player_team,
+		array
+		(
+			select
+				row(r.player_id, get_player_name(r.player_id))::player_information
+			from
+				round_player as r
+			where
+				r.round_id = round.id and
+				r.team != round_player.team
+		)
+		as enemy_team,
+		case
+			when
+				round.terrorist_score = round.counter_terrorist_score
+			then
+				'draw'::game_outcome
+			when
+				(
+					round.terrorist_score >= round.max_rounds / 2.0 and
+					round_player.team = 'terrorist'::team_type
+				) or
+				(
+					round.counter_terrorist_score >= round.max_rounds / 2.0 and
+					round_player.team = 'counter_terrorist'::team_type
+				)
+			then
+				'win'::game_outcome
+			else
+				'loss'::game_outcome
+		end
+		as outcome
 	from
 		round,
 		round_player
