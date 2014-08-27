@@ -200,7 +200,7 @@ var BeRated;
                     if (_this.sortColumn != null)
                         throw new Error('There cannot be more than one default sort column');
                     _this.sortColumn = column;
-                    _this.sortMode = 0 /* Ascending */;
+                    _this.sortMode = SortMode.Ascending;
                     if (column.defaultSortMode != null)
                         _this.sortMode = column.defaultSortMode;
                 }
@@ -243,7 +243,7 @@ var BeRated;
             while (this.table.firstChild)
                 this.table.removeChild(this.table.firstChild);
             this.table.appendChild(this.headerRow);
-            var iconClass = this.sortMode === 0 /* Ascending */ ? BeRated.Configuration.sortIconAscending : BeRated.Configuration.sortIconDescending;
+            var iconClass = this.sortMode === SortMode.Ascending ? BeRated.Configuration.sortIconAscending : BeRated.Configuration.sortIconDescending;
             var icon = BeRated.Utility.createIcon(iconClass);
             this.sortColumn.header.appendChild(icon);
             this.rows.forEach((function (row) {
@@ -260,9 +260,9 @@ var BeRated;
                 var output = 0;
                 if (property1 < property2)
                     output = -1;
-                else if (property1 > property2)
+else if (property1 > property2)
                     output = 1;
-                if (_this.sortMode == 1 /* Descending */)
+                if (_this.sortMode == SortMode.Descending)
                     output = -output;
                 return output;
             }).bind(this));
@@ -276,19 +276,19 @@ var BeRated;
                 container.removeChild(icon);
             }
             if (this.sortColumn == column) {
-                if (this.sortMode === 0 /* Ascending */)
-                    this.sortMode = 1 /* Descending */;
-                else
-                    this.sortMode = 0 /* Ascending */;
+                if (this.sortMode === SortMode.Ascending)
+                    this.sortMode = SortMode.Descending;
+else
+                    this.sortMode = SortMode.Ascending;
             } else {
                 this.sortColumn = column;
                 if (column.defaultSortMode == null) {
-                    this.sortMode = 0 /* Ascending */;
+                    this.sortMode = SortMode.Ascending;
                     if (this.rows.length > 0) {
                         var firstRecord = this.rows[0].record;
                         var firstValue = column.select(firstRecord);
                         if (typeof firstValue === 'number')
-                            this.sortMode = 1 /* Descending */;
+                            this.sortMode = SortMode.Descending;
                     }
                 } else {
                     this.sortMode = column.defaultSortMode;
@@ -300,7 +300,6 @@ var BeRated;
     })();
     BeRated.DataTable = DataTable;
 })(BeRated || (BeRated = {}));
-
 var BeRated;
 (function (BeRated) {
     var client = null;
@@ -339,7 +338,7 @@ var BeRated;
             var message;
             if (wasConnected)
                 message = 'Disconnected from server';
-            else
+else
                 message = 'Unable to connect';
             var error = this.createHeader(BeRated.Configuration.errorIcon, message);
             error.classList.add('error');
@@ -451,11 +450,17 @@ var BeRated;
             this.clearBody();
             this.setTitle(playerStats.name);
             this.addHeader(playerStats);
-            this.addWeaponTable(playerStats);
-            this.addEncounterTable(playerStats);
-            this.addPurchases(playerStats);
-            this.addKillDeathRatioHistory(playerStats);
-            this.addPlayerGames(playerStats);
+            var leftContainer = document.createElement('div');
+            leftContainer.className = 'leftSide';
+            var rightContainer = document.createElement('div');
+            rightContainer.className = 'rightSide';
+            document.body.appendChild(leftContainer);
+            document.body.appendChild(rightContainer);
+            this.addWeaponTable(playerStats, leftContainer);
+            this.addEncounterTable(playerStats, leftContainer);
+            this.addPurchases(playerStats, leftContainer);
+            this.addKillDeathRatioHistory(playerStats, leftContainer);
+            this.addPlayerGames(playerStats, rightContainer);
             this.doneLoadingContent();
         };
 
@@ -476,14 +481,14 @@ var BeRated;
             container.appendChild(table);
         };
 
-        Client.prototype.addWeaponTable = function (playerStats) {
+        Client.prototype.addWeaponTable = function (playerStats, container) {
             var weaponColumns = [
                 new BeRated.DataTableColumn('Weapon', function (record) {
                     return record.weapon;
                 }),
                 new BeRated.DataTableColumn('Kills', function (record) {
                     return record.kills;
-                }, null, true, 1 /* Descending */),
+                }, null, true, BeRated.SortMode.Descending),
                 new BeRated.DataTableColumn('Headshot kills', function (record) {
                     return record.headshots;
                 }),
@@ -491,10 +496,10 @@ var BeRated;
                     return record.headshotPercentage;
                 }, this.renderPercentage.bind(this))
             ];
-            this.addTable(playerStats.weapons, weaponColumns);
+            this.addTable(playerStats.weapons, weaponColumns, container);
         };
 
-        Client.prototype.addEncounterTable = function (playerStats) {
+        Client.prototype.addEncounterTable = function (playerStats, container) {
             var encounterColumns = [
                 new BeRated.DataTableColumn('Opponent', function (record) {
                     return record.opponentName;
@@ -512,10 +517,10 @@ var BeRated;
                     return record.winPercentage;
                 }, this.renderPercentage.bind(this))
             ];
-            this.addTable(playerStats.encounters, encounterColumns);
+            this.addTable(playerStats.encounters, encounterColumns, container);
         };
 
-        Client.prototype.addPurchases = function (playerStats) {
+        Client.prototype.addPurchases = function (playerStats, container) {
             var purchasesColumns = [
                 new BeRated.DataTableColumn('Item', function (record) {
                     return record.item;
@@ -525,23 +530,23 @@ var BeRated;
                 }),
                 new BeRated.DataTableColumn('Purchases/round', function (record) {
                     return record.purchasesPerRound;
-                }, null, true, 1 /* Descending */),
+                }, null, true, BeRated.SortMode.Descending),
                 new BeRated.DataTableColumn('Kills/purchase', function (record) {
                     return record.killsPerPurchase;
-                }, null, false, 1 /* Descending */)
+                }, null, false, BeRated.SortMode.Descending)
             ];
-            this.addTable(playerStats.purchases, purchasesColumns);
+            this.addTable(playerStats.purchases, purchasesColumns, container);
         };
 
-        Client.prototype.addKillDeathRatioHistory = function (playerStats) {
+        Client.prototype.addKillDeathRatioHistory = function (playerStats, container) {
             var _this = this;
             var header = document.createElement('h1');
             header.className = 'dataHeader';
             header.textContent = 'Kill/death ratio';
-            var container = document.createElement('div');
-            container.className = 'killDeathRatioGraph';
-            document.body.appendChild(header);
-            document.body.appendChild(container);
+            var graphContainer = document.createElement('div');
+            graphContainer.className = 'killDeathRatioGraph';
+            container.appendChild(header);
+            container.appendChild(graphContainer);
             var data = [];
             var lastDay = null;
             playerStats.killDeathRatioHistory.forEach(function (x) {
@@ -575,18 +580,15 @@ var BeRated;
                 },
                 xAxisLabelWidth: 80
             };
-            var graph = new Dygraph(container, data, options);
+            var graph = new Dygraph(graphContainer, data, options);
         };
 
-        Client.prototype.addPlayerGames = function (playerStats) {
+        Client.prototype.addPlayerGames = function (playerStats, container) {
             var _this = this;
-            var header = document.createElement('h1');
-            header.className = 'dataHeader';
-            header.textContent = 'Games';
             var columns = [
                 new BeRated.DataTableColumn('Time', function (record) {
                     return new Date(record.gameTime);
-                }, this.renderGameTime.bind(this), true, 1 /* Descending */),
+                }, this.renderGameTime.bind(this), true, BeRated.SortMode.Descending),
                 new BeRated.DataTableColumn('Outcome', function (record) {
                     return record.outcome;
                 }, this.renderOutcome.bind(this)),
@@ -604,8 +606,9 @@ var BeRated;
                     return _this.renderTeam(record.enemyTeam);
                 })
             ];
-            document.body.appendChild(header);
-            this.addTable(playerStats.games, columns);
+            var dataTable = new BeRated.DataTable(playerStats.games, columns);
+            dataTable.table.classList.add('gamesTable');
+            container.appendChild(dataTable.table);
         };
 
         Client.prototype.getTeamValue = function (players) {
@@ -634,7 +637,7 @@ var BeRated;
         Client.prototype.addZero = function (input) {
             if (input < 10)
                 return '0' + input;
-            else
+else
                 return '' + input;
         };
 

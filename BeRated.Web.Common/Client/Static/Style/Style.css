@@ -3,8 +3,6 @@
 }
 
 body {
-	padding-left: 2em;
-	padding-right: 2em;
 }
 
 a:link {
@@ -28,6 +26,7 @@ a:hover {
 .dataTable {
 	border-collapse: collapse;
 	margin-bottom: 2em;
+    width: 100%;
 }
 
 .dataTable tr:nth-child(odd) {
@@ -67,11 +66,10 @@ a:hover {
 }
 
 .indexTable {
-	min-width: 80em;
+	width: 100em;
 }
 
 .individualPlayerStatsTable {
-	width: 40em;
 }
 
 .returnLink {
@@ -96,6 +94,18 @@ a:hover {
 
 .playerHeader {
 	cursor: pointer;
+}
+
+.gamesTable th:first-child {
+    width: 8em;
+}
+
+.gamesTable th {
+    text-align: left;
+}
+
+.gamesTable td {
+    text-align: left;
 }
 
 .fa-gear {
@@ -154,8 +164,8 @@ a:hover {
 }
 
 .killDeathRatioGraph {
-	width: 40em;
-	height: 15em;
+	width: 100%;
+	height: 18em;
 	border: 1px solid #a0a0a0;
 }
 
@@ -169,6 +179,20 @@ a:hover {
 
 .outcomeDraw {
 	color: #b3b500;
+}
+
+.leftSide {
+    float: left;
+    padding-left: 1em;
+    padding-right: 1em;
+    width: 40em;
+}
+
+.rightSide {
+    float: left;
+    padding-left: 1em;
+    padding-right: 1em;
+    width: 60em;
 }
 
 @-webkit-keyframes rotate {

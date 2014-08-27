@@ -139,12 +139,18 @@ module BeRated {
 		private onGetPlayerStats(playerStats: IPlayerStats) {
 			this.clearBody();
 			this.setTitle(playerStats.name);
-			this.addHeader(playerStats);
-			this.addWeaponTable(playerStats);
-			this.addEncounterTable(playerStats);
-			this.addPurchases(playerStats);
-			this.addKillDeathRatioHistory(playerStats);
-			this.addPlayerGames(playerStats);
+            this.addHeader(playerStats);
+            var leftContainer = document.createElement('div');
+            leftContainer.className = 'leftSide';
+            var rightContainer = document.createElement('div')
+            rightContainer.className = 'rightSide';
+            document.body.appendChild(leftContainer);
+            document.body.appendChild(rightContainer);
+			this.addWeaponTable(playerStats, leftContainer);
+            this.addEncounterTable(playerStats, leftContainer);
+            this.addPurchases(playerStats, leftContainer);
+            this.addKillDeathRatioHistory(playerStats, leftContainer);
+            this.addPlayerGames(playerStats, rightContainer);
 			this.doneLoadingContent();
 		}
 
@@ -155,24 +161,24 @@ module BeRated {
 			document.body.appendChild(header);
 		}
 
-		private addTable(data: Array<any>, columns: Array<DataTableColumn>, container: HTMLElement = document.body) {
+		private addTable(data: Array<any>, columns: Array<DataTableColumn>, container: Node = document.body) {
 			var dataTable = new DataTable(data, columns);
 			var table = dataTable.table;
 			table.classList.add('individualPlayerStatsTable');
 			container.appendChild(table);
 		}
 
-		private addWeaponTable(playerStats: IPlayerStats) {
+		private addWeaponTable(playerStats: IPlayerStats, container: Node) {
 			var weaponColumns: Array<DataTableColumn> = [
 				new DataTableColumn('Weapon', (record: IPlayerWeaponStats) => record.weapon),
 				new DataTableColumn('Kills', (record: IPlayerWeaponStats) => record.kills, null, true, SortMode.Descending),
 				new DataTableColumn('Headshot kills', (record: IPlayerWeaponStats) => record.headshots),
 				new DataTableColumn('Headshot kill percentage', (record: IPlayerWeaponStats) => record.headshotPercentage, this.renderPercentage.bind(this))
 			];
-			this.addTable(playerStats.weapons, weaponColumns);
+			this.addTable(playerStats.weapons, weaponColumns, container);
 		}
 
-		private addEncounterTable(playerStats: IPlayerStats) {
+        private addEncounterTable(playerStats: IPlayerStats, container: Node) {
 			var encounterColumns: Array<DataTableColumn> = [
 				new DataTableColumn('Opponent', (record: IPlayerEncounterStats) => record.opponentName, this.renderEncounterStatsName.bind(this), true),
 				new DataTableColumn('Encounters', (record: IPlayerEncounterStats) => record.encounters),
@@ -180,27 +186,27 @@ module BeRated {
 				new DataTableColumn('Deaths', (record: IPlayerEncounterStats) => record.deaths),
 				new DataTableColumn('Win percentage', (record: IPlayerEncounterStats) => record.winPercentage, this.renderPercentage.bind(this))
 			];
-			this.addTable(playerStats.encounters, encounterColumns);
+			this.addTable(playerStats.encounters, encounterColumns, container);
 		}
 
-		private addPurchases(playerStats: IPlayerStats) {
+        private addPurchases(playerStats: IPlayerStats, container: Node) {
 			var purchasesColumns: Array<DataTableColumn> = [
 				new DataTableColumn('Item', (record: IPlayerPurchaseStats) => record.item),
 				new DataTableColumn('Purchases', (record: IPlayerPurchaseStats) => record.timesPurchased),
 				new DataTableColumn('Purchases/round', (record: IPlayerPurchaseStats) => record.purchasesPerRound, null, true, SortMode.Descending),
 				new DataTableColumn('Kills/purchase', (record: IPlayerPurchaseStats) => record.killsPerPurchase, null, false, SortMode.Descending)
 			];
-			this.addTable(playerStats.purchases, purchasesColumns);
+			this.addTable(playerStats.purchases, purchasesColumns, container);
 		}
 
-		private addKillDeathRatioHistory(playerStats: IPlayerStats) {
+        private addKillDeathRatioHistory(playerStats: IPlayerStats, container: Node) {
 			var header = document.createElement('h1');
 			header.className = 'dataHeader';
 			header.textContent = 'Kill/death ratio';
-			var container = document.createElement('div');
-			container.className = 'killDeathRatioGraph';
-			document.body.appendChild(header);
-			document.body.appendChild(container);
+			var graphContainer = document.createElement('div');
+			graphContainer.className = 'killDeathRatioGraph';
+            container.appendChild(header);
+            container.appendChild(graphContainer);
 			var data = [];
 			var lastDay: Date = null;
 			playerStats.killDeathRatioHistory.forEach((x) => {
@@ -232,13 +238,10 @@ module BeRated {
 				},
 				xAxisLabelWidth: 80
 			};
-			var graph = new Dygraph(container, data, options);
+			var graph = new Dygraph(graphContainer, data, options);
 		}
 
-		private addPlayerGames(playerStats: IPlayerStats) {
-			var header = document.createElement('h1');
-			header.className = 'dataHeader';
-			header.textContent = 'Games';
+        private addPlayerGames(playerStats: IPlayerStats, container: Node) {
 			var columns: Array<DataTableColumn> = [
 				new DataTableColumn('Time', (record: IPlayerGame) => new Date(record.gameTime), this.renderGameTime.bind(this), true, SortMode.Descending),
 				new DataTableColumn('Outcome', (record: IPlayerGame) => record.outcome, this.renderOutcome.bind(this)),
@@ -246,8 +249,9 @@ module BeRated {
 				new DataTableColumn('Team', (record: IPlayerGame) => this.getTeamValue(record.playerTeam), (value: string, record: IPlayerGame) => this.renderTeam(record.playerTeam)),
 				new DataTableColumn('Enemy team', (record: IPlayerGame) => this.getTeamValue(record.enemyTeam), (value: string, record: IPlayerGame) => this.renderTeam(record.enemyTeam))
 			];
-			document.body.appendChild(header);
-			this.addTable(playerStats.games, columns);
+            var dataTable = new DataTable(playerStats.games, columns);
+            dataTable.table.classList.add('gamesTable');
+            container.appendChild(dataTable.table);
 		}
 
 		private getTeamValue(players: Array<IGamePlayer>) {
