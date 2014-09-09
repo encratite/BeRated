@@ -73,7 +73,6 @@ namespace BeRated
                 // This file has already been processed
                 return;
             }
-			Console.WriteLine(path);
             var content = File.ReadAllText(path);
             content = content.Replace("\r", "");
             if (content.Length == 0 || content.Last() != '\n')
@@ -81,6 +80,7 @@ namespace BeRated
                 // Console.WriteLine("Log file {0} is currently being written to, skipping it for now", path);
                 return;
             }
+            Console.WriteLine("Processing {0}", path);
             var lines = content.Split('\n');
 			int lineCounter = 1;
 			foreach (var line in lines)
