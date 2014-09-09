@@ -83,3 +83,11 @@ create table purchase
 	item text not null,
 	primary key (line, time)
 );
+
+drop table if exists log_state cascade;
+
+create table log_state
+(
+    file_name text primary key,
+    bytes_processed bigint not null
+);

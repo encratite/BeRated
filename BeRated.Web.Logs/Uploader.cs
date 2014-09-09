@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace BeRated
 {
 	class Uploader: IDisposable
 	{
 		const int MaxRoundsDefault = 30;
+        const int UpdateInterval = 10 * 1000;
 
 		string _LogPath;
 		string _ConnectionString;
@@ -35,30 +37,63 @@ namespace BeRated
 
 		public void Run()
 		{
-			var connection = new NpgsqlConnection(_ConnectionString);
-			_Database = new DatabaseCommander(connection);
-			var files = Directory.GetFiles(_LogPath);
-			using (var transaction = _Database.Transaction())
-			{
-				_Database.NonQueryFunction("lock_tables");
-				foreach (var file in files)
-					ProcessLog(file);
-				transaction.Commit();
-			}
+            while (true)
+            {
+                // Console.WriteLine("Checking logs");
+                try
+                {
+                    var connection = new NpgsqlConnection(_ConnectionString);
+                    _Database = new DatabaseCommander(connection);
+                    var files = Directory.GetFiles(_LogPath);
+                    foreach (var file in files)
+                        ProcessLog(file);
+                }
+                catch(Exception exception)
+                {
+                    Console.WriteLine("Failed to update database: {0} ({1})", exception.Message, exception.GetType());
+                }
+                Thread.Sleep(UpdateInterval);
+            }
 		}
 
 		void ProcessLog(string path)
 		{
 			_MaxRounds = MaxRoundsDefault;
 			_Players = new Dictionary<string, string>();
+            string fileName = Path.GetFileName(path);
+            var fileInfo = new FileInfo(path);
+            long currentFileSize = fileInfo.Length;
+            var getLogStateParameters = new[]
+			{
+				new CommandParameter("file_name", fileName),
+			};
+            long? bytesProcessed = _Database.ScalarFunction<long?>("get_log_state", getLogStateParameters);
+            if (bytesProcessed != null && bytesProcessed >= currentFileSize)
+            {
+                // This file has already been processed
+                return;
+            }
 			Console.WriteLine(path);
-			var lines = File.ReadLines(path);
+            var content = File.ReadAllText(path);
+            content = content.Replace("\r", "");
+            if (content.Length == 0 || content.Last() != '\n')
+            {
+                // Console.WriteLine("Log file {0} is currently being written to, skipping it for now", path);
+                return;
+            }
+            var lines = content.Split('\n');
 			int lineCounter = 1;
 			foreach (var line in lines)
 			{
 				ProcessLine(line, lineCounter);
 				lineCounter++;
 			}
+            var updateLogStateParameters = new[]
+            {
+                new CommandParameter("file_name", fileName),
+                new CommandParameter("bytes_processed", currentFileSize),
+            };
+            _Database.NonQueryFunction("update_log_state", updateLogStateParameters);
 		}
 
 		void ProcessLine(string line, int lineCounter)

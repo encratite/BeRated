@@ -33,15 +33,6 @@ end $$ language 'plpgsql';
 
 select drop_functions();
 
-create function lock_tables() returns void as $$
-begin
-	lock player;
-	lock kill;
-	lock round;
-	lock round_player;
-	lock purchase;
-end $$ language 'plpgsql';
-
 create function check_player_id(player_id integer) returns void as $$
 begin
 	if not exists (select 1 from player where id = player_id) then
@@ -685,4 +676,27 @@ begin
 			round.terrorist_score + round.counter_terrorist_score = round.max_rounds
 		)
 	order by round.time desc;
+end $$ language 'plpgsql';
+
+create function get_log_state(file_name text) returns bigint as $$
+declare
+    bytes_processed bigint;
+begin
+    select log_state.bytes_processed
+        from log_state
+        where log_state.file_name = get_log_state.file_name
+        into bytes_processed;
+    return bytes_processed;
+end $$ language 'plpgsql';
+
+create function update_log_state(file_name text, bytes_processed bigint) returns void as $$
+begin
+    begin
+        insert into log_state (file_name, bytes_processed)
+            values (update_log_state.file_name, update_log_state.bytes_processed);
+    exception when unique_violation then
+        update log_state
+            set log_state.bytes_processed = update_log_state.bytes_processed
+            where log_state.file_name = update_log_state.file_name;
+    end;
 end $$ language 'plpgsql';
