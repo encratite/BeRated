@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Ashod;
 
 namespace BeRated
 {
@@ -6,14 +6,8 @@ namespace BeRated
 	{
 		static void Main(string[] arguments)
 		{
-			if (arguments.Length != 2)
-			{
-				Console.WriteLine("Usage: <path to CS:GO SRCDS logs directory> <connection string>");
-				return;
-			}
-			string logDirectory = arguments[0];
-			string connectionString = arguments[1];
-			using (var uploader = new Uploader(logDirectory, connectionString))
+            var configuration = JsonFile.Read<Configuration>();
+            using (var uploader = new Uploader(configuration.LogDirectory, configuration.ConnectionString))
 			{
 				uploader.Run();
 			}
