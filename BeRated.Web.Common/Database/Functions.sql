@@ -696,7 +696,7 @@ begin
             values (update_log_state.file_name, update_log_state.bytes_processed);
     exception when unique_violation then
         update log_state
-            set log_state.bytes_processed = update_log_state.bytes_processed
+            set bytes_processed = update_log_state.bytes_processed
             where log_state.file_name = update_log_state.file_name;
     end;
 end $$ language 'plpgsql';
