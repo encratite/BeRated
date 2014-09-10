@@ -2,7 +2,6 @@
 using Npgsql;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -28,18 +27,13 @@ namespace BeRated
 
 		void IDisposable.Dispose()
 		{
-			if (_Database != null)
-			{
-				_Database.Dispose();
-				_Database = null;
-			}
+            Disconnect();
 		}
 
 		public void Run()
 		{
             while (true)
             {
-                // Console.WriteLine("Checking logs");
                 try
                 {
                     var connection = new NpgsqlConnection(_ConnectionString);
@@ -52,6 +46,7 @@ namespace BeRated
                 {
                     Console.WriteLine("Failed to update database: {0} ({1})", exception.Message, exception.GetType());
                 }
+                Disconnect();
                 Thread.Sleep(UpdateInterval);
             }
 		}
@@ -77,7 +72,7 @@ namespace BeRated
             content = content.Replace("\r", "");
             if (content.Length == 0 || content.Last() != '\n')
             {
-                // Console.WriteLine("Log file {0} is currently being written to, skipping it for now", path);
+                // The log file is currently being written to or has been abandoned, skip it
                 return;
             }
             Console.WriteLine("Processing {0}", path);
@@ -199,5 +194,14 @@ namespace BeRated
 			string output = string.Join(",", players);
 			return output;
 		}
+
+        void Disconnect()
+        {
+            if (_Database != null)
+            {
+                _Database.Dispose();
+                _Database = null;
+            }
+        }
 	}
 }
