@@ -91,6 +91,7 @@
     <Content Include="Client\Static\Frame.html" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration.cs" />
     <Compile Include="Server\GamePlayer.cs" />
     <Compile Include="Server\PlayerGame.cs" />
     <Compile Include="Server\PlayerStats.cs" />

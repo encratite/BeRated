@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ashod;
+using System;
 
 namespace BeRated
 {
@@ -7,13 +8,8 @@ namespace BeRated
 		[STAThread]
 		static void Main(string[] arguments)
 		{
-			if (arguments.Length != 2)
-				return;
-
-			int port = int.Parse(arguments[0]);
-			string connectionString = arguments[1];
-
-			using (var server = new Server(port, connectionString))
+            var configuration = JsonFile.Read<Configuration>();
+			using (var server = new Server(configuration.Port, configuration.ConnectionString))
 			{
 				server.Run();
 				System.Windows.Forms.Application.Run();

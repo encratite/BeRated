@@ -72,6 +72,10 @@
       <Project>{7b4923d9-8607-4b59-93fd-e2a4327a11bf}</Project>
       <Name>Ashod.WebSocket</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">
+      <Project>{9659019c-3181-4c5c-bd0d-0117456328a6}</Project>
+      <Name>Ashod</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BeRated.Web.Common\BeRated.Web.Common.csproj">
       <Project>{613f152c-f73a-4642-ae7a-0bc443120d92}</Project>
       <Name>BeRated.Web.Common</Name>
