@@ -243,7 +243,7 @@ module BeRated {
 
         private addPlayerGames(playerStats: IPlayerStats, container: Node) {
 			var columns: Array<DataTableColumn> = [
-				new DataTableColumn('Time', (record: IPlayerGame) => new Date(record.gameTime), this.renderGameTime.bind(this), true, SortMode.Descending),
+				new DataTableColumn('Time', (record: IPlayerGame) => new Date(record.gameTime + 'Z'), this.renderGameTime.bind(this), true, SortMode.Descending),
 				new DataTableColumn('Outcome', (record: IPlayerGame) => record.outcome, this.renderOutcome.bind(this)),
 				new DataTableColumn('Score', (record: IPlayerGame) => record.playerScore * 100 + record.enemyScore, this.renderScore.bind(this)),
 				new DataTableColumn('Team', (record: IPlayerGame) => this.getTeamValue(record.playerTeam), (value: string, record: IPlayerGame) => this.renderTeam(record.playerTeam)),

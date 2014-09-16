@@ -587,7 +587,7 @@ else
             var _this = this;
             var columns = [
                 new BeRated.DataTableColumn('Time', function (record) {
-                    return new Date(record.gameTime);
+                    return new Date(record.gameTime + 'Z');
                 }, this.renderGameTime.bind(this), true, BeRated.SortMode.Descending),
                 new BeRated.DataTableColumn('Outcome', function (record) {
                     return record.outcome;
