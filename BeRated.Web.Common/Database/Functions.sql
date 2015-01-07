@@ -233,6 +233,9 @@ end $$ language 'plpgsql';
 
 create function get_percentage(x integer, y integer) returns numeric as $$
 begin
+	if y = 0 then
+		return null;
+	end if;
 	return round(x::numeric / y * 100, 1);
 end $$ language 'plpgsql';
 
