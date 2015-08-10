@@ -654,11 +654,11 @@ begin
 				'draw'::game_outcome
 			when
 				(
-					round.terrorist_score >= round.max_rounds / 2.0 and
+					round.terrorist_score > round.max_rounds / 2 and
 					round_player.team = 'terrorist'::team_type
 				) or
 				(
-					round.counter_terrorist_score >= round.max_rounds / 2.0 and
+					round.counter_terrorist_score > round.max_rounds / 2 and
 					round_player.team = 'counter_terrorist'::team_type
 				)
 			then
@@ -674,8 +674,8 @@ begin
 		round.id = round_player.round_id and
 		round_player.player_id = get_player_games.player_id and
 		(
-			round.terrorist_score >= round.max_rounds / 2.0 or
-			round.counter_terrorist_score >= round.max_rounds / 2.0 or
+			round.terrorist_score > round.max_rounds / 2 or
+			round.counter_terrorist_score > round.max_rounds / 2 or
 			round.terrorist_score + round.counter_terrorist_score = round.max_rounds
 		)
 	order by round.time desc;
