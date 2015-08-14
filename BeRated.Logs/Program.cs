@@ -2,7 +2,7 @@
 
 namespace BeRated
 {
-	class Application
+	class Program
 	{
         static void Main(string[] arguments)
         {
