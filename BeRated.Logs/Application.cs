@@ -1,21 +1,16 @@
-﻿using System;
+﻿using Ashod;
 
 namespace BeRated
 {
 	class Application
 	{
-		static void Main(string[] arguments)
-		{
-			if (arguments.Length != 3)
+        static void Main(string[] arguments)
+        {
+            var configuration = JsonFile.Read<Configuration>();
+            using (var uploader = new Uploader(configuration.LogDirectory, configuration.ConnectionString))
 			{
-				Console.WriteLine("Usage: <path to CS:GO SRCDS logs directory> <SQL server data source> <database>");
-				return;
+				uploader.Run();
 			}
-			string logDirectory = arguments[0];
-			string dataSource = arguments[1];
-			string database = arguments[2];
-			var uploader = new Uploader(logDirectory, dataSource, database);
-			uploader.Run();
 		}
 	}
 }
