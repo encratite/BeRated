@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -73,17 +74,17 @@ namespace BeRated.Server
             {
                 string argument = arguments[i];
                 var parameter = parameters[i];
-                var convertedParameter = ConvertParameter(argument, parameter.ParameterType);
+                var converter = new StringConverter();
+                if (!converter.CanConvertTo(parameter.ParameterType))
+                {
+                    string message = string.Format("Unable to convert to parameter type {0}", parameter.ParameterType);
+                    throw new ApplicationException(message);
+                }
+                var convertedParameter = converter.ConvertTo(argument, parameter.ParameterType);
                 convertedParameters.Add(convertedParameter);
             }
             var output = method.Invoke(_Instance, convertedParameters.ToArray());
             return output;
-        }
-
-        private object ConvertParameter(string input, Type parameterType)
-        {
-            // To do: support integers
-            return input;
         }
     }
 }
