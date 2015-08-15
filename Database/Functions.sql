@@ -600,14 +600,16 @@ begin
 	order by time::date;
 end $$ language 'plpgsql';
 
+-- player_team, enemy_team and outcome are cast to text to deal with a missing feature in Npgsql 3
+-- Might be fixed in Npgsql 3.1, though
 create function get_player_games(player_id integer) returns table
 (
 	game_time timestamp,
 	player_score integer,
 	enemy_score integer,
-	player_team player_information[],
-	enemy_team player_information[],
-	outcome game_outcome
+	player_team text,
+	enemy_team text,
+	outcome text
 ) as $$
 begin
 	perform check_player_id(player_id);
@@ -634,7 +636,7 @@ begin
 			where
 				r.round_id = round.id and
 				r.team = round_player.team
-		)
+		)::text
 		as player_team,
 		array
 		(
@@ -645,9 +647,9 @@ begin
 			where
 				r.round_id = round.id and
 				r.team != round_player.team
-		)
+		)::text
 		as enemy_team,
-		case
+		(case
 			when
 				round.terrorist_score = round.counter_terrorist_score
 			then
@@ -665,7 +667,7 @@ begin
 				'win'::game_outcome
 			else
 				'loss'::game_outcome
-		end
+		end)::text
 		as outcome
 	from
 		round,
