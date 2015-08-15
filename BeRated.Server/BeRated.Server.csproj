@@ -77,7 +77,6 @@
     <Compile Include="Database\AllPlayerStatsRow.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Server\IServerInstance.cs" />
-    <Compile Include="Database\KillDeathRatioHistoryRow.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
     <Compile Include="Database\PlayerEncounterStatsRow.cs" />

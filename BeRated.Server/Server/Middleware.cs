@@ -73,7 +73,12 @@ namespace BeRated.Server
             {
                 string argument = arguments[i];
                 var parameter = parameters[i];
-                var convertedParameter = Convert.ChangeType(argument, parameter.ParameterType);
+                var type = parameter.ParameterType;
+                object convertedParameter;
+                if (argument == "null" && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    convertedParameter = null;
+                else
+                    convertedParameter = Convert.ChangeType(argument, type);
                 convertedParameters.Add(convertedParameter);
             }
             var output = method.Invoke(_Instance, convertedParameters.ToArray());
