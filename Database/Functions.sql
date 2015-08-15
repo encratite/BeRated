@@ -161,29 +161,49 @@ begin
 	end;
 end $$ language 'plpgsql';
 
-create function get_player_kills(player_id integer, team_kills boolean default false) returns int as $$
+create function matches_time_constraints(the_time timestamp, time_start timestamp, time_end timestamp) returns boolean as $$
+begin
+	return
+		(time_start is null or the_time >= time_start) and
+		(time_end is null or the_time < time_end);
+end $$ language 'plpgsql';
+
+create function get_player_kills(player_id integer, time_start timestamp, time_end timestamp, team_kills boolean default false) returns int as $$
 declare
 	kills integer;
 begin
-	select count(*) from kill where killer_id = player_id and killer_id != victim_id and (not team_kills or killer_team = victim_team) into kills;
+	select count(*)
+	from kill
+	where
+		killer_id = player_id and
+		killer_id != victim_id and
+		matches_time_constraints(time, time_start, time_end) and
+		team_kills = (killer_team = victim_team)
+	into kills;
 	return kills;
 end $$ language 'plpgsql';
 
-create function get_player_deaths(player_id integer) returns int as $$
+create function get_player_deaths(player_id integer, time_start timestamp, time_end timestamp) returns int as $$
 declare
 	deaths integer;
 begin
-	select count(*) from kill where victim_id = player_id into deaths;
+	select count(*)
+	from kill
+	where
+		victim_id = player_id and
+		matches_time_constraints(time, time_start, time_end) and
+		killer_team != victim_team
+	into deaths;
 	return deaths;
 end $$ language 'plpgsql';
 
-create function get_player_kill_death_ratio(player_id integer) returns numeric as $$
+create function get_player_kill_death_ratio(player_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
 declare
 	kills integer;
 	deaths integer;
 begin
-	select get_player_kills(player_id) into kills;
-	select get_player_deaths(player_id) into deaths;
+	select get_player_kills(player_id, time_start, time_end) into kills;
+	select get_player_deaths(player_id, time_start, time_end) into deaths;
 	if deaths = 0 then
 		return null;
 	end if;
@@ -203,7 +223,7 @@ begin
 		score1 + score2 >= max_rounds;
 end $$ language 'plpgsql';
 
-create function get_player_rounds(player_id integer, team team_type default null, get_rounds_won boolean default null, end_of_game boolean default false) returns integer as $$
+create function get_player_rounds(player_id integer, time_start timestamp, time_end timestamp, team team_type default null, get_rounds_won boolean default null, end_of_game boolean default false) returns integer as $$
 declare
 	rounds_won integer;
 begin
@@ -211,6 +231,7 @@ begin
 	from round, round_player
 	where
 		round.id = round_player.round_id and
+		matches_time_constraints(round.time, time_start, time_end) and
 		round_player.player_id = get_player_rounds.player_id and
 		(
 			get_rounds_won is null or
@@ -239,27 +260,27 @@ begin
 	return round(x::numeric / y * 100, 1);
 end $$ language 'plpgsql';
 
-create function get_player_game_win_percentage(player_id integer) returns numeric as $$
+create function get_player_game_win_percentage(player_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
 declare
 	wins integer;
 	games integer;
 begin
-	select get_player_rounds(player_id, null, true, true) into wins;
-	select get_player_rounds(player_id, null, null, true) into games;
+	select get_player_rounds(player_id, time_start, time_end, null, true, true) into wins;
+	select get_player_rounds(player_id, time_start, time_end, null, null, true) into games;
 	return get_percentage(wins, games);
 end $$ language 'plpgsql';
 
-create function get_player_round_win_percentage(player_id integer, team team_type default null) returns numeric as $$
+create function get_player_round_win_percentage(player_id integer, time_start timestamp, time_end timestamp, team team_type default null) returns numeric as $$
 declare
 	wins integer;
 	games integer;
 begin
-	select get_player_rounds(player_id, team, true) into wins;
-	select get_player_rounds(player_id, team) into games;
+	select get_player_rounds(player_id, time_start, time_end, team, true) into wins;
+	select get_player_rounds(player_id, time_start, time_end, team) into games;
 	return get_percentage(wins, games);
 end $$ language 'plpgsql';
 
-create function get_all_player_stats() returns table
+create function get_all_player_stats(time_start timestamp, time_end timestamp) returns table
 (
 	id integer,
 	name text,
@@ -280,22 +301,22 @@ begin
 	return query select
 		player.id,
 		player.name,
-		get_player_kills(player.id) as kills,
-		get_player_deaths(player.id) as deaths,
-		get_player_kills(player.id, true) as kills,
-		round(get_player_kill_death_ratio(player.id), 2) as kill_death_ratio,
-		get_player_rounds(player.id) as rounds_played,
-		get_player_round_win_percentage(player.id) as win_percentage,
-		get_player_rounds(player.id, 'terrorist'::team_type) as rounds_played_terrorist,
-		get_player_round_win_percentage(player.id, 'terrorist'::team_type) as win_percentage_terrorist,
-		get_player_rounds(player.id, 'counter_terrorist'::team_type) as rounds_played_counter_terrorist,
-		get_player_round_win_percentage(player.id, 'counter_terrorist'::team_type) as win_percentage_counter_terrorist,
-		get_player_rounds(player.id, null, null, true) as games_played,
-		get_player_game_win_percentage(player.id) as game_win_percentage
+		get_player_kills(player.id, time_start, time_end) as kills,
+		get_player_deaths(player.id, time_start, time_end) as deaths,
+		get_player_kills(player.id, time_start, time_end, true) as kills,
+		round(get_player_kill_death_ratio(player.id, time_start, time_end), 2) as kill_death_ratio,
+		get_player_rounds(player.id, time_start, time_end) as rounds_played,
+		get_player_round_win_percentage(player.id, time_start, time_end) as win_percentage,
+		get_player_rounds(player.id, time_start, time_end, 'terrorist'::team_type) as rounds_played_terrorist,
+		get_player_round_win_percentage(player.id, time_start, time_end, 'terrorist'::team_type) as win_percentage_terrorist,
+		get_player_rounds(player.id, time_start, time_end, 'counter_terrorist'::team_type) as rounds_played_counter_terrorist,
+		get_player_round_win_percentage(player.id, time_start, time_end, 'counter_terrorist'::team_type) as win_percentage_counter_terrorist,
+		get_player_rounds(player.id, time_start, time_end, null, null, true) as games_played,
+		get_player_game_win_percentage(player.id, time_start, time_end) as game_win_percentage
 	from player;
 end $$ language 'plpgsql';
 
-create function get_player_weapon_kills(player_id integer, weapon text, headshots_only boolean) returns integer as $$
+create function get_player_weapon_kills(player_id integer, time_start timestamp, time_end timestamp, weapon text, headshots_only boolean) returns integer as $$
 declare
 	kills integer;
 begin
@@ -303,23 +324,24 @@ begin
 	from kill
 	where
 		killer_id = player_id and
+		matches_time_constraints(time, time_start, time_end) and
 		kill.weapon = get_player_weapon_kills.weapon and
-		(not headshots_only or headshot = true)
+		headshots_only = headshot
 	into kills;
 	return kills;
 end $$ language 'plpgsql';
 
-create function get_player_weapon_headshot_percentage(player_id integer, weapon text) returns numeric as $$
+create function get_player_weapon_headshot_percentage(player_id integer, time_start timestamp, time_end timestamp, weapon text) returns numeric as $$
 declare
 	kills integer;
 	headshots integer;
 begin
-	select get_player_weapon_kills(player_id, weapon, false) into kills;
-	select get_player_weapon_kills(player_id, weapon, true) into headshots;
+	select get_player_weapon_kills(player_id, time_start, time_end, weapon, false) into kills;
+	select get_player_weapon_kills(player_id, time_start, time_end, weapon, true) into headshots;
 	return get_percentage(headshots, kills);
 end $$ language 'plpgsql';
 
-create function get_player_weapon_stats(player_id integer) returns table
+create function get_player_weapon_stats(player_id integer, time_start timestamp, time_end timestamp) returns table
 (
 	weapon text,
 	kills integer,
@@ -330,15 +352,17 @@ begin
 	perform check_player_id(player_id);
 	return query select
 		kill.weapon,
-		get_player_weapon_kills(player_id, kill.weapon, false) as kills,
-		get_player_weapon_kills(player_id, kill.weapon, true) as headshots,
-		get_player_weapon_headshot_percentage(player_id, kill.weapon) as headshot_percentage
+		get_player_weapon_kills(player_id, time_start, time_end, kill.weapon, false) as kills,
+		get_player_weapon_kills(player_id, time_start, time_end, kill.weapon, true) as headshots,
+		get_player_weapon_headshot_percentage(player_id, time_start, time_end, kill.weapon) as headshot_percentage
 	from kill
-	where killer_id = player_id
+	where
+		killer_id = player_id and
+		matches_time_constraints(time, time_start, time_end)
 	group by kill.weapon;
 end $$ language 'plpgsql';
 
-create function get_matchup_kills(killer_id integer, victim_id integer) returns int as $$
+create function get_matchup_kills(killer_id integer, victim_id integer, time_start timestamp, time_end timestamp) returns int as $$
 declare
 	kills integer;
 begin
@@ -346,19 +370,21 @@ begin
 	from kill
 	where
 		kill.killer_id = get_matchup_kills.killer_id and
-		kill.victim_id = get_matchup_kills.victim_id
+		kill.victim_id = get_matchup_kills.victim_id and
+		kill.killer_team != kill.victim_team and
+		matches_time_constraints(time, time_start, time_end)
 	into kills;
 	return kills;
 end $$ language 'plpgsql';
 
-create function get_encounter_win_percentage(player_id integer, opponent_id integer) returns numeric as $$
+create function get_encounter_win_percentage(player_id integer, opponent_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
 declare
 	kills integer;
 	deaths integer;
 	encounters integer;
 begin
-	select get_matchup_kills(player_id, opponent_id) into kills;
-	select get_matchup_kills(opponent_id, player_id) into deaths;
+	select get_matchup_kills(player_id, opponent_id, time_start, time_end) into kills;
+	select get_matchup_kills(opponent_id, player_id, time_start, time_end) into deaths;
 	encounters := kills + deaths;
 	if encounters = 0 then
 		return null;
@@ -366,7 +392,7 @@ begin
 	return get_percentage(kills, encounters);
 end $$ language 'plpgsql';
 
-create function get_player_encounter_stats(player_id integer) returns table
+create function get_player_encounter_stats(player_id integer, time_start timestamp, time_end timestamp) returns table
 (
 	opponent_id integer,
 	opponent_name text,
@@ -380,14 +406,14 @@ begin
 	return query select
 		id as opponent_id,
 		name as opponent_name,
-		get_matchup_kills(player_id, id) + get_matchup_kills(id, player_id) as encounters,
-		get_matchup_kills(player_id, id) as kills,
-		get_matchup_kills(id, player_id) as deaths,
-		get_encounter_win_percentage(player_id, id) as win_percentage
+		get_matchup_kills(player_id, id, time_start, time_end) + get_matchup_kills(id, player_id, time_start, time_end) as encounters,
+		get_matchup_kills(player_id, id, time_start, time_end) as kills,
+		get_matchup_kills(id, player_id, time_start, time_end) as deaths,
+		get_encounter_win_percentage(player_id, id, time_start, time_end) as win_percentage
 	from player
 	where
 		id != player_id and
-		get_encounter_win_percentage(player_id, id) is not null;
+		get_encounter_win_percentage(player_id, id, time_start, time_end) is not null;
 end $$ language 'plpgsql';
 
 create function get_player_id_by_steam_id(steam_id text) returns integer as $$
@@ -482,59 +508,80 @@ begin
 	);
 end $$ language 'plpgsql';
 
-create function get_player_purchases_in_team(player_id integer, item text, team team_type) returns integer as $$
-declare
-	purchases integer;
-begin
-	select count(*) from purchase
-	where
-		purchase.player_id = get_player_purchases_in_team.player_id and
-		purchase.item = get_player_purchases_in_team.item and
-		purchase.team = get_player_purchases_in_team.team
-	into purchases;
-	return purchases;
-end $$ language 'plpgsql';
-
-create function get_player_purchases_per_round(player_id integer, item text, team team_type) returns integer[2] as $$
+create function get_player_purchases_per_round(player_id integer, time_start timestamp, time_end timestamp, item text, team team_type) returns integer[2] as $$
 declare
 	purchases integer := 0;
 	rounds integer := 0;
 begin
-	if exists(select 1 from purchase where purchase.item = get_player_purchases_per_round.item and purchase.team = get_player_purchases_per_round.team) then
-		select count(*) from purchase where purchase.player_id = get_player_purchases_per_round.player_id and purchase.item = get_player_purchases_per_round.item and purchase.team =  get_player_purchases_per_round.team into purchases;
-		select get_player_rounds(player_id, get_player_purchases_per_round.team) into rounds;
+	if exists
+	(
+		select 1
+		from purchase
+		where
+			purchase.item = get_player_purchases_per_round.item and
+			purchase.team = get_player_purchases_per_round.team and
+			matches_time_constraints(time, time_start, time_end)
+	)
+	then
+		select count(*)
+		from purchase
+		where
+			purchase.player_id = get_player_purchases_per_round.player_id and
+			purchase.item = get_player_purchases_per_round.item and
+			purchase.team =  get_player_purchases_per_round.team and
+			matches_time_constraints(time, time_start, time_end)
+		into purchases;
+		select get_player_rounds(player_id, time_start, time_end, get_player_purchases_per_round.team) into rounds;
 	end if;
 	return array[purchases, rounds];
 end $$ language 'plpgsql';
 
-create function get_player_purchases_per_round(player_id integer, item text) returns numeric as $$
+create function get_player_purchases_per_round(player_id integer, time_start timestamp, time_end timestamp, item text) returns numeric as $$
 declare
 	terrorist_result integer[2];
 	counter_terrorist_result integer[2];
 	purchases integer;
 	rounds integer;
 begin
-	select get_player_purchases_per_round(player_id, item, 'terrorist'::team_type) into terrorist_result;
-	select get_player_purchases_per_round(player_id, item, 'counter_terrorist'::team_type) into counter_terrorist_result;
+	select get_player_purchases_per_round(player_id, time_start, time_end, item, 'terrorist'::team_type) into terrorist_result;
+	select get_player_purchases_per_round(player_id, time_start, time_end, item, 'counter_terrorist'::team_type) into counter_terrorist_result;
 	purchases := terrorist_result[1] + counter_terrorist_result[1];
 	rounds := terrorist_result[2] + counter_terrorist_result[2];
+	if rounds = 0 then
+		return null;
+	end if;
 	return round(purchases::numeric / rounds, 2);
 end $$ language 'plpgsql';
 
-create function get_player_kills_per_purchase(player_id integer, weapon text) returns numeric as $$
+create function get_player_kills_per_purchase(player_id integer, time_start timestamp, time_end timestamp, weapon text) returns numeric as $$
 declare
 	kills integer;
 	purchases integer;
 begin
-	select count(*) from kill where killer_id = player_id and kill.weapon = get_player_kills_per_purchase.weapon into kills;
+	select count(*)
+	from kill
+	where
+		killer_id = player_id and
+		kill.weapon = get_player_kills_per_purchase.weapon and
+		matches_time_constraints(time, time_start, time_end)
+	into kills;
 	if kills = 0 then
 		return null;
 	end if;
-	select count(*) from purchase where purchase.player_id = get_player_kills_per_purchase.player_id and purchase.item = get_player_kills_per_purchase.weapon into purchases;
+	select count(*)
+	from purchase
+	where
+		purchase.player_id = get_player_kills_per_purchase.player_id and
+		purchase.item = get_player_kills_per_purchase.weapon and
+		matches_time_constraints(time, time_start, time_end)
+	into purchases;
+	if purchases = 0 then
+		return null;
+	end if;
 	return round(kills::numeric / purchases, 2);
 end $$ language 'plpgsql';
 
-create function get_player_purchases(player_id integer) returns table
+create function get_player_purchases(player_id integer, time_start timestamp, time_end timestamp) returns table
 (
 	item text,
 	times_purchased integer,
@@ -544,65 +591,20 @@ create function get_player_purchases(player_id integer) returns table
 declare
 	rounds_played integer;
 begin
-	select get_player_rounds(player_id) into rounds_played;
+	select get_player_rounds(player_id, time_start, time_end) into rounds_played;
 	return query select
 		purchase.item,
 		count(*)::integer as times_purchased,
-		get_player_purchases_per_round(get_player_purchases.player_id, purchase.item) as purchases_per_round,
-		get_player_kills_per_purchase(get_player_purchases.player_id, purchase.item) as kills_per_purchase
+		get_player_purchases_per_round(get_player_purchases.player_id, time_start, time_end, purchase.item) as purchases_per_round,
+		get_player_kills_per_purchase(get_player_purchases.player_id, time_start, time_end, purchase.item) as kills_per_purchase
 	from purchase
 	where purchase.player_id = get_player_purchases.player_id
 	group by purchase.item;
 end $$ language 'plpgsql';
 
-create function get_player_kills_on_day(player_id integer, day date) returns int as $$
-declare
-	kills integer;
-begin
-	select count(*) from kill where killer_id = player_id and killer_id != victim_id and time::date = day into kills;
-	return kills;
-end $$ language 'plpgsql';
-
-create function get_player_deaths_on_day(player_id integer, day date) returns int as $$
-declare
-	deaths integer;
-begin
-	select count(*) from kill where victim_id = player_id and time::date = day into deaths;
-	return deaths;
-end $$ language 'plpgsql';
-
-create function get_player_kill_death_ratio_on_day(player_id integer, day date) returns numeric as $$
-declare
-	kills integer;
-	deaths integer;
-begin
-	select get_player_kills_on_day(player_id, day) into kills;
-	select get_player_deaths_on_day(player_id, day) into deaths;
-	if deaths = 0 then
-		return null;
-	end if;
-	return kills::numeric / deaths;
-end $$ language 'plpgsql';
-
-create function get_player_kill_death_ratio_history(player_id integer) returns table
-(
-	day date,
-	kill_death_ratio numeric
-) as $$
-begin
-	perform check_player_id(player_id);
-	return query select
-		date(time) as day,
-		round(get_player_kill_death_ratio_on_day(player_id, time::date), 2) as kill_death_ratio
-	from kill
-	where victim_id = player_id
-	group by time::date
-	order by time::date;
-end $$ language 'plpgsql';
-
--- player_team, enemy_team and outcome are cast to text to deal with a missing feature in Npgsql 3
--- Might be fixed in Npgsql 3.1, though
-create function get_player_games(player_id integer) returns table
+-- player_team, enemy_team and outcome are cast to text to deal with a missing feature in Npgsql 3.0
+-- It's supposed to get fixed in Npgsql 3.1, though
+create function get_player_games(player_id integer, time_start timestamp, time_end timestamp) returns table
 (
 	game_time timestamp,
 	player_score integer,
@@ -674,6 +676,7 @@ begin
 		round_player
 	where
 		round.id = round_player.round_id and
+		matches_time_constraints(round.time, time_start, time_end) and
 		round_player.player_id = get_player_games.player_id and
 		(
 			round.terrorist_score > round.max_rounds / 2 or
