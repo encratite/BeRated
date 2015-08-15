@@ -60,7 +60,7 @@ namespace BeRated.Server
             string methodName = pathTokens.First();
             var arguments = pathTokens.Skip(1).ToArray();
             var notFoundException = new MiddlewareException("No such method.");
-            var method = _Instance.GetType().GetMethod(methodName, BindingFlags.Public);
+            var method = _Instance.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public);
             if (method == null)
                 throw notFoundException;
             var attribute = method.GetCustomAttribute(typeof(ServerMethodAttribute));
@@ -74,13 +74,7 @@ namespace BeRated.Server
             {
                 string argument = arguments[i];
                 var parameter = parameters[i];
-                var converter = new StringConverter();
-                if (!converter.CanConvertTo(parameter.ParameterType))
-                {
-                    string message = string.Format("Unable to convert to parameter type {0}", parameter.ParameterType);
-                    throw new ApplicationException(message);
-                }
-                var convertedParameter = converter.ConvertTo(argument, parameter.ParameterType);
+                var convertedParameter = Convert.ChangeType(argument, parameter.ParameterType);
                 convertedParameters.Add(convertedParameter);
             }
             var output = method.Invoke(_Instance, convertedParameters.ToArray());

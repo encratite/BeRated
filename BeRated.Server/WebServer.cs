@@ -33,12 +33,12 @@ namespace BeRated.Server
 
         public void Run()
         {
-            _WebApp = WebApp.Start<WebServer>(_Url);
-        }
-
-        public void Configuration(IAppBuilder app)
-        {
-            app.Use(typeof(Middleware), _Instance);
+            var options = new StartOptions(_Url);
+            WebApp.Start(_Url, (app) =>
+            {
+                var webServerApp = new WebServerApp(_Instance);
+                webServerApp.Configuration(app);
+            });
         }
     }
 }

@@ -9,7 +9,8 @@ namespace BeRated.Server
         static void Main(string[] arguments)
         {
             var configuration = JsonFile.Read<Configuration>();
-            using (var server = new WebServer(null, configuration.ServerUrl))
+            var ratingServer = new ServerInstance();
+            using (var server = new WebServer(ratingServer, configuration.ServerUrl))
             {
                 server.Run();
                 Console.WriteLine("Running on {0}", configuration.ServerUrl);
