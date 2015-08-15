@@ -63,10 +63,6 @@ namespace BeRated
                 {
                     playerStats.Purchases = reader.ReadAll<PlayerPurchasesRow>();
                 }
-                using (var reader = _Database.ReadFunction("get_player_kill_death_ratio_history", idParameter))
-                {
-                    playerStats.KillDeathRatioHistory = reader.ReadAll<KillDeathRatioHistoryRow>();
-                }
                 using (var reader = _Database.ReadFunction("get_player_games", idParameter))
                 {
                     var rows = reader.ReadAll<PlayerGameHistoryRow>();

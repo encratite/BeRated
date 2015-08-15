@@ -10,7 +10,6 @@ namespace BeRated.Model
 		public List<PlayerWeaponStatsRow> Weapons { get; set; }
 		public List<PlayerEncounterStatsRow> Encounters { get; set; }
 		public List<PlayerPurchasesRow> Purchases { get; set; }
-		public List<KillDeathRatioHistoryRow> KillDeathRatioHistory { get; set; }
 		public List<PlayerGameModel> Games { get; set; }
 	}
 }
