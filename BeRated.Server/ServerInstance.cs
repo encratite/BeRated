@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Ashod.Database;
+using BeRated.Database;
+using BeRated.Model;
+using BeRated.Server;
+using Npgsql;
 
-namespace BeRated.Server
+namespace BeRated
 {
     class ServerInstance : IServerInstance
     {
-        [ServerMethod]
-        public string Test(string argument1, int argument2)
-        {
-            return string.Format("{0}: {1}", argument1, 2 * argument2);
-        }
+        private DatabaseConnection _Database = null;
 
-        [ServerMethod]
-        public Tuple<string, int> Test2()
+        public ServerInstance(string connectionString)
         {
-            return new Tuple<string, int>("String", 123);
+            var connection = new NpgsqlConnection(connectionString);
+            _Database = new DatabaseConnection(connection);
         }
 
         void IDisposable.Dispose()
@@ -22,7 +25,55 @@ namespace BeRated.Server
 
         string IServerInstance.GetMarkup(string json)
         {
-            return "<!doctype html>\n<head>\n<title>Title</title>\n<script>var output = JSON.parse('" + json.Replace("'", "\\'") + "');</script>\n<body>\n</body>\n</html>";
+            return "<!doctype html>\n<head>\n<title>Title</title>\n<script>var output = JSON.parse('" + json.Replace("'", "\\'") + "'); console.log(output);</script>\n<body>\n</body>\n</html>";
+        }
+
+        [ServerMethod]
+        public List<AllPlayerStatsModel> GetAllPlayerStats()
+        {
+            lock (_Database)
+            {
+                using (var reader = _Database.ReadFunction("get_all_player_stats"))
+                {
+                    var rows = reader.ReadAll<AllPlayerStatsRow>();
+                    var players = rows.OfType<AllPlayerStatsModel>().ToList();
+                    return players;
+                }
+            }
+        }
+
+        [ServerMethod]
+        public PlayerStatsModel GetPlayerStats(int playerId)
+        {
+            lock (_Database)
+            {
+                var playerStats = new PlayerStatsModel();
+                playerStats.Id = playerId;
+                var idParameter = new CommandParameter("player_id", playerId);
+                playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
+                using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter))
+                {
+                    playerStats.Weapons = reader.ReadAll<PlayerWeaponStatsRow>();
+                }
+                using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter))
+                {
+                    playerStats.Encounters = reader.ReadAll<PlayerEncounterStatsRow>();
+                }
+                using (var reader = _Database.ReadFunction("get_player_purchases", idParameter))
+                {
+                    playerStats.Purchases = reader.ReadAll<PlayerPurchasesRow>();
+                }
+                using (var reader = _Database.ReadFunction("get_player_kill_death_ratio_history", idParameter))
+                {
+                    playerStats.KillDeathRatioHistory = reader.ReadAll<KillDeathRatioHistoryRow>();
+                }
+                using (var reader = _Database.ReadFunction("get_player_games", idParameter))
+                {
+                    var rows = reader.ReadAll<PlayerGameHistoryRow>();
+                    playerStats.Games = rows.Select(row => new PlayerGameModel(row)).ToList();
+                }
+                return playerStats;
+            }
         }
     }
 }

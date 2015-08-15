@@ -31,7 +31,7 @@ namespace BeRated.Server
             }
         }
 
-        public void Run()
+        public void Start()
         {
             var options = new StartOptions(_Url);
             WebApp.Start(_Url, (app) =>

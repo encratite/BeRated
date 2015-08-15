@@ -1,4 +1,4 @@
-﻿namespace BeRated.Server
+﻿namespace BeRated
 {
     public class Configuration
     {

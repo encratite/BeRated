@@ -7,7 +7,7 @@
     <ProjectGuid>{28F38B01-2D17-42C8-A9CF-0D2D88294B7B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BeRated.Server</RootNamespace>
+    <RootNamespace>BeRated</RootNamespace>
     <AssemblyName>BeRated.Server</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -52,6 +52,10 @@
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Npgsql, Version=3.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.3.0.0\lib\net45\Npgsql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
@@ -66,15 +70,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\AllPlayerStatsModel.cs" />
+    <Compile Include="Model\GamePlayerModel.cs" />
+    <Compile Include="Model\PlayerGameModel.cs" />
+    <Compile Include="Model\PlayerStatsModel.cs" />
+    <Compile Include="Database\AllPlayerStatsRow.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="IServerInstance.cs" />
-    <Compile Include="Middleware.cs" />
-    <Compile Include="MiddlewareException.cs" />
+    <Compile Include="Server\IServerInstance.cs" />
+    <Compile Include="Database\KillDeathRatioHistoryRow.cs" />
+    <Compile Include="Server\Middleware.cs" />
+    <Compile Include="Server\MiddlewareException.cs" />
+    <Compile Include="Database\PlayerEncounterStatsRow.cs" />
+    <Compile Include="Database\PlayerGameHistoryRow.cs" />
+    <Compile Include="Database\PlayerPurchasesRow.cs" />
+    <Compile Include="Database\PlayerWeaponStatsRow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ServerInstance.cs" />
-    <Compile Include="ServerMethodAttribute.cs" />
-    <Compile Include="WebServer.cs" />
-    <Compile Include="WebServerApp.cs" />
+    <Compile Include="Server\ServerMethodAttribute.cs" />
+    <Compile Include="Server\WebServer.cs" />
+    <Compile Include="Server\WebServerApp.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

@@ -15,7 +15,7 @@ namespace BeRated
 
 		string _LogPath;
 		string _ConnectionString;
-		DatabaseCommander _Database;
+		DatabaseConnection _Database;
 		int _MaxRounds = MaxRoundsDefault;
 		Dictionary<string, string> _Players = new Dictionary<string, string>();
 
@@ -37,7 +37,7 @@ namespace BeRated
                 try
                 {
                     var connection = new NpgsqlConnection(_ConnectionString);
-                    _Database = new DatabaseCommander(connection);
+                    _Database = new DatabaseConnection(connection);
                     var files = Directory.GetFiles(_LogPath);
                     foreach (var file in files)
                         ProcessLog(file);
