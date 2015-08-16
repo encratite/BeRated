@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Owin;
 using Newtonsoft.Json;
@@ -23,16 +24,39 @@ namespace BeRated.Server
             var response = context.Response;
             try
             {
-                var path = context.Request.Path;
-                if (!path.HasValue)
-                    throw new MiddlewareException("Path not set.");
-                string pathString = path.Value;
-                if (pathString.Length == 0)
+                string path = context.Request.Uri.PathAndQuery;
+                if (path.Length == 0)
                     throw new MiddlewareException("Path is empty.");
-                var pathTokens = pathString.Substring(1).Split('/');
-                if (pathTokens.Length == 0)
-                    throw new MiddlewareException("Invalid number of path tokens.");
-                object output = InvokeServerInstance(pathTokens);
+                if (path == "/favicon.ico")
+                {
+                    response.StatusCode = 404;
+                    return response.WriteAsync("Not found.");
+                }
+                var pattern = new Regex(@"^/(?<method>\w+?)(?:\?(?:(?<firstArgument>\w+?)=(?<firstValue>[^?=&]*))(?:&(?<arguments>\w+?)=(?<values>[^?=&]*))*)?$", RegexOptions.ECMAScript);
+                var match = pattern.Match(path);
+                if (!match.Success)
+                    throw new MiddlewareException("Malformed request.");
+                var groups = match.Groups;
+                var methodGroup = groups["method"];
+                var firstArgumentGroup = groups["firstArgument"];
+                var firstValueGroup = groups["firstValue"];
+                var argumentGroup = groups["arguments"];
+                var valueGroup = groups["values"];
+                string method = methodGroup.Value;
+                var arguments = new Dictionary<string, string>();
+                if (firstArgumentGroup.Success)
+                {
+                    arguments[firstArgumentGroup.Value] = firstValueGroup.Value;
+                    var valueEnumerator = valueGroup.Captures.GetEnumerator();
+                    valueEnumerator.MoveNext();
+                    foreach (Capture argument in argumentGroup.Captures)
+                    {
+                        var value = (Capture)valueEnumerator.Current;
+                        arguments[argument.Value] = value.Value;
+                        valueEnumerator.MoveNext();
+                    }
+                }
+                object output = InvokeServerInstance(method, arguments);
                 string json = JsonConvert.SerializeObject(output);
                 string markup = _Instance.GetMarkup(json);
                 response.ContentType = "text/html";
@@ -54,34 +78,44 @@ namespace BeRated.Server
             }
         }
 
-        private object InvokeServerInstance(string[] pathTokens)
+        private object InvokeServerInstance(string method, Dictionary<string, string> arguments)
         {
-            string methodName = pathTokens.First();
-            var arguments = pathTokens.Skip(1).ToArray();
             var notFoundException = new MiddlewareException("No such method.");
-            var method = _Instance.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public);
-            if (method == null)
+            var methodInfo = _Instance.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.Public);
+            if (methodInfo == null)
                 throw notFoundException;
-            var attribute = method.GetCustomAttribute(typeof(ServerMethodAttribute));
+            var attribute = methodInfo.GetCustomAttribute(typeof(ServerMethodAttribute));
             if (attribute == null)
                 throw notFoundException;
-            var parameters = method.GetParameters();
-            if (arguments.Length != parameters.Length)
-                throw new MiddlewareException("Invalid argument count.");
-            var convertedParameters = new List<object>();
-            for (int i = 0; i < arguments.Length; i++)
+            var parameters = methodInfo.GetParameters();
+            var invokeParameters = new List<object>();
+            foreach (var parameter in parameters)
             {
-                string argument = arguments[i];
-                var parameter = parameters[i];
-                var type = parameter.ParameterType;
+                string argument;
                 object convertedParameter;
-                if (argument == "null" && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    convertedParameter = null;
-                else
+                var type = parameter.ParameterType;
+                bool isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+                if (arguments.TryGetValue(parameter.Name, out argument))
+                {
+                    if (isNullable)
+                        type = type.GenericTypeArguments.First();
                     convertedParameter = Convert.ChangeType(argument, type);
-                convertedParameters.Add(convertedParameter);
+                }
+                else
+                {
+                    if (type == typeof(string) || isNullable)
+                    {
+                        convertedParameter = null;
+                    }
+                    else
+                    {
+                        string message = string.Format("Parameter \"{0}\" has not been specified.", parameter.Name);
+                        throw new MiddlewareException(message);
+                    }
+                }
+                invokeParameters.Add(convertedParameter);
             }
-            var output = method.Invoke(_Instance, convertedParameters.ToArray());
+            var output = methodInfo.Invoke(_Instance, invokeParameters.ToArray());
             return output;
         }
     }

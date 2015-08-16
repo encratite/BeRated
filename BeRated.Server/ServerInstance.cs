@@ -29,7 +29,7 @@ namespace BeRated
         }
 
         [ServerMethod]
-        public List<AllPlayerStatsModel> GetAllPlayerStats(DateTimeOffset? start, DateTimeOffset? end)
+        public List<AllPlayerStatsModel> GetAllPlayerStats(DateTime? start, DateTime? end)
         {
             lock (_Database)
             {
@@ -45,7 +45,7 @@ namespace BeRated
         }
 
         [ServerMethod]
-        public PlayerStatsModel GetPlayerStats(int playerId, DateTimeOffset? start, DateTimeOffset? end)
+        public PlayerStatsModel GetPlayerStats(int playerId, DateTime? start, DateTime? end)
         {
             lock (_Database)
             {
