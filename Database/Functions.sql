@@ -49,13 +49,21 @@ begin
 	return name;
 end $$ language 'plpgsql';
 
-create function update_player(name text, steam_id text) returns integer as $$
+create function update_player(name text, steam_id text, _time timestamp) returns integer as $$
 declare
 	player_id integer;
+	last_modified timestamp;
 begin
-	update player set name = update_player.name where player.steam_id = update_player.steam_id returning id into player_id;
+	select player.last_modified from player where player.steam_id = update_player.steam_id into last_modified;
 	if not found then
-		insert into player (name, steam_id) values (name, steam_id) returning id into player_id;
+		insert into player (name, steam_id, last_modified) values (name, steam_id, _time) returning id into player_id;
+	elsif last_modified < _time then
+		update player
+		set
+			name = update_player.name,
+			last_modified = _time
+		where player.steam_id = update_player.steam_id
+		returning id into player_id;
 	end if;
 	return player_id;
 end $$ language 'plpgsql';
@@ -161,11 +169,11 @@ begin
 	end;
 end $$ language 'plpgsql';
 
-create function matches_time_constraints(the_time timestamp, time_start timestamp, time_end timestamp) returns boolean as $$
+create function matches_time_constraints(_time timestamp, time_start timestamp, time_end timestamp) returns boolean as $$
 begin
 	return
-		(time_start is null or the_time >= time_start) and
-		(time_end is null or the_time < time_end);
+		(time_start is null or _time >= time_start) and
+		(time_end is null or _time < time_end);
 end $$ language 'plpgsql';
 
 create function get_player_kills(player_id integer, time_start timestamp, time_end timestamp, team_kills boolean default false) returns int as $$

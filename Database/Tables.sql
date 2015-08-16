@@ -28,7 +28,9 @@ create table player
 	id serial primary key,
 	-- The latest name of the player
 	name text not null,
-	steam_id text unique not null
+	steam_id text unique not null,
+	-- Used to keep track of the time of a name change
+	last_modified timestamp not null
 );
 
 drop table if exists kill cascade;

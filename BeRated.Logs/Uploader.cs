@@ -75,7 +75,7 @@ namespace BeRated
                 // The log file is currently being written to or has been abandoned, skip it
                 return;
             }
-            Console.WriteLine("Processing {0}", path);
+            Console.WriteLine("{0} Processing {1}", DateTime.Now, path);
             var lines = content.Split('\n');
 			int lineCounter = 1;
 			foreach (var line in lines)
@@ -135,7 +135,8 @@ namespace BeRated
 				{
 					new CommandParameter("name", teamSwitch.Player.Name),
 					new CommandParameter("steam_id", steamId),
-				};
+                    new CommandParameter("_time", teamSwitch.Time),
+                };
 				_Database.NonQueryFunction("update_player", parameters);
 				return;
 			}
