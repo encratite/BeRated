@@ -21,6 +21,11 @@ namespace BeRated
 
         void IDisposable.Dispose()
         {
+            if (_Database != null)
+            {
+                _Database.Dispose();
+                _Database = null;
+            }
         }
 
         string IServerInstance.GetMarkup(string json)
