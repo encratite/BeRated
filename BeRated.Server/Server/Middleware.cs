@@ -56,12 +56,13 @@ namespace BeRated.Server
                         valueEnumerator.MoveNext();
                     }
                 }
-                object output = InvokeServerInstance(method, arguments);
-                string json = JsonConvert.SerializeObject(output);
-                string markup = _Instance.GetMarkup(json);
+                object model = InvokeServerInstance(method, arguments);
+                throw new NotImplementedException();
+                /*
                 response.ContentType = "text/html";
                 var task = context.Response.WriteAsync(markup);
                 return task;
+                */
             }
             catch (Exception exception)
             {

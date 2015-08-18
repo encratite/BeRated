@@ -28,11 +28,6 @@ namespace BeRated
             }
         }
 
-        string IServerInstance.GetMarkup(string json)
-        {
-            return "<!doctype html>\n<head>\n<title>Title</title>\n<script>var output = JSON.parse('" + json.Replace("'", "\\'") + "'); console.log(output);</script>\n<body>\n</body>\n</html>";
-        }
-
         [ServerMethod]
         public List<AllPlayerStatsModel> GetAllPlayerStats(DateTime? start, DateTime? end)
         {

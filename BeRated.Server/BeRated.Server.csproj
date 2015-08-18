@@ -94,6 +94,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="ServerInstance.cs" />
     <Compile Include="Server\ServerMethodAttribute.cs" />
+    <Compile Include="Server\TemplateManager.cs" />
     <Compile Include="Server\WebServer.cs" />
     <Compile Include="Server\WebServerApp.cs" />
   </ItemGroup>
