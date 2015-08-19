@@ -9,32 +9,31 @@ using System.Linq;
 
 namespace BeRated
 {
-    class ServerInstance : IServerInstance
+    class RatingApp : BaseApp
     {
         private Configuration _Configuration;
         private DatabaseConnection _Database = null;
-        private TemplateManager _TemplateManager = null;
 
-        public ServerInstance(Configuration configuration)
+        public RatingApp(Configuration configuration)
         {
             _Configuration = configuration;
         }
 
-        void IDisposable.Dispose()
+        public override void Dispose()
         {
             if (_Database != null)
             {
                 _Database.Dispose();
                 _Database = null;
             }
+            base.Dispose();
         }
 
         public void Initialize()
         {
+            base.Initialize(_Configuration.TemplatePath);
             var connection = new NpgsqlConnection(_Configuration.ConnectionString);
             _Database = new DatabaseConnection(connection);
-            _TemplateManager = new TemplateManager(_Configuration.TemplatePath);
-            _TemplateManager.LoadTemplates();
         }
 
         [ServerMethod]

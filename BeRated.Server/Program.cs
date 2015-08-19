@@ -27,11 +27,11 @@ namespace BeRated
         private static void RunServer()
         {
             var configuration = JsonFile.Read<Configuration>();
-            var instance = new ServerInstance(configuration);
+            var instance = new RatingApp(configuration);
             instance.Initialize();
-            using (var server = new WebServer(instance, configuration.ServerUrl))
+            using (var launcher = new WebAppLauncher(instance, configuration.ServerUrl))
             {
-                server.Start();
+                launcher.Start();
                 Console.WriteLine("Running on {0}", configuration.ServerUrl);
                 Console.WriteLine("Hit enter to shut down the server");
                 Console.ReadLine();

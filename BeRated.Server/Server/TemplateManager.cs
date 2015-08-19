@@ -24,7 +24,7 @@ namespace BeRated.Server
             _Engine = RazorEngineService.Create(configuration);
         }
 
-        void IDisposable.Dispose()
+        public void Dispose()
         {
             if (_Engine != null)
             {
@@ -40,6 +40,12 @@ namespace BeRated.Server
             LoadTemplates(string.Empty);
             stopwatch.Stop();
             Console.WriteLine("Compiled templates in {0} ms", stopwatch.ElapsedMilliseconds);
+        }
+
+        public string Render(string path, Type modelType, object model)
+        {
+            string markup = _Engine.Run(path, model.GetType(), model);
+            return markup;
         }
 
         private void LoadTemplates(string virtualPath)

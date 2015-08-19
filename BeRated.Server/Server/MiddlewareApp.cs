@@ -2,11 +2,11 @@
 
 namespace BeRated.Server
 {
-    class WebServerApp
+    class MiddlewareApp
     {
-        private IServerInstance _Instance;
+        private BaseApp _Instance;
 
-        public WebServerApp(IServerInstance instance)
+        public MiddlewareApp(BaseApp instance)
         {
             _Instance = instance;
         }

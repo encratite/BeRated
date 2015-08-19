@@ -81,7 +81,7 @@
     <Compile Include="Database\AllPlayerStatsRow.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Model\Test.cs" />
-    <Compile Include="Server\IServerInstance.cs" />
+    <Compile Include="Server\BaseApp.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
     <Compile Include="Database\PlayerEncounterStatsRow.cs" />
@@ -89,11 +89,11 @@
     <Compile Include="Database\PlayerPurchasesRow.cs" />
     <Compile Include="Database\PlayerWeaponStatsRow.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="ServerInstance.cs" />
+    <Compile Include="RatingApp.cs" />
     <Compile Include="Server\ServerMethodAttribute.cs" />
     <Compile Include="Server\TemplateManager.cs" />
-    <Compile Include="Server\WebServer.cs" />
-    <Compile Include="Server\WebServerApp.cs" />
+    <Compile Include="Server\WebAppLauncher.cs" />
+    <Compile Include="Server\MiddlewareApp.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

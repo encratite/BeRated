@@ -1,17 +1,16 @@
-﻿using System;
-using Microsoft.Owin.Hosting;
-using Owin;
+﻿using Microsoft.Owin.Hosting;
+using System;
 
 namespace BeRated.Server
 {
-    class WebServer : IDisposable
+    class WebAppLauncher : IDisposable
     {
-        private IServerInstance _Instance;
+        private BaseApp _Instance;
         private string _Url;
 
         private IDisposable _WebApp = null;
 
-        public WebServer(IServerInstance instance, string url)
+        public WebAppLauncher(BaseApp instance, string url)
         {
             _Instance = instance;
             _Url = url;
@@ -36,7 +35,7 @@ namespace BeRated.Server
             var options = new StartOptions(_Url);
             WebApp.Start(_Url, (app) =>
             {
-                var webServerApp = new WebServerApp(_Instance);
+                var webServerApp = new MiddlewareApp(_Instance);
                 webServerApp.Configuration(app);
             });
         }

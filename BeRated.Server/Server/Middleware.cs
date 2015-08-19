@@ -10,9 +10,9 @@ namespace BeRated.Server
 {
     public class Middleware : OwinMiddleware
     {
-        private IServerInstance _Instance;
+        private BaseApp _Instance;
 
-        public Middleware(OwinMiddleware next, IServerInstance instance)
+        public Middleware(OwinMiddleware next, BaseApp instance)
             : base(next)
         {
             _Instance = instance;
@@ -23,7 +23,8 @@ namespace BeRated.Server
             var response = context.Response;
             try
             {
-                string path = context.Request.Uri.PathAndQuery;
+                var uri = context.Request.Uri;
+                string path = uri.PathAndQuery;
                 if (path.Length == 0)
                     throw new MiddlewareException("Path is empty.");
                 if (path == "/favicon.ico")
@@ -55,13 +56,12 @@ namespace BeRated.Server
                         valueEnumerator.MoveNext();
                     }
                 }
-                object model = InvokeServerInstance(method, arguments);
-                throw new NotImplementedException();
-                /*
+                Type modelType;
+                object model = Invoke(method, arguments, out modelType);
+                string markup = _Instance.Render(uri.AbsolutePath, modelType, model);
                 response.ContentType = "text/html";
                 var task = context.Response.WriteAsync(markup);
                 return task;
-                */
             }
             catch (Exception exception)
             {
@@ -78,7 +78,7 @@ namespace BeRated.Server
             }
         }
 
-        private object InvokeServerInstance(string method, Dictionary<string, string> arguments)
+        private object Invoke(string method, Dictionary<string, string> arguments, out Type modelType)
         {
             var notFoundException = new MiddlewareException("No such method.");
             var methodInfo = _Instance.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.Public);
@@ -116,6 +116,7 @@ namespace BeRated.Server
                 invokeParameters.Add(convertedParameter);
             }
             var output = methodInfo.Invoke(_Instance, invokeParameters.ToArray());
+            modelType = methodInfo.ReturnType;
             return output;
         }
     }
