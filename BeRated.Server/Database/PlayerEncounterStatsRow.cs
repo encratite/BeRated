@@ -1,6 +1,6 @@
 ﻿namespace BeRated.Database
 {
-	class PlayerEncounterStatsRow
+	public class PlayerEncounterStatsRow
 	{
 		public int OpponentId { get; set; }
 		public string OpponentName { get; set; }

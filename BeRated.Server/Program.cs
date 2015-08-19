@@ -12,7 +12,7 @@ namespace BeRated
     {
         private static void CreateAppDomain()
         {
-            Console.WriteLine("Creating new app domain");
+            Logger.Log("Creating new app domain");
             var setup = new AppDomainSetup();
             setup.ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
             var current = AppDomain.CurrentDomain;
@@ -32,8 +32,8 @@ namespace BeRated
             using (var launcher = new WebAppLauncher(instance, configuration.ServerUrl))
             {
                 launcher.Start();
-                Console.WriteLine("Running on {0}", configuration.ServerUrl);
-                Console.WriteLine("Hit enter to shut down the server");
+                Logger.Log("Running on {0}", configuration.ServerUrl);
+                Logger.Log("Hit enter to shut down the server");
                 Console.ReadLine();
             }
         }

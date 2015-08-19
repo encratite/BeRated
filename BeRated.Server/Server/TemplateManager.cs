@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Ashod;
 
 namespace BeRated.Server
 {
@@ -13,7 +14,7 @@ namespace BeRated.Server
 
         private string _Path;
 
-        private Dictionary<string, DateTime> _TemplateTimestamps = new Dictionary<string, DateTime>();
+        private Dictionary<string, FileInfo> _TemplateFileInfo = new Dictionary<string, FileInfo>();
 
         private IRazorEngineService _Engine;
 
@@ -39,19 +40,38 @@ namespace BeRated.Server
             stopwatch.Start();
             LoadTemplates(string.Empty);
             stopwatch.Stop();
-            Console.WriteLine("Compiled templates in {0} ms", stopwatch.ElapsedMilliseconds);
+            Logger.Log("Compiled templates in {0} ms", stopwatch.ElapsedMilliseconds);
         }
 
-        public string Render(string path, Type modelType, object model)
+        public string Render(string key, Type modelType, object model)
         {
-            string markup = _Engine.Run(path, model.GetType(), model);
+            FileInfo cacheFileInfo;
+            if (!_TemplateFileInfo.TryGetValue(key, out cacheFileInfo))
+                throw new ApplicationException("Unable to find template in cache");
+            string templatePath = cacheFileInfo.FullName;
+            var fileInfo = new FileInfo(templatePath);
+            if (fileInfo.LastWriteTimeUtc > cacheFileInfo.LastWriteTimeUtc)
+            {
+                try
+                {
+                    Console.WriteLine("Recompiling {0}", templatePath);
+                    string source = File.ReadAllText(templatePath);
+                    _Engine.Compile(source, key);
+                    _TemplateFileInfo[key] = fileInfo;
+                }
+                catch (TemplateCompilationException exception)
+                {
+                    PrintCompilationError(templatePath, exception);
+                    throw new MiddlewareException("Failed to serve request due to compilation error");
+                }
+            }
+            string markup = _Engine.Run(key, model.GetType(), model);
             return markup;
         }
 
         private void LoadTemplates(string virtualPath)
         {
-            string relativePath = virtualPath.Replace(PathSeparator[0], Path.PathSeparator);
-            string physicalPath = Path.Combine(_Path, relativePath);
+            string physicalPath = ConvertPath(virtualPath);
             var templateDirectory = new DirectoryInfo(physicalPath);
             var directories = templateDirectory.GetDirectories();
             foreach (var directory in directories)
@@ -62,13 +82,33 @@ namespace BeRated.Server
             var files = templateDirectory.GetFiles("*.cshtml");
             foreach (var file in files)
             {
-                string key = Combine(virtualPath, Path.GetFileNameWithoutExtension(file.Name));
-                string source = File.ReadAllText(file.FullName);
-                Console.WriteLine("Compiling {0} for virtual path {1}", file.FullName, key);
-                _Engine.AddTemplate(key, source);
-                _Engine.Compile(key);
-                _TemplateTimestamps[key] = file.LastWriteTimeUtc;
+                try
+                {
+                    string key = Combine(virtualPath, Path.GetFileNameWithoutExtension(file.Name));
+                    string source = File.ReadAllText(file.FullName);
+                    Logger.Log("Compiling {0} for virtual path {1}", file.FullName, key);
+                    _Engine.Compile(source, key);
+                    _TemplateFileInfo[key] = file;
+                }
+                catch (TemplateCompilationException exception)
+                {
+                    PrintCompilationError(file.FullName, exception);
+                }
             }
+        }
+
+        private static void PrintCompilationError(string path, TemplateCompilationException exception)
+        {
+            Logger.Error("Failed to compile {0}:", path);
+            foreach (var error in exception.CompilerErrors)
+                Logger.Error("Line {0}: {1}", error.Line, error.ErrorText);
+        }
+
+        private string ConvertPath(string virtualPath)
+        {
+            string relativePath = virtualPath.Replace(PathSeparator, Path.DirectorySeparatorChar.ToString());
+            string physicalPath = Path.Combine(_Path, relativePath);
+            return physicalPath;
         }
 
         private string Combine(string left, string right)

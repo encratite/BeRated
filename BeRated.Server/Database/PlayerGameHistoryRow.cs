@@ -2,7 +2,7 @@
 
 namespace BeRated.Database
 {
-	class PlayerGameHistoryRow
+	public class PlayerGameHistoryRow
 	{
 		public DateTime GameTime { get; set; }
 		public int PlayerScore { get; set; }

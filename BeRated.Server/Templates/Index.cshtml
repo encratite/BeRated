@@ -1,0 +1,20 @@
+﻿@using BeRated.Model
+@using System.Collections.Generic
+
+@model List<AllPlayerStatsModel>
+
+<!doctype html>
+<html>
+<head>
+    <title>Counter-Strike Global Offensive Statistics</title>
+</head>
+<body>
+    <table>
+        @foreach (var player in Model) {
+            <tr>
+                <td>@player.Name</td>
+            </tr>
+        }
+    </table>
+</body>
+</html>

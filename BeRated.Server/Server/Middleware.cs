@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Ashod;
 using Microsoft.Owin;
 
 namespace BeRated.Server
@@ -65,7 +66,7 @@ namespace BeRated.Server
             }
             catch (Exception exception)
             {
-                Console.WriteLine("Error: {0} ({1})", exception.Message, exception.GetType());
+                Logger.Error("Request error: {0} ({1})", exception.Message, exception.GetType());
                 response.StatusCode = 500;
                 response.ContentType = "text/plain";
                 string message;

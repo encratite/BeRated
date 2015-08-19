@@ -37,7 +37,7 @@ namespace BeRated
         }
 
         [ServerMethod]
-        public List<AllPlayerStatsModel> GetAllPlayerStats(DateTime? start, DateTime? end)
+        public List<AllPlayerStatsModel> Index(DateTime? start, DateTime? end)
         {
             lock (_Database)
             {
@@ -53,7 +53,7 @@ namespace BeRated
         }
 
         [ServerMethod]
-        public PlayerStatsModel GetPlayerStats(int playerId, DateTime? start, DateTime? end)
+        public PlayerStatsModel Player(int playerId, DateTime? start, DateTime? end)
         {
             lock (_Database)
             {

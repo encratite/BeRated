@@ -80,7 +80,6 @@
     <Compile Include="Model\PlayerStatsModel.cs" />
     <Compile Include="Database\AllPlayerStatsRow.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="Model\Test.cs" />
     <Compile Include="Server\BaseApp.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
@@ -94,6 +93,7 @@
     <Compile Include="Server\TemplateManager.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />
     <Compile Include="Server\MiddlewareApp.cs" />
+    <None Include="Templates\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

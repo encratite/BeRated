@@ -1,8 +1,6 @@
-﻿using BeRated.Database;
-
-namespace BeRated.Model
+﻿namespace BeRated.Model
 {
-    class AllPlayerStatsModel
+    public class AllPlayerStatsModel
     {
         public int Id { get; set; }
         public string Name { get; set; }

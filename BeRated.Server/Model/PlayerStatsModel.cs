@@ -1,9 +1,9 @@
-﻿using BeRated.Database;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using BeRated.Database;
 
 namespace BeRated.Model
 {
-	class PlayerStatsModel
+	public class PlayerStatsModel
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
