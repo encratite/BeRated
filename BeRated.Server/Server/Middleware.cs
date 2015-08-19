@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Owin;
-using Newtonsoft.Json;
 
 namespace BeRated.Server
 {

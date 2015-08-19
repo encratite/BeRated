@@ -80,6 +80,7 @@
     <Compile Include="Model\PlayerStatsModel.cs" />
     <Compile Include="Database\AllPlayerStatsRow.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Model\Test.cs" />
     <Compile Include="Server\IServerInstance.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
@@ -98,7 +99,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">

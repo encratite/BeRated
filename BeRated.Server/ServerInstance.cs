@@ -1,22 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Ashod.Database;
+﻿using Ashod.Database;
 using BeRated.Database;
 using BeRated.Model;
 using BeRated.Server;
 using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BeRated
 {
     class ServerInstance : IServerInstance
     {
+        private Configuration _Configuration;
         private DatabaseConnection _Database = null;
+        private TemplateManager _TemplateManager = null;
 
-        public ServerInstance(string connectionString)
+        public ServerInstance(Configuration configuration)
         {
-            var connection = new NpgsqlConnection(connectionString);
-            _Database = new DatabaseConnection(connection);
+            _Configuration = configuration;
         }
 
         void IDisposable.Dispose()
@@ -26,6 +27,14 @@ namespace BeRated
                 _Database.Dispose();
                 _Database = null;
             }
+        }
+
+        public void Initialize()
+        {
+            var connection = new NpgsqlConnection(_Configuration.ConnectionString);
+            _Database = new DatabaseConnection(connection);
+            _TemplateManager = new TemplateManager(_Configuration.TemplatePath);
+            _TemplateManager.LoadTemplates();
         }
 
         [ServerMethod]

@@ -10,7 +10,7 @@
 
         public Configuration()
         {
-            TemplatePath = "Template";
+            TemplatePath = "Templates";
         }
     }
 }

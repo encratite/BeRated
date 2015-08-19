@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using RazorEngine.Configuration;
+﻿using RazorEngine.Configuration;
 using RazorEngine.Templating;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 
 namespace BeRated.Server
 {
     class TemplateManager : IDisposable
     {
-        private const char PathSeparator = '/';
+        private const string PathSeparator = "/";
 
         private string _Path;
 
@@ -32,21 +33,32 @@ namespace BeRated.Server
             }
         }
 
-        public void LoadTemplates(string virtualPath = null)
+        public void LoadTemplates()
         {
-            string physicalPath = _Path;
-            if (virtualPath != null)
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            LoadTemplates(string.Empty);
+            stopwatch.Stop();
+            Console.WriteLine("Compiled templates in {0} ms", stopwatch.ElapsedMilliseconds);
+        }
+
+        private void LoadTemplates(string virtualPath)
+        {
+            string relativePath = virtualPath.Replace(PathSeparator[0], Path.PathSeparator);
+            string physicalPath = Path.Combine(_Path, relativePath);
+            var templateDirectory = new DirectoryInfo(physicalPath);
+            var directories = templateDirectory.GetDirectories();
+            foreach (var directory in directories)
             {
-                string relativePath = virtualPath.Replace(PathSeparator, Path.PathSeparator);
-                physicalPath = Path.Combine(physicalPath, relativePath);
+                string directoryVirtualPath = Combine(virtualPath, directory.Name);
+                LoadTemplates(directoryVirtualPath);
             }
-            var directory = new DirectoryInfo(physicalPath);
-            foreach (var file in directory.GetFiles("*.cshtml"))
+            var files = templateDirectory.GetFiles("*.cshtml");
+            foreach (var file in files)
             {
-                string key = file.Name;
-                if (virtualPath != null)
-                    key = Combine(virtualPath, key);
+                string key = Combine(virtualPath, Path.GetFileNameWithoutExtension(file.Name));
                 string source = File.ReadAllText(file.FullName);
+                Console.WriteLine("Compiling {0} for virtual path {1}", file.FullName, key);
                 _Engine.AddTemplate(key, source);
                 _Engine.Compile(key);
                 _TemplateTimestamps[key] = file.LastWriteTimeUtc;
@@ -55,7 +67,7 @@ namespace BeRated.Server
 
         private string Combine(string left, string right)
         {
-            return string.Format("{0}{1}{2}", left, PathSeparator, right);
+            return left + PathSeparator + right;
         }
     }
 }
