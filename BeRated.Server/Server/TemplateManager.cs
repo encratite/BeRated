@@ -69,10 +69,10 @@ namespace BeRated.Server
                     templateState.FileInfo = fileInfo;
 					templateState.Compiled = true;
                 }
-                catch (TemplateCompilationException exception)
+                catch (Exception exception)
                 {
 					templateState.Compiled = false;
-					PrintCompilationError(templatePath, exception);
+					PrintTemplateError(templatePath, exception);
                     throw new ApplicationException("Failed to serve request due to compilation error");
                 }
             }
@@ -103,18 +103,33 @@ namespace BeRated.Server
                     _Engine.Compile(source, key);
 					templateState.Compiled = true;
                 }
-                catch (TemplateCompilationException exception)
+                catch (Exception exception)
                 {
-                    PrintCompilationError(file.FullName, exception);
+                    PrintTemplateError(file.FullName, exception);
                 }
             }
         }
 
-        private static void PrintCompilationError(string path, TemplateCompilationException exception)
+        private static void PrintTemplateError(string path, Exception exception)
         {
-            Logger.Error("Failed to compile {0}:", path);
-            foreach (var error in exception.CompilerErrors)
-                Logger.Error("Line {0}: {1}", error.Line, error.ErrorText);
+			var parsingException = exception as TemplateParsingException;
+			var compilationException = exception as TemplateCompilationException;
+			if (compilationException != null)
+			{
+				Logger.Error("Failed to compile {0}:", path);
+				foreach (var error in compilationException.CompilerErrors)
+					Logger.Error("Line {0}: {1}", error.Line, error.ErrorText);
+			}
+			else if (parsingException != null)
+			{
+				Logger.Error("Failed to parse {0}:", path);
+				Logger.Error("Line {0}: {1}", parsingException.Line, parsingException.Message);
+			}
+			else
+			{
+				Logger.Error("Unknown error in {0}:", path);
+				Logger.Error("{0} ({1}", exception.Message, exception.GetType());
+			}
         }
 
         private string ConvertPath(string virtualPath)

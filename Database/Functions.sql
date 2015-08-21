@@ -231,7 +231,7 @@ begin
 		score1 + score2 >= max_rounds;
 end $$ language 'plpgsql';
 
-create function get_player_rounds(player_id integer, time_start timestamp, time_end timestamp, team team_type default null, get_rounds_won boolean default null, end_of_game boolean default false) returns integer as $$
+create function get_player_rounds(player_id integer, time_start timestamp, time_end timestamp, get_rounds_won boolean default null, end_of_game boolean default false) returns integer as $$
 declare
 	rounds_won integer;
 begin
@@ -249,10 +249,6 @@ begin
 			)
 		) and
 		(
-			get_player_rounds.team is null or
-			get_player_rounds.team = round_player.team
-		) and
-		(
 			not end_of_game or
 			is_end_of_game(round.terrorist_score, round.counter_terrorist_score, round.max_rounds)
 		)
@@ -260,32 +256,32 @@ begin
 	return rounds_won;
 end $$ language 'plpgsql';
 
-create function get_percentage(x integer, y integer) returns numeric as $$
+create function get_ratio(x integer, y integer) returns numeric as $$
 begin
 	if y = 0 then
 		return null;
 	end if;
-	return round(x::numeric / y * 100, 1);
+	return x::numeric / y;
 end $$ language 'plpgsql';
 
-create function get_player_game_win_percentage(player_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
+create function get_player_game_win_ratio(player_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
 declare
 	wins integer;
 	games integer;
 begin
-	select get_player_rounds(player_id, time_start, time_end, null, true, true) into wins;
-	select get_player_rounds(player_id, time_start, time_end, null, null, true) into games;
-	return get_percentage(wins, games);
+	select get_player_rounds(player_id, time_start, time_end, true, true) into wins;
+	select get_player_rounds(player_id, time_start, time_end, null, true) into games;
+	return get_ratio(wins, games);
 end $$ language 'plpgsql';
 
-create function get_player_round_win_percentage(player_id integer, time_start timestamp, time_end timestamp, team team_type default null) returns numeric as $$
+create function get_player_round_win_ratio(player_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
 declare
 	wins integer;
 	games integer;
 begin
-	select get_player_rounds(player_id, time_start, time_end, team, true) into wins;
-	select get_player_rounds(player_id, time_start, time_end, team) into games;
-	return get_percentage(wins, games);
+	select get_player_rounds(player_id, time_start, time_end, true) into wins;
+	select get_player_rounds(player_id, time_start, time_end) into games;
+	return get_ratio(wins, games);
 end $$ language 'plpgsql';
 
 create function get_all_player_stats(time_start timestamp, time_end timestamp) returns table
@@ -297,13 +293,9 @@ create function get_all_player_stats(time_start timestamp, time_end timestamp) r
 	team_kills integer,
 	kill_death_ratio numeric,
 	rounds_played integer,
-	win_percentage numeric,
-	rounds_played_terrorist integer,
-	win_percentage_terrorist numeric,
-	rounds_played_counter_terrorist integer,
-	win_percentage_counter_terrorist numeric,
+	round_win_ratio numeric,
 	games_played integer,
-	game_win_percentage numeric
+	game_win_ratio numeric
 ) as $$
 begin
 	return query select
@@ -314,13 +306,9 @@ begin
 		get_player_kills(player.id, time_start, time_end, true) as kills,
 		round(get_player_kill_death_ratio(player.id, time_start, time_end), 2) as kill_death_ratio,
 		get_player_rounds(player.id, time_start, time_end) as rounds_played,
-		get_player_round_win_percentage(player.id, time_start, time_end) as win_percentage,
-		get_player_rounds(player.id, time_start, time_end, 'terrorist'::team_type) as rounds_played_terrorist,
-		get_player_round_win_percentage(player.id, time_start, time_end, 'terrorist'::team_type) as win_percentage_terrorist,
-		get_player_rounds(player.id, time_start, time_end, 'counter_terrorist'::team_type) as rounds_played_counter_terrorist,
-		get_player_round_win_percentage(player.id, time_start, time_end, 'counter_terrorist'::team_type) as win_percentage_counter_terrorist,
-		get_player_rounds(player.id, time_start, time_end, null, null, true) as games_played,
-		get_player_game_win_percentage(player.id, time_start, time_end) as game_win_percentage
+		get_player_round_win_ratio(player.id, time_start, time_end) as round_win_ratio,
+		get_player_rounds(player.id, time_start, time_end, null, true) as games_played,
+		get_player_game_win_ratio(player.id, time_start, time_end) as game_win_ratio
 	from player;
 end $$ language 'plpgsql';
 
@@ -339,14 +327,14 @@ begin
 	return kills;
 end $$ language 'plpgsql';
 
-create function get_player_weapon_headshot_percentage(player_id integer, time_start timestamp, time_end timestamp, weapon text) returns numeric as $$
+create function get_player_weapon_headshot_ratio(player_id integer, time_start timestamp, time_end timestamp, weapon text) returns numeric as $$
 declare
 	kills integer;
 	headshots integer;
 begin
 	select get_player_weapon_kills(player_id, time_start, time_end, weapon, false) into kills;
 	select get_player_weapon_kills(player_id, time_start, time_end, weapon, true) into headshots;
-	return get_percentage(headshots, kills);
+	return get_ratio(headshots, kills);
 end $$ language 'plpgsql';
 
 create function get_player_weapon_stats(player_id integer, time_start timestamp, time_end timestamp) returns table
@@ -354,7 +342,7 @@ create function get_player_weapon_stats(player_id integer, time_start timestamp,
 	weapon text,
 	kills integer,
 	headshots integer,
-	headshot_percentage numeric
+	headshot_ratio numeric
 ) as $$
 begin
 	perform check_player_id(player_id);
@@ -362,7 +350,7 @@ begin
 		kill.weapon,
 		get_player_weapon_kills(player_id, time_start, time_end, kill.weapon, false) as kills,
 		get_player_weapon_kills(player_id, time_start, time_end, kill.weapon, true) as headshots,
-		get_player_weapon_headshot_percentage(player_id, time_start, time_end, kill.weapon) as headshot_percentage
+		get_player_weapon_headshot_ratio(player_id, time_start, time_end, kill.weapon) as headshot_ratio
 	from kill
 	where
 		killer_id = player_id and
@@ -385,7 +373,7 @@ begin
 	return kills;
 end $$ language 'plpgsql';
 
-create function get_encounter_win_percentage(player_id integer, opponent_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
+create function get_encounter_win_ratio(player_id integer, opponent_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
 declare
 	kills integer;
 	deaths integer;
@@ -397,7 +385,7 @@ begin
 	if encounters = 0 then
 		return null;
 	end if;
-	return get_percentage(kills, encounters);
+	return get_ratio(kills, encounters);
 end $$ language 'plpgsql';
 
 create function get_player_encounter_stats(player_id integer, time_start timestamp, time_end timestamp) returns table
@@ -407,7 +395,7 @@ create function get_player_encounter_stats(player_id integer, time_start timesta
 	encounters integer,
 	kills integer,
 	deaths integer,
-	win_percentage numeric
+	win_ratio numeric
 ) as $$
 begin
 	perform check_player_id(player_id);
@@ -417,11 +405,11 @@ begin
 		get_matchup_kills(player_id, id, time_start, time_end) + get_matchup_kills(id, player_id, time_start, time_end) as encounters,
 		get_matchup_kills(player_id, id, time_start, time_end) as kills,
 		get_matchup_kills(id, player_id, time_start, time_end) as deaths,
-		get_encounter_win_percentage(player_id, id, time_start, time_end) as win_percentage
+		get_encounter_win_ratio(player_id, id, time_start, time_end) as win_ratio
 	from player
 	where
 		id != player_id and
-		get_encounter_win_percentage(player_id, id, time_start, time_end) is not null;
+		get_encounter_win_ratio(player_id, id, time_start, time_end) is not null;
 end $$ language 'plpgsql';
 
 create function get_player_id_by_steam_id(steam_id text) returns integer as $$

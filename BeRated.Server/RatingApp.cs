@@ -48,7 +48,8 @@ namespace BeRated
                     var rows = reader.ReadAll<AllPlayerStatsRow>();
                     var players = rows.OfType<AllPlayerStatsModel>();
 					players = players.OrderBy(player => player.Name);
-                    return players.ToList();
+                    var model = players.ToList();
+					return model;
                 }
             }
         }

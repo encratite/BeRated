@@ -12,16 +12,24 @@
 	<table>
 		<tr>
 			<th>Name</th>
+			<th>Kill/death ratio</th>
 			<th>Kills</th>
 			<th>Deaths</th>
-			<th>Kill/death ratio</th>
+			<th>Games won</th>
+			<th>Games played</th>
+			<th>Rounds won</th>
+			<th>Rounds played</th>
 		</tr>
 		@foreach (var player in Model) {
 			<tr>
 				<td>@player.Name</td>
+				<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
 				<td>@player.Kills</td>
 				<td>@player.Deaths</td>
-				<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
+				<td>@player.GameWinRatio.ToString("P1")</td>
+				<td>@player.GamesPlayed</td>
+				<td>@player.RoundWinRatio.ToString("P1")</td>
+				<td>@player.RoundsPlayed</td>
 			</tr>
 		}
 	</table>
