@@ -1,10 +1,10 @@
-﻿using RazorEngine.Configuration;
-using RazorEngine.Templating;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Ashod;
+using RazorEngine.Configuration;
+using RazorEngine.Templating;
 
 namespace BeRated.Server
 {
@@ -14,14 +14,19 @@ namespace BeRated.Server
 
         private string _Path;
 
+        private IRazorEngineService _Engine;
+
         private Dictionary<string, FileInfo> _TemplateFileInfo = new Dictionary<string, FileInfo>();
 
-        private IRazorEngineService _Engine;
+        private DelegateTemplateManager _TemplateManager = new DelegateTemplateManager();
+        private InvalidatingCachingProvider _CachingProvider = new InvalidatingCachingProvider();
 
         public TemplateManager(string path)
         {
             _Path = path;
             var configuration = new TemplateServiceConfiguration();
+            configuration.TemplateManager = _TemplateManager;
+            configuration.CachingProvider = _CachingProvider;
             _Engine = RazorEngineService.Create(configuration);
         }
 
@@ -56,6 +61,9 @@ namespace BeRated.Server
                 {
                     Console.WriteLine("Recompiling {0}", templatePath);
                     string source = File.ReadAllText(templatePath);
+                    var templateKey = _Engine.GetKey(key);
+                    _TemplateManager.RemoveDynamic(templateKey);
+                    _CachingProvider.InvalidateCache(templateKey);
                     _Engine.Compile(source, key);
                     _TemplateFileInfo[key] = fileInfo;
                 }
