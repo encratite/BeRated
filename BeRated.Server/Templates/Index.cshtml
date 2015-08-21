@@ -6,15 +6,24 @@
 <!doctype html>
 <html>
 <head>
-    <title>Counter-Strike Global Offensive Statistics</title>
+	<title>Counter-Strike Global Offensive Statistics</title>
 </head>
 <body>
-    <table>
-        @foreach (var player in Model) {
-            <tr>
-                <td>@player.Name</td>
-            </tr>
-        }
-    </table>
+	<table>
+		<tr>
+			<th>Name</th>
+			<th>Kills</th>
+			<th>Deaths</th>
+			<th>Kill/death ratio</th>
+		</tr>
+		@foreach (var player in Model) {
+			<tr>
+				<td>@player.Name</td>
+				<td>@player.Kills</td>
+				<td>@player.Deaths</td>
+				<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
+			</tr>
+		}
+	</table>
 </body>
 </html>

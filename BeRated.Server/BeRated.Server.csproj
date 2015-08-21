@@ -91,6 +91,7 @@
     <Compile Include="RatingApp.cs" />
     <Compile Include="Server\ServerMethodAttribute.cs" />
     <Compile Include="Server\TemplateManager.cs" />
+    <Compile Include="Server\TemplateState.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />
     <Compile Include="Server\MiddlewareApp.cs" />
     <None Include="Templates\Index.cshtml" />

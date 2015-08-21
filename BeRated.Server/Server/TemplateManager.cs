@@ -16,7 +16,7 @@ namespace BeRated.Server
 
         private IRazorEngineService _Engine;
 
-        private Dictionary<string, FileInfo> _TemplateFileInfo = new Dictionary<string, FileInfo>();
+        private Dictionary<string, TemplateState> _TemplateStates = new Dictionary<string, TemplateState>();
 
         private DelegateTemplateManager _TemplateManager = new DelegateTemplateManager();
         private InvalidatingCachingProvider _CachingProvider = new InvalidatingCachingProvider();
@@ -50,12 +50,13 @@ namespace BeRated.Server
 
         public string Render(string key, Type modelType, object model)
         {
-            FileInfo cacheFileInfo;
-            if (!_TemplateFileInfo.TryGetValue(key, out cacheFileInfo))
+			TemplateState templateState;
+            if (!_TemplateStates.TryGetValue(key, out templateState))
                 throw new ApplicationException("Unable to find template in cache");
+			var cacheFileInfo = templateState.FileInfo;
             string templatePath = cacheFileInfo.FullName;
             var fileInfo = new FileInfo(templatePath);
-            if (fileInfo.LastWriteTimeUtc > cacheFileInfo.LastWriteTimeUtc)
+            if (!templateState.Compiled || fileInfo.LastWriteTimeUtc > cacheFileInfo.LastWriteTimeUtc)
             {
                 try
                 {
@@ -65,12 +66,14 @@ namespace BeRated.Server
                     _TemplateManager.RemoveDynamic(templateKey);
                     _CachingProvider.InvalidateCache(templateKey);
                     _Engine.Compile(source, key);
-                    _TemplateFileInfo[key] = fileInfo;
+                    templateState.FileInfo = fileInfo;
+					templateState.Compiled = true;
                 }
                 catch (TemplateCompilationException exception)
                 {
-                    PrintCompilationError(templatePath, exception);
-                    throw new MiddlewareException("Failed to serve request due to compilation error");
+					templateState.Compiled = false;
+					PrintCompilationError(templatePath, exception);
+                    throw new ApplicationException("Failed to serve request due to compilation error");
                 }
             }
             string markup = _Engine.Run(key, model.GetType(), model);
@@ -90,13 +93,15 @@ namespace BeRated.Server
             var files = templateDirectory.GetFiles("*.cshtml");
             foreach (var file in files)
             {
-                try
+				string key = Combine(virtualPath, Path.GetFileNameWithoutExtension(file.Name));
+				var templateState = new TemplateState(file);
+				_TemplateStates[key] = templateState;
+				try
                 {
-                    string key = Combine(virtualPath, Path.GetFileNameWithoutExtension(file.Name));
                     string source = File.ReadAllText(file.FullName);
                     Logger.Log("Compiling {0} for virtual path {1}", file.FullName, key);
                     _Engine.Compile(source, key);
-                    _TemplateFileInfo[key] = file;
+					templateState.Compiled = true;
                 }
                 catch (TemplateCompilationException exception)
                 {

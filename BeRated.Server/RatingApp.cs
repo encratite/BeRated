@@ -46,8 +46,9 @@ namespace BeRated
                 using (var reader = _Database.ReadFunction("get_all_player_stats", startParameter, endParameter))
                 {
                     var rows = reader.ReadAll<AllPlayerStatsRow>();
-                    var players = rows.OfType<AllPlayerStatsModel>().ToList();
-                    return players;
+                    var players = rows.OfType<AllPlayerStatsModel>();
+					players = players.OrderBy(player => player.Name);
+                    return players.ToList();
                 }
             }
         }
