@@ -10,10 +10,32 @@ body, div {
 
 a {
 	text-decoration: none;
+	color: #00709f;
+}
+
+a:active, :visited {
+	color: #03697a;
+}
+
+a:hover {
+	color: #3390b1;
 }
 
 th {
 	text-align: left;
+	color: #636363;
+	background-color: #ededed;
+	border: 1px solid #bbbbbb;
+	padding: 10px 8px 10px 8px;
+}
+
+td {
+	border: 1px solid #bbbbbb;
+	padding: 10px 8px 10px 8px;
+}
+
+table {
+	border-collapse: collapse;
 }
 
 .firstRow {
@@ -75,4 +97,8 @@ th {
 	margin-left: auto;
 	margin-right: auto;
 	width: 1200px;
+}
+
+.numeric td:nth-child(n + 2) {
+	text-align: right;
 }

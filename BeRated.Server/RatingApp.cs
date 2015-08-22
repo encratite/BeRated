@@ -1,15 +1,15 @@
-﻿using Ashod.Database;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Ashod.Database;
 using BeRated.Database;
 using BeRated.Model;
 using BeRated.Server;
 using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BeRated
 {
-    class RatingApp : BaseApp
+    public class RatingApp : BaseApp
     {
         private Configuration _Configuration;
         private DatabaseConnection _Database = null;
@@ -19,7 +19,12 @@ namespace BeRated
             _Configuration = configuration;
         }
 
-        public override void Dispose()
+		public static string GetPercentage(decimal ratio)
+		{
+			return ratio.ToString("P1").Replace(" ", "");
+		}
+
+		public override void Dispose()
         {
             if (_Database != null)
             {
@@ -55,13 +60,13 @@ namespace BeRated
         }
 
         [ServerMethod]
-        public PlayerStatsModel Player(int playerId, DateTime? start, DateTime? end)
+        public PlayerStatsModel Player(int id, DateTime? start, DateTime? end)
         {
             lock (_Database)
             {
                 var playerStats = new PlayerStatsModel();
-                playerStats.Id = playerId;
-                var idParameter = new CommandParameter("player_id", playerId);
+                playerStats.Id = id;
+                var idParameter = new CommandParameter("player_id", id);
                 var startParameter = new CommandParameter("time_start", start);
                 var endParameter = new CommandParameter("time_end", end);
                 playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);

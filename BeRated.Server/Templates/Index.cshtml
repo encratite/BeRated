@@ -1,4 +1,5 @@
-﻿@using BeRated.Model
+﻿@using BeRated
+@using BeRated.Model
 @using System.Collections.Generic
 
 @model List<AllPlayerStatsModel>
@@ -15,8 +16,12 @@
 	<div class="firstRow">
 		<div class="container">
 			<div class="left">
-				<img src="/Images/Logo.png" alt="Logo">
-				<span>Developer Network</span>
+				<a href="/">
+					<img src="/Images/Logo.png" alt="Logo">
+				</a>
+				<a href="/">
+					<span>Developer Network</span>
+				</a>
 			</div>
 			<div class="right">
 				<a href="/" class="textLink">Sign in</a>
@@ -30,7 +35,7 @@
 	</div>
 	<div class="secondRow"></div>
 	<div class="container">
-		<table>
+		<table class="numeric">
 			<tr>
 				<th>Name</th>
 				<th>Kill/death ratio</th>
@@ -43,13 +48,13 @@
 			</tr>
 			@foreach (var player in Model) {
 				<tr>
-					<td>@player.Name</td>
+					<td><a href="/Player?id=@player.Id">@player.Name</a></td>
 					<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
 					<td>@player.Kills</td>
 					<td>@player.Deaths</td>
-					<td>@player.GameWinRatio.ToString("P1")</td>
+					<td>@RatingApp.GetPercentage(player.GameWinRatio)</td>
 					<td>@player.GamesPlayed</td>
-					<td>@player.RoundWinRatio.ToString("P1")</td>
+					<td>@RatingApp.GetPercentage(player.RoundWinRatio)</td>
 					<td>@player.RoundsPlayed</td>
 				</tr>
 			}
