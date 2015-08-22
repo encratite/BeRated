@@ -176,9 +176,10 @@ begin
 		(time_end is null or _time < time_end);
 end $$ language 'plpgsql';
 
-create function get_player_kills(player_id integer, time_start timestamp, time_end timestamp, team_kills boolean default false) returns int as $$
+create function get_player_kills(player_id integer, time_start timestamp, time_end timestamp) returns int as $$
 declare
 	kills integer;
+	team_kills integer;
 begin
 	select count(*)
 	from kill
@@ -186,9 +187,17 @@ begin
 		killer_id = player_id and
 		killer_id != victim_id and
 		matches_time_constraints(time, time_start, time_end) and
-		team_kills = (killer_team = victim_team)
+		killer_team != victim_team
 	into kills;
-	return kills;
+	select count(*)
+	from kill
+	where
+		killer_id = player_id and
+		killer_id != victim_id and
+		matches_time_constraints(time, time_start, time_end) and
+		killer_team = victim_team
+	into team_kills;
+	return kills - team_kills;
 end $$ language 'plpgsql';
 
 create function get_player_deaths(player_id integer, time_start timestamp, time_end timestamp) returns int as $$
@@ -290,7 +299,6 @@ create function get_all_player_stats(time_start timestamp, time_end timestamp) r
 	name text,
 	kills integer,
 	deaths integer,
-	team_kills integer,
 	kill_death_ratio numeric,
 	rounds_played integer,
 	round_win_ratio numeric,
@@ -303,7 +311,6 @@ begin
 		player.name,
 		get_player_kills(player.id, time_start, time_end) as kills,
 		get_player_deaths(player.id, time_start, time_end) as deaths,
-		get_player_kills(player.id, time_start, time_end, true) as kills,
 		round(get_player_kill_death_ratio(player.id, time_start, time_end), 2) as kill_death_ratio,
 		get_player_rounds(player.id, time_start, time_end) as rounds_played,
 		get_player_round_win_ratio(player.id, time_start, time_end) as round_win_ratio,
