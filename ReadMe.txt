@@ -1,0 +1,39 @@
+nginx settings:
+
+worker_processes  1;
+
+events {
+	worker_connections 1024;
+}
+
+http {
+	include mime.types;
+	default_type application/octet-stream;
+
+	keepalive_timeout 65;
+
+	server {
+		listen 80;
+		server_name localhost;
+		
+		location /Static {
+			alias X:/BeRated/Web/;
+		}
+		
+		location ~ ^/(Images|Scripts|Styles)/ {
+			rewrite ^/(.+) /Static/$1;
+		}
+		
+		location = /favicon.ico {
+			rewrite .* /Images/Favicon.ico;
+		}
+		
+		location = / {
+			rewrite .* /Index;
+		}
+		
+		location / {
+			proxy_pass http://localhost:0/;
+		}
+	}
+}
