@@ -226,3 +226,19 @@ table {
 	font-size: 90%;
 	margin-left: 3px;
 }
+
+#frameworkPopup {
+	display: none;
+	border: 1px solid #bdbdbd;
+	padding: 10px;
+	position: absolute;
+	background-color: #ffffff;
+	margin-top: 30px;
+	margin-left: -100px;
+}
+
+#frameworkPopup li {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}

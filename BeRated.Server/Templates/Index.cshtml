@@ -11,7 +11,8 @@
 	<link rel="icon" href="/Images/Favicon.ico">
 	<link rel="stylesheet" type="text/css" href="/Styles/Main.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-	<script src="/Scripts/TableSort.js"></script>
+	<script src="/Scripts/Table.js"></script>
+	<script src="/Scripts/Popup.js"></script>
 </head>
 <body>
 	<div class="firstRow">
@@ -49,6 +50,12 @@
 			<div class="frameworkSelector">
 				<span>.NET Framework 4.6 and 4.5</span>
 				<span id="frameworkSelector">Other Versions <i class="fa fa-caret-down"></i></span>
+				<ul id="frameworkPopup">
+					<li><a href="/Index?days=7">Past week</a></li>
+					<li><a href="/Index?days=14">Past two weeks</a></li>
+					<li><a href="/Index?days=30">Past month</a></li>
+					<li><a href="/">Everything</a></li>
+				</ul>
 			</div>
 			<p class="description">A block-level flow content element that provides a grid-based presentation of a player's skill organized by rows and columns.</p>
 			<table class="sortable numericTable">
