@@ -178,13 +178,51 @@ table {
 	margin-right: 8px;
 }
 
+.libraryLinks .fa-caret-down {
+	font-size: 90%;
+}
+
 .title {
 	font-size: 36px;
 	font-weight: normal;
+	margin-bottom: 25px;
 }
 
 .content {
 	margin-left: 50px;
 	margin-right: 50px;
 	margin-bottom: 80px;
+}
+
+.content table {
+	margin-left: 15px;
+}
+
+.frameworkSelector {
+	margin-bottom: 30px;
+}
+
+.frameworkSelector span:nth-child(1) {
+	font-weight: bold;
+	color: #5d5d5d;
+	border-right: 1px solid #bdbdbd;
+	padding-right: 10px;
+	margin-right: 5px;
+}
+
+.description {
+	margin-bottom: 30px;
+}
+
+#frameworkSelector {
+	color: #00709f;
+}
+
+#frameworkSelector:hover {
+	color: #3390b1;
+}
+
+#frameworkSelector i {
+	font-size: 90%;
+	margin-left: 3px;
 }
