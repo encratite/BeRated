@@ -42,8 +42,14 @@ namespace BeRated
         }
 
         [ServerMethod]
-        public List<AllPlayerStatsModel> Index(DateTime? start, DateTime? end)
+        public List<AllPlayerStatsModel> Index(DateTime? start, DateTime? end, int? days)
         {
+			if (days != null)
+			{
+				var then = DateTime.Now.AddDays((double)-days);
+                start = new DateTime(then.Year, then.Month, then.Day);
+				end = null;
+			}
             lock (_Database)
             {
                 var startParameter = new CommandParameter("time_start", start);
