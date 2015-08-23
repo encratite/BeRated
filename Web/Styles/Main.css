@@ -93,6 +93,43 @@ table {
 	margin-bottom: 25px;
 }
 
+.secondRow ul {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+.secondRow li {
+	display: inline;
+	list-style-type: none;
+	height: 100%;
+}
+
+.secondRow a {
+	color: #ffffff;
+	font-size: 20px;
+	font-family: wf_segoe-ui_light, "Segoe UI Light", "Segoe WP Light", wf_segoe-ui_normal, "Segoe UI", Segoe, "Segoe WP", Tahoma, Verdana, Arial, sans-serif;
+	display: inline-block;
+	margin-top: 6px;
+	padding-left: 16px;
+	padding-right: 11px;
+	height: 34px;
+}
+
+.secondRow a:hover {
+	border-bottom: solid 5px #ffffff;
+}
+
+.secondRow i {
+	margin-left: 4px;
+	vertical-align: text-bottom;
+	font-size: 16px;
+}
+
+.secondRow .selected {
+	border-bottom: solid 5px #bdbdbd;
+}
+
 .container {
 	margin-left: auto;
 	margin-right: auto;
