@@ -93,7 +93,11 @@ table {
 	margin-bottom: 25px;
 }
 
-.secondRow a {
+.categoryLinks {
+	display: inline;
+}
+
+.categoryLinks a {
 	color: #ffffff;
 	font-size: 20px;
 	font-family: wf_segoe-ui_light, "Segoe UI Light", "Segoe WP Light", wf_segoe-ui_normal, "Segoe UI", Segoe, "Segoe WP", Tahoma, Verdana, Arial, sans-serif;
@@ -106,17 +110,17 @@ table {
 	height: 34px;
 }
 
-.secondRow a:hover {
+.categoryLinks a:hover {
 	border-bottom: solid 5px #ffffff;
 }
 
-.secondRow i {
+.categoryLinks i {
 	margin-left: 4px;
 	vertical-align: text-bottom;
 	font-size: 16px;
 }
 
-.secondRow .selected {
+.categoryLinks .selected {
 	border-bottom: solid 5px #bdbdbd;
 }
 
@@ -132,4 +136,26 @@ table {
 
 .sortable th {
 	cursor: pointer;
+}
+
+.searchButton {
+	margin: 0;
+	float: right;
+	height: 45px;
+	width: 45px;
+	background-color: #444444;
+	text-align: center;
+	vertical-align: middle;
+	cursor: pointer;
+	border: 0;
+}
+
+.searchButton i {
+	font-size: 16px;
+	color: #ffffff;
+	-moz-transform: scale(-1, 1);
+	-webkit-transform: scale(-1, 1);
+	-o-transform: scale(-1, 1);
+	-ms-transform: scale(-1, 1);
+	transform: scale(-1, 1);
 }
