@@ -11,6 +11,7 @@
 	<link rel="icon" href="/Images/Favicon.ico">
 	<link rel="stylesheet" type="text/css" href="/Styles/Main.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+	<script src="/Scripts/TableSort.js"></script>
 </head>
 <body>
 	<div class="firstRow">
@@ -39,29 +40,31 @@
 		</div>
 	</div>
 	<div class="container">
-		<table class="numeric">
-			<tr>
-				<th>Name</th>
-				<th>Kill/death ratio</th>
-				<th>Kills</th>
-				<th>Deaths</th>
-				<th>Games won</th>
-				<th>Games played</th>
-				<th>Rounds won</th>
-				<th>Rounds played</th>
-			</tr>
-			@foreach (var player in Model) {
+		<table class="sortable numericTable">
+			<tbody>
 				<tr>
-					<td><a href="/Player?id=@player.Id">@player.Name</a></td>
-					<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
-					<td>@player.Kills</td>
-					<td>@player.Deaths</td>
-					<td>@RatingApp.GetPercentage(player.GameWinRatio)</td>
-					<td>@player.GamesPlayed</td>
-					<td>@RatingApp.GetPercentage(player.RoundWinRatio)</td>
-					<td>@player.RoundsPlayed</td>
+					<th class="string">Name</th>
+					<th>Kill/death ratio</th>
+					<th>Kills</th>
+					<th>Deaths</th>
+					<th>Games won</th>
+					<th>Games played</th>
+					<th>Rounds won</th>
+					<th>Rounds played</th>
 				</tr>
-			}
+				@foreach (var player in Model) {
+					<tr>
+						<td><a href="/Player?id=@player.Id">@player.Name</a></td>
+						<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
+						<td>@player.Kills</td>
+						<td>@player.Deaths</td>
+						<td>@RatingApp.GetPercentage(player.GameWinRatio)</td>
+						<td>@player.GamesPlayed</td>
+						<td>@RatingApp.GetPercentage(player.RoundWinRatio)</td>
+						<td>@player.RoundsPlayed</td>
+					</tr>
+				}
+			</tbody>
 		</table>
 	</div>
 </body>

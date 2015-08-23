@@ -126,6 +126,10 @@ table {
 	width: 1200px;
 }
 
-.numeric td:nth-child(n + 2) {
+.numericTable td:nth-child(n + 2) {
 	text-align: right;
+}
+
+.sortable th {
+	cursor: pointer;
 }
