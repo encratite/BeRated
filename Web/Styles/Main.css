@@ -93,18 +93,6 @@ table {
 	margin-bottom: 25px;
 }
 
-.secondRow ul {
-	margin: 0;
-	padding: 0;
-	height: 100%;
-}
-
-.secondRow li {
-	display: inline;
-	list-style-type: none;
-	height: 100%;
-}
-
 .secondRow a {
 	color: #ffffff;
 	font-size: 20px;
@@ -112,7 +100,9 @@ table {
 	display: inline-block;
 	margin-top: 6px;
 	padding-left: 16px;
-	padding-right: 11px;
+	padding-right: 15px;
+	margin-left: 0;
+	margin-right: 0;
 	height: 34px;
 }
 
