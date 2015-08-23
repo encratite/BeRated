@@ -44,32 +44,35 @@
 	</div>
 	<div class="container">
 		<div class="libraryLinks"><i class="fa fa-ellipsis-h"></i> <i class="fa fa-angle-right"></i> <a href="/">.NET Framework Class Library</a> <i class="fa fa-angle-right"></i> <a href="/">System.Player</a> <i class="fa fa-caret-down"></i></div>
-		<table class="sortable numericTable">
-			<tbody>
-				<tr>
-					<th class="string">Name</th>
-					<th>Kill/death ratio</th>
-					<th>Kills</th>
-					<th>Deaths</th>
-					<th>Games won</th>
-					<th>Games played</th>
-					<th>Rounds won</th>
-					<th>Rounds played</th>
-				</tr>
-				@foreach (var player in Model) {
+		<div class="content">
+			<h1 class="title">Player Class</h1>
+			<table class="sortable numericTable">
+				<tbody>
 					<tr>
-						<td><a href="/Player?id=@player.Id">@player.Name</a></td>
-						<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
-						<td>@player.Kills</td>
-						<td>@player.Deaths</td>
-						<td>@RatingApp.GetPercentage(player.GameWinRatio)</td>
-						<td>@player.GamesPlayed</td>
-						<td>@RatingApp.GetPercentage(player.RoundWinRatio)</td>
-						<td>@player.RoundsPlayed</td>
+						<th class="string">Name</th>
+						<th>Kill/death ratio</th>
+						<th>Kills</th>
+						<th>Deaths</th>
+						<th>Games won</th>
+						<th>Games played</th>
+						<th>Rounds won</th>
+						<th>Rounds played</th>
 					</tr>
-				}
-			</tbody>
-		</table>
+					@foreach (var player in Model) {
+						<tr>
+							<td><a href="/Player?id=@player.Id">@player.Name</a></td>
+							<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
+							<td>@player.Kills</td>
+							<td>@player.Deaths</td>
+							<td>@RatingApp.GetPercentage(player.GameWinRatio)</td>
+							<td>@player.GamesPlayed</td>
+							<td>@RatingApp.GetPercentage(player.RoundWinRatio)</td>
+							<td>@player.RoundsPlayed</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
 	</div>
 </body>
 </html>

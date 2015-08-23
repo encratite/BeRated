@@ -63,7 +63,7 @@ table {
 
 .firstRow img {
 	float: left;
-	margin-left: 1px;
+	margin-left: 10px;
 	margin-top: 9px;
 	margin-right: 21px;
 }
@@ -95,6 +95,7 @@ table {
 
 .categoryLinks {
 	display: inline;
+	margin-left: 25px;
 }
 
 .categoryLinks a {
@@ -103,8 +104,7 @@ table {
 	font-family: wf_segoe-ui_light, "Segoe UI Light", "Segoe WP Light", wf_segoe-ui_normal, "Segoe UI", Segoe, "Segoe WP", Tahoma, Verdana, Arial, sans-serif;
 	display: inline-block;
 	margin-top: 6px;
-	padding-left: 16px;
-	padding-right: 15px;
+	padding-right: 31px;
 	margin-left: 0;
 	margin-right: 0;
 	height: 34px;
@@ -176,4 +176,15 @@ table {
 
 .libraryLinks i {
 	margin-right: 8px;
+}
+
+.title {
+	font-size: 36px;
+	font-weight: normal;
+}
+
+.content {
+	margin-left: 50px;
+	margin-right: 50px;
+	margin-bottom: 80px;
 }
