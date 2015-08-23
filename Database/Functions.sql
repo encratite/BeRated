@@ -316,7 +316,8 @@ begin
 		get_player_round_win_ratio(player.id, time_start, time_end) as round_win_ratio,
 		get_player_rounds(player.id, time_start, time_end, null, true) as games_played,
 		get_player_game_win_ratio(player.id, time_start, time_end) as game_win_ratio
-	from player;
+	from player
+	where get_player_rounds(player.id, time_start, time_end) > 0;
 end $$ language 'plpgsql';
 
 create function get_player_weapon_kills(player_id integer, time_start timestamp, time_end timestamp, weapon text, headshots_only boolean) returns integer as $$
