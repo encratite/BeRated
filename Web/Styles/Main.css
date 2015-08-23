@@ -90,7 +90,7 @@ table {
 .secondRow {
 	background-color: #232323;
 	height: 45px;
-	margin-bottom: 25px;
+	margin-bottom: 20px;
 }
 
 .categoryLinks {
@@ -158,4 +158,22 @@ table {
 	-o-transform: scale(-1, 1);
 	-ms-transform: scale(-1, 1);
 	transform: scale(-1, 1);
+}
+
+.libraryLinks {
+	margin-left: 26px;
+	margin-bottom: 40px;
+}
+
+.libraryLinks a {
+	color: #000000;
+	margin-right: 8px;
+}
+
+.libraryLinks a:hover {
+	color: #8c8c8c;
+}
+
+.libraryLinks i {
+	margin-right: 8px;
 }
