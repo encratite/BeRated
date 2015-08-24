@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using BeRated.Database;
 
 namespace BeRated.Model
 {
@@ -18,7 +17,7 @@ namespace BeRated.Model
 		{
 		}
 
-		public PlayerGameModel(PlayerGameHistoryRow row)
+		public PlayerGameModel(PlayerGameHistoryModel row)
 		{
 			GameTime = row.GameTime;
 			PlayerScore = row.PlayerScore;

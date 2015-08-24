@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Ashod.Database;
-using BeRated.Database;
 using BeRated.Model;
 using BeRated.Server;
 using Npgsql;
@@ -56,11 +55,9 @@ namespace BeRated
                 var endParameter = new CommandParameter("time_end", end);
                 using (var reader = _Database.ReadFunction("get_all_player_stats", startParameter, endParameter))
                 {
-                    var rows = reader.ReadAll<AllPlayerStatsRow>();
-                    var players = rows.OfType<AllPlayerStatsModel>();
-					players = players.OrderBy(player => player.Name);
-                    var model = players.ToList();
-					return model;
+                    var players = reader.ReadAll<AllPlayerStatsModel>();
+					var sortedPlayers = players.OrderBy(player => player.Name).ToList();
+					return sortedPlayers;
                 }
             }
         }
@@ -78,19 +75,19 @@ namespace BeRated
                 playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
                 using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
                 {
-                    playerStats.Weapons = reader.ReadAll<PlayerWeaponStatsRow>();
+                    playerStats.Weapons = reader.ReadAll<PlayerWeaponStatsModel>();
                 }
                 using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
                 {
-                    playerStats.Encounters = reader.ReadAll<PlayerEncounterStatsRow>();
+                    playerStats.Encounters = reader.ReadAll<PlayerEncounterStatsModel>();
                 }
                 using (var reader = _Database.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
                 {
-                    playerStats.Purchases = reader.ReadAll<PlayerPurchasesRow>();
+                    playerStats.Purchases = reader.ReadAll<PlayerPurchasesModel>();
                 }
                 using (var reader = _Database.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
                 {
-                    var rows = reader.ReadAll<PlayerGameHistoryRow>();
+                    var rows = reader.ReadAll<PlayerGameHistoryModel>();
                     playerStats.Games = rows.Select(row => new PlayerGameModel(row)).ToList();
                 }
                 return playerStats;

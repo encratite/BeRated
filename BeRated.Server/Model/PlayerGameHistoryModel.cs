@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace BeRated.Database
+namespace BeRated.Model
 {
-	public class PlayerGameHistoryRow
+	public class PlayerGameHistoryModel
 	{
 		public DateTime GameTime { get; set; }
 		public int PlayerScore { get; set; }
