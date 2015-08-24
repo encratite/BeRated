@@ -38,6 +38,7 @@ namespace BeRated
         {
             base.Initialize(_Configuration.TemplatePath);
             var connection = new NpgsqlConnection(_Configuration.ConnectionString);
+            connection.Open();
             _Database = new DatabaseConnection(connection);
         }
 

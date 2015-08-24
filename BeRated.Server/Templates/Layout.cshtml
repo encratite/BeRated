@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+    <head>
+        <title>@ViewBag.Title - CS:GO Stats</title>
+        <link rel="icon" href="/Images/Favicon.ico">
+        <link rel="stylesheet" type="text/css" href="/Styles/Main.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <script src="/Scripts/Table.js"></script>
+        <script src="/Scripts/Popup.js"></script>
+    </head>
+    <body>
+        <div class="firstRow">
+            <div class="container">
+                <div class="left">
+                    <a href="/">
+                        <img src="/Images/Logo.png" alt="Logo">
+                    </a>
+                    <a href="/">
+                        <span>Developer Network</span>
+                    </a>
+                </div>
+                <div class="right">
+                    <a href="/" class="textLink">Sign in</a>
+                    <a href="/" class="textLink">MSDN subscriptions</a>
+                    <a href="/" class="textLink">Get tools</a>
+                    <a href="/"><i class="fa fa-facebook-official"></i></a>
+                    <a href="/"><i class="fa fa-twitter"></i></a>
+                    <a href="/"><i class="fa fa-google-plus"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="secondRow">
+            <div class="container">
+                <div class="categoryLinks"><a href="/">Technologies <i class="fa fa-angle-down"></i></a><a href="/">Downloads <i class="fa fa-angle-down"></i></a><a href="/">Programs <i class="fa fa-angle-down"></i></a><a href="/">Community <i class="fa fa-angle-down"></i></a><a href="/" class="selected">Documentation <i class="fa fa-angle-down"></i></a><a href="/">Samples</a></div>
+                <button class="searchButton">
+                    <a href="/"><i class="fa fa-search"></i></a>
+                </button>
+            </div>
+        </div>
+        <div class="container">
+            <div class="libraryLinks"><i class="fa fa-ellipsis-h"></i> <i class="fa fa-angle-right"></i> <a href="/">.NET Framework Class Library</a> <i class="fa fa-angle-right"></i> <a href="/">System.Player</a> <i class="fa fa-caret-down"></i></div>
+            <div class="content">
+                @RenderBody()
+            </div>
+        </div>
+    </body>
+</html>

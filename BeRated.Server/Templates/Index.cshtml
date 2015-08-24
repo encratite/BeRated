@@ -4,88 +4,47 @@
 
 @model List<AllPlayerStatsModel>
 
-<!doctype html>
-<html>
-<head>
-	<title>Counter-Strike Global Offensive Statistics</title>
-	<link rel="icon" href="/Images/Favicon.ico">
-	<link rel="stylesheet" type="text/css" href="/Styles/Main.css">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-	<script src="/Scripts/Table.js"></script>
-	<script src="/Scripts/Popup.js"></script>
-</head>
-<body>
-	<div class="firstRow">
-		<div class="container">
-			<div class="left">
-				<a href="/">
-					<img src="/Images/Logo.png" alt="Logo">
-				</a>
-				<a href="/">
-					<span>Developer Network</span>
-				</a>
-			</div>
-			<div class="right">
-				<a href="/" class="textLink">Sign in</a>
-				<a href="/" class="textLink">MSDN subscriptions</a>
-				<a href="/" class="textLink">Get tools</a>
-				<a href="/"><i class="fa fa-facebook-official"></i></a>
-				<a href="/"><i class="fa fa-twitter"></i></a>
-				<a href="/"><i class="fa fa-google-plus"></i></a>
-			</div>
-		</div>
-	</div>
-	<div class="secondRow">
-		<div class="container">
-			<div class="categoryLinks"><a href="/">Technologies <i class="fa fa-angle-down"></i></a><a href="/">Downloads <i class="fa fa-angle-down"></i></a><a href="/">Programs <i class="fa fa-angle-down"></i></a><a href="/">Community <i class="fa fa-angle-down"></i></a><a href="/" class="selected">Documentation <i class="fa fa-angle-down"></i></a><a href="/">Samples</a></div>
-			<button class="searchButton">
-				<a href="/"><i class="fa fa-search"></i></a>
-			</button>
-		</div>
-	</div>
-	<div class="container">
-		<div class="libraryLinks"><i class="fa fa-ellipsis-h"></i> <i class="fa fa-angle-right"></i> <a href="/">.NET Framework Class Library</a> <i class="fa fa-angle-right"></i> <a href="/">System.Player</a> <i class="fa fa-caret-down"></i></div>
-		<div class="content">
-			<h1 class="title">Player Class</h1>
-			<div class="frameworkSelector">
-				<span>.NET Framework 4.6 and 4.5</span>
-				<span id="frameworkSelector">Other Versions <i class="fa fa-caret-down"></i></span>
-				<ul id="frameworkPopup">
-					<li><a href="/Index?days=7">Past week</a></li>
-					<li><a href="/Index?days=14">Past two weeks</a></li>
-					<li><a href="/Index?days=30">Past month</a></li>
-					<li><a href="/Index?days=90">Past three months</a></li>
-					<li><a href="/">Everything</a></li>
-				</ul>
-			</div>
-			<p class="description">A block-level flow content element that provides a grid-based presentation of a player's skill organized by rows and columns.</p>
-			<table class="sortable numericTable">
-				<tbody>
-					<tr>
-						<th class="string">Name</th>
-						<th>Kill/death ratio</th>
-						<th>Kills</th>
-						<th>Deaths</th>
-						<th>Games won</th>
-						<th>Games played</th>
-						<th>Rounds won</th>
-						<th>Rounds played</th>
-					</tr>
-					@foreach (var player in Model) {
-						<tr>
-							<td><a href="/Player?id=@player.Id">@player.Name</a></td>
-							<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
-							<td>@player.Kills</td>
-							<td>@player.Deaths</td>
-							<td>@RatingApp.GetPercentage(player.GameWinRatio)</td>
-							<td>@player.GamesPlayed</td>
-							<td>@RatingApp.GetPercentage(player.RoundWinRatio)</td>
-							<td>@player.RoundsPlayed</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-		</div>
-	</div>
-</body>
-</html>
+@{
+    Layout = "/Layout";
+    ViewBag.Title = "Overview";
+}
+
+<h1 class="title">Player Class</h1>
+<div class="frameworkSelector">
+    <span>.NET Framework 4.6 and 4.5</span>
+    <span id="frameworkSelector">Other Versions <i class="fa fa-caret-down"></i></span>
+    <ul id="frameworkPopup">
+        <li><a href="/Index?days=7">Past week</a></li>
+        <li><a href="/Index?days=14">Past two weeks</a></li>
+        <li><a href="/Index?days=30">Past month</a></li>
+        <li><a href="/Index?days=90">Past three months</a></li>
+        <li><a href="/">Everything</a></li>
+    </ul>
+</div>
+<p class="description">A block-level flow content element that provides a grid-based presentation of a player's skill organized by rows and columns.</p>
+<table class="sortable numericTable">
+    <tbody>
+        <tr>
+            <th class="string">Name</th>
+            <th>Kill/death ratio</th>
+            <th>Kills</th>
+            <th>Deaths</th>
+            <th>Games won</th>
+            <th>Games played</th>
+            <th>Rounds won</th>
+            <th>Rounds played</th>
+        </tr>
+        @foreach (var player in Model) {
+            <tr>
+                <td><a href="/Player?id=@player.Id">@player.Name</a></td>
+                <td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
+                <td>@player.Kills</td>
+                <td>@player.Deaths</td>
+                <td>@RatingApp.GetPercentage(player.GameWinRatio)</td>
+                <td>@player.GamesPlayed</td>
+                <td>@RatingApp.GetPercentage(player.RoundWinRatio)</td>
+                <td>@player.RoundsPlayed</td>
+            </tr>
+        }
+    </tbody>
+</table>
