@@ -89,12 +89,11 @@
     <Compile Include="Database\PlayerWeaponStatsRow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RatingApp.cs" />
-    <Compile Include="Server\ServerMethodAttribute.cs" />
+    <Compile Include="Server\ControllerAttribute.cs" />
     <Compile Include="Server\TemplateManager.cs" />
     <Compile Include="Server\TemplateState.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />
     <Compile Include="Server\MiddlewareApp.cs" />
-    <None Include="Templates\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

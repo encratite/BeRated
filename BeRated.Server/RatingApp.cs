@@ -36,13 +36,12 @@ namespace BeRated
 
         public void Initialize()
         {
-            base.Initialize(_Configuration.TemplatePath);
+            base.Initialize(_Configuration.ViewPath);
             var connection = new NpgsqlConnection(_Configuration.ConnectionString);
-            connection.Open();
             _Database = new DatabaseConnection(connection);
         }
 
-        [ServerMethod]
+        [Controller]
         public List<AllPlayerStatsModel> Index(DateTime? start, DateTime? end, int? days)
         {
 			if (days != null)
@@ -66,7 +65,7 @@ namespace BeRated
             }
         }
 
-        [ServerMethod]
+        [Controller]
         public PlayerStatsModel Player(int id, DateTime? start, DateTime? end)
         {
             lock (_Database)

@@ -1,10 +1,10 @@
-﻿using Ashod;
-using BeRated.Server;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
+using Ashod;
+using BeRated.Server;
 
 namespace BeRated
 {
@@ -27,6 +27,7 @@ namespace BeRated
         private static void RunServer()
         {
             var configuration = JsonFile.Read<Configuration>();
+			configuration.Validate();
             var instance = new RatingApp(configuration);
             instance.Initialize();
             using (var launcher = new WebAppLauncher(instance, configuration.ServerUrl))

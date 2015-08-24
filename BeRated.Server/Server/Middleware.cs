@@ -85,7 +85,7 @@ namespace BeRated.Server
             var methodInfo = _Instance.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.Public);
             if (methodInfo == null)
                 throw notFoundException;
-            var attribute = methodInfo.GetCustomAttribute(typeof(ServerMethodAttribute));
+            var attribute = methodInfo.GetCustomAttribute(typeof(ControllerAttribute));
             if (attribute == null)
                 throw notFoundException;
             var parameters = methodInfo.GetParameters();

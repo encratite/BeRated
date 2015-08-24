@@ -1,4 +1,6 @@
-﻿namespace BeRated
+﻿using System;
+
+namespace BeRated
 {
     public class Configuration
     {
@@ -6,11 +8,12 @@
 
         public string ConnectionString { get; set; }
 
-        public string TemplatePath { get; set; }
+        public string ViewPath { get; set; }
 
-        public Configuration()
-        {
-            TemplatePath = "Templates";
-        }
+        public void Validate()
+		{
+			if (ServerUrl == null || ConnectionString == null || ViewPath == null)
+				throw new ApplicationException("Invalid configuration");
+		}
     }
 }

@@ -2,7 +2,7 @@
 
 namespace BeRated.Server
 {
-    class ServerMethodAttribute : Attribute
+    class ControllerAttribute : Attribute
     {
     }
 }

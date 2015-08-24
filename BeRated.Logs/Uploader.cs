@@ -37,7 +37,6 @@ namespace BeRated
                 try
                 {
                     var connection = new NpgsqlConnection(_ConnectionString);
-                    connection.Open();
                     _Database = new DatabaseConnection(connection);
                     var files = Directory.GetFiles(_LogPath);
                     foreach (var file in files)
