@@ -512,7 +512,7 @@ begin
 	);
 end $$ language 'plpgsql';
 
-create function get_player_purchases_per_round(player_id integer, time_start timestamp, time_end timestamp, item text, team team_type) returns integer[2] as $$
+create function get_player_purchases_per_round(player_id integer, time_start timestamp, time_end timestamp, item text) returns numeric as $$
 declare
 	purchases integer := 0;
 	rounds integer := 0;
@@ -523,7 +523,6 @@ begin
 		from purchase
 		where
 			purchase.item = get_player_purchases_per_round.item and
-			purchase.team = get_player_purchases_per_round.team and
 			matches_time_constraints(time, time_start, time_end)
 	)
 	then
@@ -532,25 +531,10 @@ begin
 		where
 			purchase.player_id = get_player_purchases_per_round.player_id and
 			purchase.item = get_player_purchases_per_round.item and
-			purchase.team =  get_player_purchases_per_round.team and
 			matches_time_constraints(time, time_start, time_end)
 		into purchases;
-		select get_player_rounds(player_id, time_start, time_end, get_player_purchases_per_round.team) into rounds;
+		select get_player_rounds(player_id, time_start, time_end) into rounds;
 	end if;
-	return array[purchases, rounds];
-end $$ language 'plpgsql';
-
-create function get_player_purchases_per_round(player_id integer, time_start timestamp, time_end timestamp, item text) returns numeric as $$
-declare
-	terrorist_result integer[2];
-	counter_terrorist_result integer[2];
-	purchases integer;
-	rounds integer;
-begin
-	select get_player_purchases_per_round(player_id, time_start, time_end, item, 'terrorist'::team_type) into terrorist_result;
-	select get_player_purchases_per_round(player_id, time_start, time_end, item, 'counter_terrorist'::team_type) into counter_terrorist_result;
-	purchases := terrorist_result[1] + counter_terrorist_result[1];
-	rounds := terrorist_result[2] + counter_terrorist_result[2];
 	if rounds = 0 then
 		return null;
 	end if;
