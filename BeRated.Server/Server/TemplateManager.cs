@@ -21,7 +21,7 @@ namespace BeRated.Server
         private DelegateTemplateManager _TemplateManager = new DelegateTemplateManager();
         private InvalidatingCachingProvider _CachingProvider = new InvalidatingCachingProvider();
 
-        public TemplateManager(string path)
+		public TemplateManager(string path)
         {
             _Path = path;
             var configuration = new TemplateServiceConfiguration();
@@ -72,8 +72,9 @@ namespace BeRated.Server
                 catch (Exception exception)
                 {
 					templateState.Compiled = false;
-					PrintTemplateError(templatePath, exception);
-                    throw new ApplicationException("Failed to serve request due to compilation error");
+					var errors = GetTemplateErrors(exception, templatePath);
+					string message = string.Join("\n", errors);
+					throw new ApplicationException(message);
                 }
             }
             string markup = _Engine.Run(key, model.GetType(), model);
@@ -105,31 +106,11 @@ namespace BeRated.Server
                 }
                 catch (Exception exception)
                 {
-                    PrintTemplateError(file.FullName, exception);
+                    var errors = GetTemplateErrors(exception, file.FullName);
+					foreach (string error in errors)
+						Logger.Error(error);
                 }
             }
-        }
-
-        private static void PrintTemplateError(string path, Exception exception)
-        {
-			var parsingException = exception as TemplateParsingException;
-			var compilationException = exception as TemplateCompilationException;
-			if (compilationException != null)
-			{
-				Logger.Error("Failed to compile {0}:", path);
-				foreach (var error in compilationException.CompilerErrors)
-					Logger.Error("Line {0}: {1}", error.Line, error.ErrorText);
-			}
-			else if (parsingException != null)
-			{
-				Logger.Error("Failed to parse {0}:", path);
-				Logger.Error("Line {0}: {1}", parsingException.Line, parsingException.Message);
-			}
-			else
-			{
-				Logger.Error("Unknown error in {0}:", path);
-				Logger.Error("{0} ({1}", exception.Message, exception.GetType());
-			}
         }
 
         private string ConvertPath(string virtualPath)
@@ -143,5 +124,29 @@ namespace BeRated.Server
         {
             return left + PathSeparator + right;
         }
-    }
+
+		private List<string> GetTemplateErrors(Exception exception, string path)
+		{
+			var output = new List<string>();
+			var parsingException = exception as TemplateParsingException;
+			var compilationException = exception as TemplateCompilationException;
+			if (compilationException != null)
+			{
+				output.Add(string.Format("Failed to compile {0}:", path));
+				foreach (var error in compilationException.CompilerErrors)
+					output.Add(string.Format("Line {0}: {1}", error.Line, error.ErrorText));
+			}
+			else if (parsingException != null)
+			{
+				output.Add(string.Format("Failed to parse {0}:", path));
+				output.Add(string.Format("Line {0}: {1}", parsingException.Line, parsingException.Message));
+			}
+			else
+			{
+				output.Add(string.Format("Unknown error in {0}:", path));
+				output.Add(string.Format("{0} ({1}", exception.Message, exception.GetType()));
+			}
+			return output;
+		}
+	}
 }

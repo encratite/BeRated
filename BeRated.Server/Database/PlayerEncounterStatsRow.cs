@@ -7,6 +7,6 @@
 		public int Encounters { get; set; }
 		public int Kills { get; set; }
 		public int Deaths { get; set; }
-		public decimal WinPercentage { get; set; }
+		public decimal WinRatio { get; set; }
 	}
 }

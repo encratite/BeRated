@@ -29,7 +29,7 @@ http {
 		}
 		
 		location = / {
-			rewrite .* /Index;
+			rewrite .* /All;
 		}
 		
 		location / {

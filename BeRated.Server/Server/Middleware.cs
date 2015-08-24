@@ -66,11 +66,16 @@ namespace BeRated.Server
             }
             catch (Exception exception)
             {
+				var targetInvocationException = exception as TargetInvocationException;
+				if (targetInvocationException != null)
+					exception = targetInvocationException.InnerException;
                 Logger.Error("Request error: {0} ({1})", exception.Message, exception.GetType());
                 response.StatusCode = 500;
                 response.ContentType = "text/plain";
                 string message;
-                if (exception.GetType() == typeof(MiddlewareException))
+				string remoteAddress = context.Request.RemoteIpAddress;
+				bool isLocal = remoteAddress == "127.0.0.1" || remoteAddress == "::1";
+                if (exception.GetType() == typeof(MiddlewareException) || isLocal)
                     message = exception.Message;
                 else
                     message = "An error occurred.";
