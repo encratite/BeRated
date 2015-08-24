@@ -42,7 +42,7 @@ namespace BeRated
         }
 
         [Controller]
-        public List<AllPlayerStatsModel> Index(DateTime? start, DateTime? end, int? days)
+        public List<AllPlayerStatsModel> All(DateTime? start, DateTime? end, int? days)
         {
 			if (days != null)
 			{
