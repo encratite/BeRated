@@ -77,17 +77,17 @@ namespace BeRated
                 using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
                 {
                     var weapons = reader.ReadAll<PlayerWeaponStatsModel>();
-					playerStats.Weapons = weapons.OrderByDescending(w => w.Kills).ToList();
+					playerStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
                 }
                 using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
                 {
                     var encounters = reader.ReadAll<PlayerEncounterStatsModel>();
-					playerStats.Encounters = encounters.OrderByDescending(e => e.Encounters).ToList();
+					playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
                 }
                 using (var reader = _Database.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
                 {
                     var purchases = reader.ReadAll<PlayerPurchasesModel>();
-					playerStats.Purchases = purchases.OrderByDescending(p => p.TimesPurchased).ToList();
+					playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
                 }
                 using (var reader = _Database.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
                 {

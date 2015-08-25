@@ -8,6 +8,16 @@
     ViewBag.Title = Model.Name;
 }
 
+@functions {
+	string Round(decimal? number)
+	{
+		if (number.HasValue)
+			return number.Value.ToString("0.00");
+		else
+			return string.Empty;
+	}
+}
+
 <table class="sortable numericTable">
 	<tr>
 		<th class="string">Weapon</th>
@@ -21,6 +31,23 @@
 			<td>@weapon.Kills</td>
 			<td>@weapon.Headshots</td>
 			<td>@RatingApp.GetPercentage(weapon.HeadshotRatio)</td>
+		</tr>
+	}
+</table>
+
+<table class="sortable numericTable">
+	<tr>
+		<th class="string">Item</th>
+		<th>Times purchased</th>
+		<th>Purchases per round</th>
+		<th>Kills per purchase</th>
+	</tr>
+	@foreach (var item in Model.Purchases) {
+		<tr>
+			<td>@item.Item</td>
+			<td>@item.TimesPurchased</td>
+			<td>@Round(item.PurchasesPerRound)</td>
+			<td>@Round(item.KillsPerPurchase)</td>
 		</tr>
 	}
 </table>
