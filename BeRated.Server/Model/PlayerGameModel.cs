@@ -4,6 +4,13 @@ using System.Text.RegularExpressions;
 
 namespace BeRated.Model
 {
+	public enum GameOutcome
+	{
+		Loss,
+		Win,
+		Draw,
+	}
+
 	public class PlayerGameModel
 	{
 		public DateTime GameTime { get; set; }
@@ -11,20 +18,36 @@ namespace BeRated.Model
 		public int EnemyScore { get; set; }
 		public List<GamePlayerModel> PlayerTeam { get; set; }
 		public List<GamePlayerModel> EnemyTeam { get; set; }
-		public string Outcome { get; set; }
+		public GameOutcome Outcome { get; set; }
 
         private PlayerGameModel()
 		{
 		}
 
-		public PlayerGameModel(PlayerGameHistoryModel row)
+		public PlayerGameModel(PlayerGameHistoryModel game)
 		{
-			GameTime = row.GameTime;
-			PlayerScore = row.PlayerScore;
-			EnemyScore = row.EnemyScore;
-			PlayerTeam = GetPlayers(row.PlayerTeam);
-			EnemyTeam = GetPlayers(row.EnemyTeam);
-			Outcome = row.Outcome;
+			GameTime = game.GameTime;
+			PlayerScore = game.PlayerScore;
+			EnemyScore = game.EnemyScore;
+			PlayerTeam = GetPlayers(game.PlayerTeam);
+			EnemyTeam = GetPlayers(game.EnemyTeam);
+			switch (game.Outcome)
+			{
+				case "loss":
+					Outcome = GameOutcome.Loss;
+					break;
+
+				case "win":
+					Outcome = GameOutcome.Win;
+					break;
+
+				case "draw":
+					Outcome = GameOutcome.Draw;
+					break;
+
+				default:
+					throw new ApplicationException("Unknown enum string");
+			}
 		}
 
         private List<GamePlayerModel> GetPlayers(string playerString)

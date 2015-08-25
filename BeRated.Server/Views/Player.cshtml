@@ -7,3 +7,20 @@
     Layout = "/Layout";
     ViewBag.Title = Model.Name;
 }
+
+<table class="sortable numericTable">
+	<tr>
+		<th class="string">Weapon</th>
+		<th>Kills</th>
+		<th>Headshots</th>
+		<th>Headshot percentage</th>
+	</tr>
+	@foreach (var weapon in Model.Weapons) {
+		<tr>
+			<td>@weapon.Weapon</td>
+			<td>@weapon.Kills</td>
+			<td>@weapon.Headshots</td>
+			<td>@RatingApp.GetPercentage(weapon.HeadshotRatio)</td>
+		</tr>
+	}
+</table>

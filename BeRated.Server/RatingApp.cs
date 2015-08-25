@@ -76,15 +76,18 @@ namespace BeRated
                 playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
                 using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
                 {
-                    playerStats.Weapons = reader.ReadAll<PlayerWeaponStatsModel>();
+                    var weapons = reader.ReadAll<PlayerWeaponStatsModel>();
+					playerStats.Weapons = weapons.OrderByDescending(w => w.Kills).ToList();
                 }
                 using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
                 {
-                    playerStats.Encounters = reader.ReadAll<PlayerEncounterStatsModel>();
+                    var encounters = reader.ReadAll<PlayerEncounterStatsModel>();
+					playerStats.Encounters = encounters.OrderByDescending(e => e.Encounters).ToList();
                 }
                 using (var reader = _Database.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
                 {
-                    playerStats.Purchases = reader.ReadAll<PlayerPurchasesModel>();
+                    var purchases = reader.ReadAll<PlayerPurchasesModel>();
+					playerStats.Purchases = purchases.OrderByDescending(p => p.TimesPurchased).ToList();
                 }
                 using (var reader = _Database.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
                 {

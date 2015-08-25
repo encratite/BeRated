@@ -22,11 +22,12 @@ a:hover {
 }
 
 th {
-	text-align: left;
+	text-align: center;
 	color: #636363;
 	background-color: #ededed;
 	border: 1px solid #bbbbbb;
 	padding: 10px 8px 10px 8px;
+	min-width: 70px;
 }
 
 td {
