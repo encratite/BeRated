@@ -6,9 +6,10 @@ namespace BeRated.Model
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
+		public int? Days { get; set; }
 		public List<PlayerWeaponStatsModel> Weapons { get; set; }
-		public List<PlayerEncounterStatsModel> Encounters { get; set; }
 		public List<PlayerPurchasesModel> Purchases { get; set; }
+		public List<PlayerEncounterStatsModel> Encounters { get; set; }
 		public List<PlayerGameModel> Games { get; set; }
 	}
 }

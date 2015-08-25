@@ -51,3 +51,22 @@
 		</tr>
 	}
 </table>
+
+<table class="sortable numericTable">
+	<tr>
+		<th class="string">Opponent</th>
+		<th>Encounters</th>
+		<th>Kills</th>
+		<th>Deaths</th>
+		<th>Win ratio</th>
+	</tr>
+	@foreach (var player in Model.Encounters) {
+		<tr>
+			<td><a href="@RatingApp.GetPlayerPath(player.OpponentId, Model.Days)">@player.OpponentName</a></td>
+			<td>@player.Encounters</td>
+			<td>@player.Kills</td>
+			<td>@player.Deaths</td>
+			<td>@RatingApp.GetPercentage(player.WinRatio)</td>
+		</tr>
+	}
+</table>

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Ashod.Database;
 using BeRated.Model;
 using BeRated.Server;
@@ -8,7 +6,7 @@ using Npgsql;
 
 namespace BeRated
 {
-    public class RatingApp : BaseApp
+	public class RatingApp : BaseApp
     {
         private Configuration _Configuration;
         private DatabaseConnection _Database = null;
@@ -21,6 +19,14 @@ namespace BeRated
 		public static string GetPercentage(decimal ratio)
 		{
 			return ratio.ToString("P1").Replace(" ", "");
+		}
+
+		public static string GetPlayerPath(int id, int? days)
+		{
+			string path = string.Format("/Player?id={0}", id);
+			if (days.HasValue)
+				path += string.Format("&days={0}", days.Value);
+			return path;
 		}
 
 		public override void Dispose()
@@ -74,22 +80,23 @@ namespace BeRated
                 var startParameter = new CommandParameter("time_start", constraints.Start);
                 var endParameter = new CommandParameter("time_end", constraints.End);
                 playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
+				playerStats.Days = days;
                 using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
                 {
                     var weapons = reader.ReadAll<PlayerWeaponStatsModel>();
 					playerStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
-                }
-                using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
-                {
-                    var encounters = reader.ReadAll<PlayerEncounterStatsModel>();
-					playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
                 }
                 using (var reader = _Database.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
                 {
                     var purchases = reader.ReadAll<PlayerPurchasesModel>();
 					playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
                 }
-                using (var reader = _Database.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
+				using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
+				{
+					var encounters = reader.ReadAll<PlayerEncounterStatsModel>();
+					playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
+				}
+				using (var reader = _Database.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
                 {
                     var rows = reader.ReadAll<PlayerGameHistoryModel>();
                     playerStats.Games = rows.Select(row => new PlayerGameModel(row)).ToList();
