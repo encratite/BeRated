@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="Model\AllPlayerStatsModel.cs" />
     <Compile Include="Model\GamePlayerModel.cs" />
+    <Compile Include="Model\GeneralPlayerStatsModel.cs" />
     <Compile Include="Model\PlayerGameModel.cs" />
     <Compile Include="Model\PlayerStatsModel.cs" />
     <Compile Include="Configuration.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Server\TemplateState.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />
     <Compile Include="Server\MiddlewareApp.cs" />
+    <Compile Include="TimeConstraints.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

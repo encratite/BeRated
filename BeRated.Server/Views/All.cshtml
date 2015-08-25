@@ -2,11 +2,21 @@
 @using BeRated.Model
 @using System.Collections.Generic
 
-@model List<AllPlayerStatsModel>
+@model AllPlayerStatsModel
 
 @{
     Layout = "/Layout";
     ViewBag.Title = "Overview";
+}
+
+@functions {
+	string GetPlayerPath(GeneralPlayerStatsModel player)
+	{
+		string path = string.Format("/Player?id={0}", player.Id);
+		if (Model.Days.HasValue)
+			path += string.Format("&days={0}", Model.Days.Value);
+		return path;
+	}
 }
 
 <h1 class="title">Player Class</h1>
@@ -34,9 +44,9 @@
             <th>Rounds won</th>
             <th>Rounds played</th>
         </tr>
-        @foreach (var player in Model) {
+        @foreach (var player in Model.Players) {
             <tr>
-                <td><a href="/Player?id=@player.Id">@player.Name</a></td>
+                <td><a href="@GetPlayerPath(player)">@player.Name</a></td>
                 <td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
                 <td>@player.Kills</td>
                 <td>@player.Deaths</td>

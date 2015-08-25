@@ -41,37 +41,38 @@ namespace BeRated
         }
 
         [Controller]
-        public List<AllPlayerStatsModel> All(DateTime? start, DateTime? end, int? days)
+        public AllPlayerStatsModel All(int? days)
         {
-			if (days != null)
-			{
-				var then = DateTime.Now.AddDays((double)-days);
-                start = new DateTime(then.Year, then.Month, then.Day);
-				end = null;
-			}
+			var constraints = new TimeConstraints(days);
             lock (_Database)
             {
-                var startParameter = new CommandParameter("time_start", start);
-                var endParameter = new CommandParameter("time_end", end);
+                var startParameter = new CommandParameter("time_start", constraints.Start);
+                var endParameter = new CommandParameter("time_end", constraints.End);
                 using (var reader = _Database.ReadFunction("get_all_player_stats", startParameter, endParameter))
                 {
-                    var players = reader.ReadAll<AllPlayerStatsModel>();
+                    var players = reader.ReadAll<GeneralPlayerStatsModel>();
 					var sortedPlayers = players.OrderBy(player => player.Name).ToList();
-					return sortedPlayers;
+					var stats = new AllPlayerStatsModel
+					{
+						Days = days,
+						Players = sortedPlayers,
+					};
+					return stats;
                 }
             }
         }
 
         [Controller]
-        public PlayerStatsModel Player(int id, DateTime? start, DateTime? end)
+        public PlayerStatsModel Player(int id, int? days)
         {
-            lock (_Database)
+			var constraints = new TimeConstraints(days);
+			lock (_Database)
             {
                 var playerStats = new PlayerStatsModel();
                 playerStats.Id = id;
                 var idParameter = new CommandParameter("player_id", id);
-                var startParameter = new CommandParameter("time_start", start);
-                var endParameter = new CommandParameter("time_end", end);
+                var startParameter = new CommandParameter("time_start", constraints.Start);
+                var endParameter = new CommandParameter("time_end", constraints.End);
                 playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
                 using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
                 {
