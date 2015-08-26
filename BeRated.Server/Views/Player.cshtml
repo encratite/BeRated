@@ -34,54 +34,57 @@
 </script>
 <div id="playerTabs">
 	<ul><li><a href="#weapons">Weapons used</a></li><li><a href="#purchases">Item purchases and weapon efficiency</a></li><li><a href="#encounters">Performance against individual players</a></li></ul>
-	<table class="sortable numericTable" id="weapons">
-		<tr>
-			<th class="string">Weapon</th>
-			<th>Kills</th>
-			<th>Headshots</th>
-			<th>Headshot percentage</th>
-		</tr>
-		@foreach (var weapon in Model.Weapons) {
+	<div class="rightSide">
+		<h1>@Model.Name</h1>
+		<table class="sortable numericTable" id="weapons">
 			<tr>
-				<td>@weapon.Weapon</td>
-				<td>@weapon.Kills</td>
-				<td>@weapon.Headshots</td>
-				<td>@RatingApp.GetPercentage(weapon.HeadshotRatio)</td>
+				<th class="string">Weapon</th>
+				<th>Kills</th>
+				<th>Headshots</th>
+				<th>Headshot percentage</th>
 			</tr>
-		}
-	</table>
-	<table class="sortable numericTable" id="purchases">
-		<tr>
-			<th class="string">Item</th>
-			<th>Times purchased</th>
-			<th>Purchases per round</th>
-			<th>Kills per purchase</th>
-		</tr>
-		@foreach (var item in Model.Purchases) {
+			@foreach (var weapon in Model.Weapons) {
+				<tr>
+					<td>@weapon.Weapon</td>
+					<td>@weapon.Kills</td>
+					<td>@weapon.Headshots</td>
+					<td>@RatingApp.GetPercentage(weapon.HeadshotRatio)</td>
+				</tr>
+			}
+		</table>
+		<table class="sortable numericTable" id="purchases">
 			<tr>
-				<td>@item.Item</td>
-				<td>@item.TimesPurchased</td>
-				<td>@Round(item.PurchasesPerRound)</td>
-				<td>@Round(item.KillsPerPurchase)</td>
+				<th class="string">Item</th>
+				<th>Times purchased</th>
+				<th>Purchases per round</th>
+				<th>Kills per purchase</th>
 			</tr>
-		}
-	</table>
-	<table class="sortable numericTable" id="encounters">
-		<tr>
-			<th class="string">Opponent</th>
-			<th>Encounters</th>
-			<th>Kills</th>
-			<th>Deaths</th>
-			<th>Win ratio</th>
-		</tr>
-		@foreach (var player in Model.Encounters) {
+			@foreach (var item in Model.Purchases) {
+				<tr>
+					<td>@item.Item</td>
+					<td>@item.TimesPurchased</td>
+					<td>@Round(item.PurchasesPerRound)</td>
+					<td>@Round(item.KillsPerPurchase)</td>
+				</tr>
+			}
+		</table>
+		<table class="sortable numericTable" id="encounters">
 			<tr>
-				<td><a href="@RatingApp.GetPlayerPath(player.OpponentId, Model.Days)">@player.OpponentName</a></td>
-				<td>@player.Encounters</td>
-				<td>@player.Kills</td>
-				<td>@player.Deaths</td>
-				<td>@RatingApp.GetPercentage(player.WinRatio)</td>
+				<th class="string">Opponent</th>
+				<th>Encounters</th>
+				<th>Kills</th>
+				<th>Deaths</th>
+				<th>Win ratio</th>
 			</tr>
-		}
-	</table>
+			@foreach (var player in Model.Encounters) {
+				<tr>
+					<td><a href="@RatingApp.GetPlayerPath(player.OpponentId, Model.Days)">@player.OpponentName</a></td>
+					<td>@player.Encounters</td>
+					<td>@player.Kills</td>
+					<td>@player.Deaths</td>
+					<td>@RatingApp.GetPercentage(player.WinRatio)</td>
+				</tr>
+			}
+		</table>
+	</div>
 </div>

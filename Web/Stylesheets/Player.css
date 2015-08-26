@@ -23,6 +23,17 @@
     margin-left: -1px;
 }
 
+#playerTabs h1 {
+	margin-top: -10px;
+	margin-bottom: 20px;
+	font-size: 24px;
+	font-weight: normal;
+}
+
+#playerTabs .rightSide {
+	float: left;
+}
+
 #playerTabs table {
-    float: left;
+	margin-bottom: 50px;
 }
