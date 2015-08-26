@@ -33,8 +33,8 @@ namespace BeRated.Server
                     response.StatusCode = 404;
                     return response.WriteAsync("Not found.");
                 }
-                var pattern = new Regex(@"^/(?<method>\w+?)(?:\?(?:(?<firstArgument>\w+?)=(?<firstValue>[^?=&]*))(?:&(?<arguments>\w+?)=(?<values>[^?=&]*))*)?$", RegexOptions.ECMAScript);
-                var match = pattern.Match(path);
+                var requestPattern = new Regex(@"^/(?<method>\w+?)(?:\?(?:(?<firstArgument>\w+?)=(?<firstValue>[^?=&]*))(?:&(?<arguments>\w+?)=(?<values>[^?=&]*))*)?$", RegexOptions.ECMAScript);
+                var match = requestPattern.Match(path);
                 if (!match.Success)
                     throw new MiddlewareException("Malformed request.");
                 var groups = match.Groups;
@@ -60,8 +60,10 @@ namespace BeRated.Server
                 Type modelType;
                 object model = Invoke(method, arguments, out modelType);
                 string markup = _Instance.Render(uri.AbsolutePath, modelType, model);
+				var markupPattern = new Regex(@"^\s+", RegexOptions.ECMAScript | RegexOptions.Multiline);
+				string prettyMarkup = markupPattern.Replace(markup, "");
                 response.ContentType = "text/html";
-                var task = context.Response.WriteAsync(markup);
+                var task = context.Response.WriteAsync(prettyMarkup);
                 return task;
             }
             catch (Exception exception)
