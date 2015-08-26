@@ -330,7 +330,8 @@ begin
 		killer_id = player_id and
 		matches_time_constraints(time, time_start, time_end) and
 		kill.weapon = get_player_weapon_kills.weapon and
-		headshots_only = headshot
+		(not headshots_only or headshot) and
+		killer_team != victim_team
 	into kills;
 	return kills;
 end $$ language 'plpgsql';
