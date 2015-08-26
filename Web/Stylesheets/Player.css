@@ -1,21 +1,28 @@
 #playerTabs ul {
     margin: 0;
-    margin-left: 15px;
+    margin-top: -5px;
+    margin-left: -24px;
+    margin-right: 20px;
     padding: 0;
+    float: left;
+    width: 275px;
 }
 
 #playerTabs li {
-    display: inline;
     list-style-type: none;
-    border: solid 1px #939393;
-    padding-left: 15px;
-    padding-right: 15px;
+    border-left: 1px solid #bebebe;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
-#playerTabs li:nth-child(n + 2) {
-    border-left: none;
+#playerTabs li.ui-tabs-active {
+    background-color: rgb(235, 248, 254);
+    border-left: 3px solid rgb(0, 164, 239);
+    margin-left: -1px;
 }
 
-#playerTabs a {
-    font-weight: bold;
+#playerTabs table {
+    float: left;
 }
