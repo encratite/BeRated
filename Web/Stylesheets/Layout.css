@@ -40,6 +40,10 @@ table {
 	border-collapse: collapse;
 }
 
+li {
+	list-style-type: none;
+}
+
 .firstRow {
 	background-color: #000000;
 	height: 39px;
@@ -216,6 +220,29 @@ table {
 	margin-bottom: 30px;
 }
 
+.bottom {
+	padding-top: 20px;
+	padding-bottom: 20px;
+	background-color: #eeeeee;
+	clear: both;
+}
+
+.bottom a {
+	font-size: 11px;
+}
+
+.bottom ul {
+	float: left;
+}
+
+.bottom ul {
+	margin-left: 150px;
+}
+
+.bottom .clear {
+	clear: both;
+}
+
 #frameworkSelector {
 	color: #00709f;
 }
@@ -240,7 +267,6 @@ table {
 }
 
 #frameworkPopup li {
-	list-style-type: none;
 	margin: 0;
 	padding: 0;
 }

@@ -9,7 +9,6 @@
 }
 
 #playerTabs li {
-    list-style-type: none;
     border-left: 1px solid #bebebe;
     padding-left: 40px;
     padding-right: 40px;
