@@ -1,0 +1,21 @@
+#playerTabs ul {
+    margin: 0;
+    margin-left: 15px;
+    padding: 0;
+}
+
+#playerTabs li {
+    display: inline;
+    list-style-type: none;
+    border: solid 1px #939393;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+#playerTabs li:nth-child(n + 2) {
+    border-left: none;
+}
+
+#playerTabs a {
+    font-weight: bold;
+}

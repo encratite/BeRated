@@ -3,10 +3,11 @@
     <head>
         <title>@ViewBag.Title - CS:GO Stats</title>
         <link rel="icon" href="/Images/Favicon.ico">
-        <link rel="stylesheet" type="text/css" href="/Styles/Main.css">
+        <link rel="stylesheet" type="text/css" href="/Stylesheets/Layout.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		@RenderSection("Stylesheets", false)
         <script src="/Scripts/Table.js"></script>
-        <script src="/Scripts/Popup.js"></script>
+		@RenderSection("Scripts", false)
     </head>
     <body>
         <div class="firstRow">

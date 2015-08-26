@@ -20,7 +20,7 @@ http {
 			alias X:/BeRated/Web/;
 		}
 		
-		location ~ ^/(Images|Scripts|Styles)/ {
+		location ~ ^/(Images|Scripts|Stylesheets)/ {
 			rewrite ^/(.+) /Static/$1;
 		}
 		

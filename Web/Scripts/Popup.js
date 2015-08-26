@@ -25,7 +25,7 @@
 	
 	function initializePopup() {
 		var selector = document.getElementById('frameworkSelector');
-		selector.onclick = onSelectorClick;
+        selector.onclick = onSelectorClick;
 	}
 	
 	document.addEventListener('DOMContentLoaded', initializePopup);
