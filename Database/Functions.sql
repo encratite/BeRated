@@ -41,12 +41,9 @@ begin
 end $$ language 'plpgsql';
 
 create function get_player_name(player_id integer) returns text as $$
-declare
-	name text;
 begin
 	perform check_player_id(player_id);
-	select player.name from player where id = player_id into name;
-	return name;
+	return (select player.name from player where id = player_id);
 end $$ language 'plpgsql';
 
 create function update_player(name text, steam_id text, _time timestamp) returns integer as $$
@@ -201,17 +198,16 @@ begin
 end $$ language 'plpgsql';
 
 create function get_player_deaths(player_id integer, time_start timestamp, time_end timestamp) returns int as $$
-declare
-	deaths integer;
 begin
-	select count(*)
-	from kill
-	where
-		victim_id = player_id and
-		matches_time_constraints(time, time_start, time_end) and
-		killer_team != victim_team
-	into deaths;
-	return deaths;
+	return
+	(
+		select count(*)
+		from kill
+		where
+			victim_id = player_id and
+			matches_time_constraints(time, time_start, time_end) and
+			killer_team != victim_team
+	);
 end $$ language 'plpgsql';
 
 create function get_player_kill_death_ratio(player_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
@@ -241,28 +237,27 @@ begin
 end $$ language 'plpgsql';
 
 create function get_player_rounds(player_id integer, time_start timestamp, time_end timestamp, get_rounds_won boolean default null, end_of_game boolean default false) returns integer as $$
-declare
-	rounds_won integer;
 begin
-	select count(*)
-	from round, round_player
-	where
-		round.id = round_player.round_id and
-		matches_time_constraints(round.time, time_start, time_end) and
-		round_player.player_id = get_player_rounds.player_id and
-		(
-			get_rounds_won is null or
+	return
+	(
+		select count(*)
+		from round, round_player
+		where
+			round.id = round_player.round_id and
+			matches_time_constraints(round.time, time_start, time_end) and
+			round_player.player_id = get_player_rounds.player_id and
 			(
-				(get_rounds_won and get_winning_team(round.sfui_notice) = round_player.team) or
-				(not get_rounds_won and get_winning_team(round.sfui_notice) != round_player.team)
+				get_rounds_won is null or
+				(
+					(get_rounds_won and get_winning_team(round.sfui_notice) = round_player.team) or
+					(not get_rounds_won and get_winning_team(round.sfui_notice) != round_player.team)
+				)
+			) and
+			(
+				not end_of_game or
+				is_end_of_game(round.terrorist_score, round.counter_terrorist_score, round.max_rounds)
 			)
-		) and
-		(
-			not end_of_game or
-			is_end_of_game(round.terrorist_score, round.counter_terrorist_score, round.max_rounds)
-		)
-	into rounds_won;
-	return rounds_won;
+	);
 end $$ language 'plpgsql';
 
 create function get_ratio(x integer, y integer) returns numeric as $$
@@ -321,19 +316,18 @@ begin
 end $$ language 'plpgsql';
 
 create function get_player_weapon_kills(player_id integer, time_start timestamp, time_end timestamp, weapon text, headshots_only boolean) returns integer as $$
-declare
-	kills integer;
 begin
-	select count(*)
-	from kill
-	where
-		killer_id = player_id and
-		matches_time_constraints(time, time_start, time_end) and
-		kill.weapon = get_player_weapon_kills.weapon and
-		(not headshots_only or headshot) and
-		killer_team != victim_team
-	into kills;
-	return kills;
+	return
+	(
+		select count(*)
+		from kill
+		where
+			killer_id = player_id and
+			matches_time_constraints(time, time_start, time_end) and
+			kill.weapon = get_player_weapon_kills.weapon and
+			(not headshots_only or headshot) and
+			killer_team != victim_team
+	);
 end $$ language 'plpgsql';
 
 create function get_player_weapon_headshot_ratio(player_id integer, time_start timestamp, time_end timestamp, weapon text) returns numeric as $$
@@ -368,18 +362,17 @@ begin
 end $$ language 'plpgsql';
 
 create function get_matchup_kills(killer_id integer, victim_id integer, time_start timestamp, time_end timestamp) returns int as $$
-declare
-	kills integer;
 begin
-	select count(*)
-	from kill
-	where
-		kill.killer_id = get_matchup_kills.killer_id and
-		kill.victim_id = get_matchup_kills.victim_id and
-		kill.killer_team != kill.victim_team and
-		matches_time_constraints(time, time_start, time_end)
-	into kills;
-	return kills;
+	return
+	(
+		select count(*)
+		from kill
+		where
+			kill.killer_id = get_matchup_kills.killer_id and
+			kill.victim_id = get_matchup_kills.victim_id and
+			kill.killer_team != kill.victim_team and
+			matches_time_constraints(time, time_start, time_end)
+	);
 end $$ language 'plpgsql';
 
 create function get_encounter_win_ratio(player_id integer, opponent_id integer, time_start timestamp, time_end timestamp) returns numeric as $$
@@ -433,17 +426,16 @@ begin
 end $$ language 'plpgsql';
 
 create function sort_string_array(string_array text[]) returns text[] as $$
-declare
-	sorted_string_array text[];
 begin
-	select array_agg(string_value)
-	from
+	return
 	(
-		select unnest(string_array) as string_value
-		order by string_value
-	) as sorted_strings
-	into sorted_string_array;
-	return sorted_string_array;
+		select array_agg(string_value)
+		from
+		(
+			select unnest(string_array) as string_value
+			order by string_value
+		) as sorted_strings
+	);
 end $$ language 'plpgsql';
 
 create function split_ids(steam_ids_string text) returns text[] as $$
@@ -699,14 +691,13 @@ begin
 end $$ language 'plpgsql';
 
 create function get_log_state(file_name text) returns bigint as $$
-declare
-    bytes_processed bigint;
 begin
-    select log_state.bytes_processed
-        from log_state
-        where log_state.file_name = get_log_state.file_name
-        into bytes_processed;
-    return bytes_processed;
+	return
+	(
+		select log_state.bytes_processed
+		from log_state
+		where log_state.file_name = get_log_state.file_name
+	);
 end $$ language 'plpgsql';
 
 create function update_log_state(file_name text, bytes_processed bigint) returns void as $$
