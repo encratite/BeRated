@@ -27,7 +27,10 @@ begin
 	loop
 		drop_command := 'drop function ' || function_record.nspname || '.' || function_record.proname || '(' || oidvectortypes(function_record.proargtypes) || ');';
 		--raise warning '%', drop_command;
-		execute drop_command;
+		begin
+			execute drop_command;
+		exception when others then
+		end;
 	end loop;
 end $$ language 'plpgsql';
 
@@ -425,25 +428,9 @@ begin
 	return player_id;
 end $$ language 'plpgsql';
 
-create function sort_string_array(string_array text[]) returns text[] as $$
-begin
-	return
-	(
-		select array_agg(string_value)
-		from
-		(
-			select unnest(string_array) as string_value
-			order by string_value
-		) as sorted_strings
-	);
-end $$ language 'plpgsql';
-
 create function split_ids(steam_ids_string text) returns text[] as $$
-declare
-	steam_ids text[];
 begin
-	select string_to_array(steam_ids_string, ',') into steam_ids;
-	return sort_string_array(steam_ids);
+	return (select string_to_array(steam_ids_string, ','));
 end $$ language 'plpgsql';
 
 create function add_players_to_team(round_id integer, team team_type, steam_ids_string text) returns void as $$
@@ -712,53 +699,36 @@ begin
     end;
 end $$ language 'plpgsql';
 
-create function get_round_team_steam_ids(round_id integer, team team_type) returns text[] as $$
+create function get_round_team_player_ids(round_id integer, team team_type) returns integer[] as $$
 declare
-	steam_ids text[];
+	player_ids integer[];
 begin
-	select array_agg(player.steam_id)
-	from player, round_player
+	select array_agg(player_id)
+	from round_player
 	where
-		round_player.round_id = get_round_team_steam_ids.round_id and
-		round_player.team = get_round_team_steam_ids.team and
-		player.id = round_player.player_id
-	into steam_ids;
-	return sort_string_array(steam_ids);
+		round_player.round_id = get_round_team_player_ids.round_id and
+		round_player.team = get_round_team_player_ids.team
+	into player_ids;
+	-- Requires intarray extension
+	return sort(player_ids);
 end $$ language 'plpgsql';
 
-create function get_steam_id(player_id_string text) returns text as $$
+create function get_player_ids(player_id_string text) returns integer[] as $$
 declare
-	player_id integer;
-	steam_id text;
+	player_id_strings text[];
+	player_ids integer[];
 begin
-	player_id := player_id_string::integer;
-	select player.steam_id from player where id = player_id into steam_id;
-	if not found then
-		raise exception 'Invalid player ID: %', player_id;
-	end if;
-	return steam_id;
-end $$ language 'plpgsql';
-
-create function get_steam_ids(player_id_string text) returns text[] as $$
-declare
-	player_ids text[];
-	steam_ids text[];
-begin
-	select split_ids(player_id_string) into player_ids;
-	select array_agg(steam_ids.steam_id) from
+	select split_ids(player_id_string) into player_id_strings;
+	select array_agg(player_ids.player_id) from
 	(
-		select get_steam_id(player_id_strings.player_id) as steam_id
-		from
-		(
-			select unnest(player_ids) as player_id
-		) as player_id_strings
-		order by steam_id
-	) as steam_ids
-	into steam_ids;
-	return steam_ids;
+		select unnest(player_id_strings)::integer as player_id
+	) as player_ids
+	into player_ids;
+	-- Requires intarray extension
+	return sort(player_ids);
 end $$ language 'plpgsql';
 
-create function get_matchup_outcomes(steam_ids1 text[], steam_ids2 text[], team team_type, precise boolean) returns table
+create function get_matchup_outcomes(player_ids1 integer[], player_ids2 integer[], team team_type, precise boolean) returns table
 (
 	outcome game_outcome
 ) as $$
@@ -776,13 +746,13 @@ begin
 			(
 				(
 					not precise and
-					steam_ids1 <@ get_round_team_steam_ids(id, team) and
-					steam_ids2 <@ get_round_team_steam_ids(id, other_team)
+					player_ids1 <@ get_round_team_player_ids(id, team) and
+					player_ids2 <@ get_round_team_player_ids(id, other_team)
 				) or
 				(
 					precise and
-					steam_ids1 = get_round_team_steam_ids(id, team) and
-					steam_ids2 = get_round_team_steam_ids(id, other_team)
+					player_ids1 = get_round_team_player_ids(id, team) and
+					player_ids2 = get_round_team_player_ids(id, other_team)
 				)
 			);
 end $$ language 'plpgsql';
@@ -795,20 +765,20 @@ create function get_matchup_stats(player_id_string1 text, player_id_string2 text
 	win_ratio numeric
 ) as $$
 declare
-	steam_ids1 text[];
-	steam_ids2 text[];
+	player_ids1 integer[];
+	player_ids2 integer[];
 	wins integer;
 	losses integer;
 	draws integer;
 	games integer;
 begin
-	select get_steam_ids(player_id_string1) into steam_ids1;
-	select get_steam_ids(player_id_string2) into steam_ids2;
+	select get_player_ids(player_id_string1) into player_ids1;
+	select get_player_ids(player_id_string2) into player_ids2;
 	with outcomes as
 	(
-		select * from get_matchup_outcomes(steam_ids1, steam_ids2, 'terrorist'::team_type, precise)
+		select * from get_matchup_outcomes(player_ids1, player_ids2, 'terrorist'::team_type, precise)
 		union all
-		select * from get_matchup_outcomes(steam_ids1, steam_ids2, 'counter_terrorist'::team_type, precise)
+		select * from get_matchup_outcomes(player_ids1, player_ids2, 'counter_terrorist'::team_type, precise)
 	)
 	select
 		(select count(*) from outcomes where outcome = 'win'::game_outcome),
