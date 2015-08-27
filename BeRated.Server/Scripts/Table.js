@@ -46,7 +46,7 @@
 				var cell = cells[columnIndex];
 				var value = cell.textContent;
 				if (columnType === ColumnType.Numeric) {
-					value = parseFloat(value);
+				    value = parseFloat(value);
 				}
 				return value;
 			};
@@ -58,14 +58,14 @@
 					output = value1.localeCompare(value2);
 				}
 				else {
-					if (value1 > value2) {
+				    if (value1 === value2) {
+				        output = 0;
+				    }
+                    else if (isNaN(value2) || value1 > value2) {
 						output = 1;
 					}
-					else if (value1 < value2) {
-						output = -1;
-					}
 					else {
-						output = 0;
+						output = -1;
 					}
 				}
 				if (columnType === ColumnType.Numeric) {
