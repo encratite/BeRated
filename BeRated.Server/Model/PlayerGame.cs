@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace BeRated.Model
 {
-	public enum GameOutcome
-	{
-		Loss,
-		Win,
-		Draw,
-	}
-
 	public class PlayerGame
 	{
 		public DateTime GameTime { get; set; }
 		public int PlayerScore { get; set; }
 		public int EnemyScore { get; set; }
+		public string Outcome { get; set; }
 
 		public string PlayerTeam
 		{
@@ -29,26 +24,17 @@ namespace BeRated.Model
 		{
 			set
 			{
-				PlayerTeamList = GetPlayers(value);
-			}
-		}
-
-		public string Outcome
-		{
-			set
-			{
-				OutcomeEnum = GetOutcome(value);
+				EnemyTeamList = GetPlayers(value);
 			}
 		}
 
 		public List<GamePlayer> PlayerTeamList { get; private set; }
 		public List<GamePlayer> EnemyTeamList { get; private set; }
-		public GameOutcome OutcomeEnum { get; private set; }
 
         private List<GamePlayer> GetPlayers(string playerString)
 		{
 			var pattern = new Regex("\"\\((\\d+),(?:\\\\\"(.+?)\\\\\"|(.+?))\\)\"[,}]");
-			var output = new List<GamePlayer>();
+			var players = new List<GamePlayer>();
 			foreach (Match match in pattern.Matches(playerString))
 			{
 				var groups = match.Groups;
@@ -57,24 +43,10 @@ namespace BeRated.Model
 				string name2 = groups[3].Value;
 				string name = !string.IsNullOrEmpty(name1) ? name1 : name2;
 				var player = new GamePlayer(playerId, name);
-				output.Add(player);
+				players.Add(player);
 			}
-			return output;
-		}
-
-		private GameOutcome GetOutcome(string outcome)
-		{
-			switch (outcome)
-			{
-				case "loss":
-					return GameOutcome.Loss;
-				case "win":
-					return GameOutcome.Win;
-				case "draw":
-					return GameOutcome.Draw;
-				default:
-					throw new ApplicationException("Unknown enum string");
-			}
+			players = players.OrderBy(player => player.Name).ToList();
+			return players;
 		}
 	}
 }

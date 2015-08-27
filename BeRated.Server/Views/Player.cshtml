@@ -33,9 +33,47 @@
 	});
 </script>
 <div id="playerTabs">
-	<ul><li><a href="#weapons">Weapons used</a></li><li><a href="#purchases">Item purchases and weapon efficiency</a></li><li><a href="#encounters">Performance against individual players</a></li></ul>
+	<ul><li><a href="#games">Match history</a></li><li><a href="#weapons">Weapons used</a></li><li><a href="#purchases">Item purchases and weapon efficiency</a></li><li><a href="#encounters">Performance against individual players</a></li></ul>
 	<div class="rightSide">
 		<h1>@Model.Name</h1>
+		<table id="games">
+			<tr>
+				<th>Time</th>
+				<th>Outcome</th>
+				<th>Score</th>
+				<th>Team</th>
+				<th>Enemy team</th>
+			</tr>
+			@foreach (var game in Model.Games)
+			{
+				<tr>
+					<td>@game.GameTime</td>
+					<td><span class="@game.Outcome">@Helper.Outcome(game.Outcome)</span></td>
+					<td>@game.PlayerScore - @game.EnemyScore</td>
+					<td>@Helper.PlayerList(game.PlayerTeamList, Model.Days)</td>
+					<td>@Helper.PlayerList(game.EnemyTeamList, Model.Days)</td>
+				</tr>
+			}
+		</table>
+		<table class="sortable numericTable" id="encounters">
+			<tr>
+				<th class="string">Opponent</th>
+				<th>Encounters</th>
+				<th>Kills</th>
+				<th>Deaths</th>
+				<th>Win ratio</th>
+			</tr>
+			@foreach (var player in Model.Encounters)
+			{
+				<tr>
+					<td>@Helper.PlayerLink(player.OpponentId, player.OpponentName, Model.Days)</td>
+					<td>@player.Encounters</td>
+					<td>@player.Kills</td>
+					<td>@player.Deaths</td>
+					<td>@RatingApp.GetPercentage(player.WinRatio)</td>
+				</tr>
+			}
+		</table>
 		<table class="sortable numericTable" id="weapons">
 			<tr>
 				<th class="string">Weapon</th>
@@ -68,23 +106,5 @@
 				</tr>
 			}
 		</table>
-		<table class="sortable numericTable" id="encounters">
-			<tr>
-				<th class="string">Opponent</th>
-				<th>Encounters</th>
-				<th>Kills</th>
-				<th>Deaths</th>
-				<th>Win ratio</th>
-			</tr>
-			@foreach (var player in Model.Encounters) {
-				<tr>
-					<td><a href="@RatingApp.GetPlayerPath(player.OpponentId, Model.Days)">@player.OpponentName</a></td>
-					<td>@player.Encounters</td>
-					<td>@player.Kills</td>
-					<td>@player.Deaths</td>
-					<td>@RatingApp.GetPercentage(player.WinRatio)</td>
-				</tr>
-			}
-		</table>
-	</div>
+    </div>
 </div>

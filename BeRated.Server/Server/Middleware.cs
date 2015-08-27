@@ -60,10 +60,11 @@ namespace BeRated.Server
                 Type modelType;
                 object model = Invoke(method, arguments, out modelType);
                 string markup = _Instance.Render(uri.AbsolutePath, modelType, model);
-				var markupPattern = new Regex(@"^\s+", RegexOptions.ECMAScript | RegexOptions.Multiline);
-				string prettyMarkup = markupPattern.Replace(markup, "");
+				markup = markup.Replace("\r", "");
+				var whitespacePattern = new Regex(@"^\s+|\n{2,}", RegexOptions.ECMAScript | RegexOptions.Multiline);
+				markup = whitespacePattern.Replace(markup, "");
                 response.ContentType = "text/html";
-                var task = context.Response.WriteAsync(prettyMarkup);
+                var task = context.Response.WriteAsync(markup);
                 return task;
             }
             catch (Exception exception)

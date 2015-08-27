@@ -1,3 +1,15 @@
+.loss {
+	color: #a20000;
+}
+
+.win {
+	color: #00a908;
+}
+
+.draw {
+	color: #b3b500;
+}
+
 #playerTabs ul {
     margin: 0;
     margin-top: -5px;
@@ -35,4 +47,26 @@
 
 #playerTabs table {
 	margin-bottom: 50px;
+}
+
+#games td {
+	vertical-align: top;
+}
+
+#games td:nth-child(1) {
+	width: 130px;
+	text-align: center;
+}
+
+#games td:nth-child(2) {
+	width: 50px;
+}
+
+#games td:nth-child(3) {
+	width: 35px;
+	text-align: center;
+}
+
+#games td:nth-child(n + 4) {
+	width: 225px;
 }

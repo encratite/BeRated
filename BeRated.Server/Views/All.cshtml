@@ -40,7 +40,7 @@
         </tr>
         @foreach (var player in Model.Players) {
             <tr>
-                <td><a href="@RatingApp.GetPlayerPath(player.Id, Model.Days)">@player.Name</a></td>
+                <td>@Helper.PlayerLink(player.Id, player.Name, Model.Days)</td>
                 <td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
                 <td>@player.Kills</td>
                 <td>@player.Deaths</td>
