@@ -758,7 +758,7 @@ begin
 	return steam_ids;
 end $$ language 'plpgsql';
 
-create function get_matchup_outcomes(steam_ids1 text[], steam_ids2 text[], team team_type) returns table
+create function get_matchup_outcomes(steam_ids1 text[], steam_ids2 text[], team team_type, precise boolean) returns table
 (
 	outcome game_outcome
 ) as $$
@@ -773,11 +773,22 @@ begin
 		from round
 		where
 			is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
-			steam_ids1 = get_round_team_steam_ids(id, team) and
-			steam_ids2 = get_round_team_steam_ids(id, other_team);
+			(
+				(
+					not precise and
+					steam_ids1 <@ get_round_team_steam_ids(id, team) and
+					steam_ids2 <@ get_round_team_steam_ids(id, other_team)
+				) or
+				(
+					precise and
+					steam_ids1 = get_round_team_steam_ids(id, team) and
+					steam_ids2 = get_round_team_steam_ids(id, other_team)
+				)
+			);
 end $$ language 'plpgsql';
 
-create function get_matchup_stats(player_id_string1 text, player_id_string2 text) returns table (
+create function get_matchup_stats(player_id_string1 text, player_id_string2 text, precise boolean) returns table
+(
 	wins integer,
 	losses integer,
 	draws integer,
@@ -795,9 +806,9 @@ begin
 	select get_steam_ids(player_id_string2) into steam_ids2;
 	with outcomes as
 	(
-		select * from get_matchup_outcomes(steam_ids1, steam_ids2, 'terrorist'::team_type)
+		select * from get_matchup_outcomes(steam_ids1, steam_ids2, 'terrorist'::team_type, precise)
 		union all
-		select * from get_matchup_outcomes(steam_ids1, steam_ids2, 'counter_terrorist'::team_type)
+		select * from get_matchup_outcomes(steam_ids1, steam_ids2, 'counter_terrorist'::team_type, precise)
 	)
 	select
 		(select count(*) from outcomes where outcome = 'win'::game_outcome),
