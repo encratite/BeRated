@@ -4,8 +4,8 @@ drop type if exists game_outcome cascade;
 
 create type game_outcome as enum
 (
-	'loss',
 	'win',
+	'loss',
 	'draw'
 );
 
@@ -758,17 +758,36 @@ begin
 	return steam_ids;
 end $$ language 'plpgsql';
 
+create function get_matchup_outcomes(steam_ids1 text[], steam_ids2 text[], team team_type) returns table
+(
+	outcome game_outcome
+) as $$
+declare
+	other_team team_type := 'terrorist'::team_type;
+begin
+	if team = 'terrorist'::team_type then
+		other_team := 'counter_terrorist'::team_type;
+	end if;
+	return query
+	select get_outcome(terrorist_score, counter_terrorist_score, max_rounds, team) as outcome
+		from round
+		where
+			is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
+			steam_ids1 = get_round_team_steam_ids(id, team) and
+			steam_ids2 = get_round_team_steam_ids(id, other_team);
+end $$ language 'plpgsql';
+
 create function get_matchup_stats(player_id_string1 text, player_id_string2 text) returns table (
-	losses integer,
 	wins integer,
+	losses integer,
 	draws integer,
 	win_ratio numeric
 ) as $$
 declare
 	steam_ids1 text[];
 	steam_ids2 text[];
-	losses integer;
 	wins integer;
+	losses integer;
 	draws integer;
 	games integer;
 begin
@@ -776,35 +795,19 @@ begin
 	select get_steam_ids(player_id_string2) into steam_ids2;
 	with outcomes as
 	(
-		select get_outcome(terrorist_score, counter_terrorist_score, max_rounds, 'terrorist'::team_type) as outcome
-		from round
-		where
-			is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
-			get_round_team_steam_ids(id, 'terrorist'::team_type) = steam_ids1 and
-			get_round_team_steam_ids(id, 'counter_terrorist'::team_type) = steam_ids2
+		select * from get_matchup_outcomes(steam_ids1, steam_ids2, 'terrorist'::team_type)
 		union all
-		select get_outcome(terrorist_score, counter_terrorist_score, max_rounds, 'counter_terrorist'::team_type)
-		from round
-		where
-			is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
-			get_round_team_steam_ids(id, 'counter_terrorist'::team_type) = steam_ids1 and
-			get_round_team_steam_ids(id, 'terrorist'::team_type) = steam_ids2
+		select * from get_matchup_outcomes(steam_ids1, steam_ids2, 'counter_terrorist'::team_type)
 	)
 	select
-		(
-			select count(*) from outcomes where outcome = 'loss'::game_outcome
-		),
-		(
-			select count(*) from outcomes where outcome = 'win'::game_outcome
-		),
-		(
-			select count(*) from outcomes where outcome = 'draw'::game_outcome
-		)
-	into losses, wins, draws;
-	games := losses + wins + draws;
+		(select count(*) from outcomes where outcome = 'win'::game_outcome),
+		(select count(*) from outcomes where outcome = 'loss'::game_outcome),
+		(select count(*) from outcomes where outcome = 'draw'::game_outcome)
+	into wins, losses, draws;
+	games := wins + losses + draws;
 	return query select
-		losses,
 		wins,
+		losses,
 		draws,
 		wins::numeric / games;
 end $$ language 'plpgsql';
