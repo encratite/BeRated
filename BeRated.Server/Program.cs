@@ -4,6 +4,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
 using Ashod;
+using BeRated.App;
 using BeRated.Server;
 
 namespace BeRated

@@ -87,13 +87,13 @@
     <Compile Include="Model\PlayerItemStats.cs" />
     <Compile Include="Model\PlayerWeaponStats.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="RatingApp.cs" />
+    <Compile Include="App\RatingApp.cs" />
     <Compile Include="Server\ControllerAttribute.cs" />
     <Compile Include="Server\TemplateManager.cs" />
     <Compile Include="Server\TemplateState.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />
     <Compile Include="Server\MiddlewareApp.cs" />
-    <Compile Include="TimeConstraints.cs" />
+    <Compile Include="App\TimeConstraints.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

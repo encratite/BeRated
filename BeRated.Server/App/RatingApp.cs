@@ -4,7 +4,7 @@ using BeRated.Model;
 using BeRated.Server;
 using Npgsql;
 
-namespace BeRated
+namespace BeRated.App
 {
 	public class RatingApp : BaseApp
     {
