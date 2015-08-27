@@ -74,19 +74,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\AllPlayerStatsModel.cs" />
-    <Compile Include="Model\GamePlayerModel.cs" />
-    <Compile Include="Model\GeneralPlayerStatsModel.cs" />
-    <Compile Include="Model\PlayerGameModel.cs" />
-    <Compile Include="Model\PlayerStatsModel.cs" />
+    <Compile Include="Model\AllPlayerStats.cs" />
+    <Compile Include="Model\GamePlayer.cs" />
+    <Compile Include="Model\GeneralPlayerStats.cs" />
+    <Compile Include="Model\PlayerGame.cs" />
+    <Compile Include="Model\PlayerStats.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Server\BaseApp.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
-    <Compile Include="Model\PlayerEncounterStatsModel.cs" />
-    <Compile Include="Model\PlayerGameHistoryModel.cs" />
-    <Compile Include="Model\PlayerPurchasesModel.cs" />
-    <Compile Include="Model\PlayerWeaponStatsModel.cs" />
+    <Compile Include="Model\PlayerEncounterStats.cs" />
+    <Compile Include="Model\PlayerItemStats.cs" />
+    <Compile Include="Model\PlayerWeaponStats.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RatingApp.cs" />
     <Compile Include="Server\ControllerAttribute.cs" />
@@ -103,6 +102,9 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Views\All.cshtml" />
+    <None Include="Views\Layout.cshtml" />
+    <None Include="Views\Player.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">

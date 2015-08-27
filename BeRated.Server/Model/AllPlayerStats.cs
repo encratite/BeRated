@@ -2,9 +2,9 @@
 
 namespace BeRated.Model
 {
-    public class AllPlayerStatsModel
+    public class AllPlayerStats
     {
 		public int? Days { get; set; }
-        public List<GeneralPlayerStatsModel> Players { get; set; }
+        public List<GeneralPlayerStats> Players { get; set; }
     }
 }

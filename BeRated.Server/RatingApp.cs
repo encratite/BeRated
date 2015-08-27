@@ -47,7 +47,7 @@ namespace BeRated
         }
 
         [Controller]
-        public AllPlayerStatsModel All(int? days)
+        public AllPlayerStats All(int? days)
         {
 			var constraints = new TimeConstraints(days);
             lock (_Database)
@@ -56,9 +56,9 @@ namespace BeRated
                 var endParameter = new CommandParameter("time_end", constraints.End);
                 using (var reader = _Database.ReadFunction("get_all_player_stats", startParameter, endParameter))
                 {
-                    var players = reader.ReadAll<GeneralPlayerStatsModel>();
+                    var players = reader.ReadAll<GeneralPlayerStats>();
 					var sortedPlayers = players.OrderBy(player => player.Name).ToList();
-					var stats = new AllPlayerStatsModel
+					var stats = new AllPlayerStats
 					{
 						Days = days,
 						Players = sortedPlayers,
@@ -69,12 +69,12 @@ namespace BeRated
         }
 
         [Controller]
-        public PlayerStatsModel Player(int id, int? days)
+        public PlayerStats Player(int id, int? days)
         {
 			var constraints = new TimeConstraints(days);
 			lock (_Database)
             {
-                var playerStats = new PlayerStatsModel();
+                var playerStats = new PlayerStats();
                 playerStats.Id = id;
                 var idParameter = new CommandParameter("player_id", id);
                 var startParameter = new CommandParameter("time_start", constraints.Start);
@@ -83,23 +83,23 @@ namespace BeRated
 				playerStats.Days = days;
                 using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
                 {
-                    var weapons = reader.ReadAll<PlayerWeaponStatsModel>();
+                    var weapons = reader.ReadAll<PlayerWeaponStats>();
 					playerStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
                 }
                 using (var reader = _Database.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
                 {
-                    var purchases = reader.ReadAll<PlayerPurchasesModel>();
+                    var purchases = reader.ReadAll<PlayerItemStats>();
 					playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
                 }
 				using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
 				{
-					var encounters = reader.ReadAll<PlayerEncounterStatsModel>();
+					var encounters = reader.ReadAll<PlayerEncounterStats>();
 					playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
 				}
 				using (var reader = _Database.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
                 {
-                    var rows = reader.ReadAll<PlayerGameHistoryModel>();
-                    playerStats.Games = rows.Select(row => new PlayerGameModel(row)).ToList();
+                    var games = reader.ReadAll<PlayerGame>();
+					playerStats.Games = games.OrderBy(game => game.GameTime).ToList();
                 }
                 return playerStats;
             }

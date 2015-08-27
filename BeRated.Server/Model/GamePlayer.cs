@@ -1,11 +1,11 @@
 ﻿namespace BeRated.Model
 {
-	public class GamePlayerModel
+	public class GamePlayer
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
 
-		public GamePlayerModel(int id, string name)
+		public GamePlayer(int id, string name)
 		{
 			Id = id;
 			Name = name;

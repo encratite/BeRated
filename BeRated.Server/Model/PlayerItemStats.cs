@@ -1,6 +1,6 @@
 ﻿namespace BeRated.Model
 {
-	public class PlayerPurchasesModel
+	public class PlayerItemStats
 	{
 		public string Item { get; set; }
 		public int TimesPurchased { get; set; }
