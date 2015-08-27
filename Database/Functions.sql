@@ -311,7 +311,7 @@ begin
 		player.name,
 		get_player_kills(player.id, time_start, time_end) as kills,
 		get_player_deaths(player.id, time_start, time_end) as deaths,
-		round(get_player_kill_death_ratio(player.id, time_start, time_end), 2) as kill_death_ratio,
+		get_player_kill_death_ratio(player.id, time_start, time_end) as kill_death_ratio,
 		get_player_rounds(player.id, time_start, time_end) as rounds_played,
 		get_player_round_win_ratio(player.id, time_start, time_end) as round_win_ratio,
 		get_player_rounds(player.id, time_start, time_end, null, true) as games_played,
@@ -432,13 +432,35 @@ begin
 	return player_id;
 end $$ language 'plpgsql';
 
+create function sort_string_array(string_array text[]) returns text[] as $$
+declare
+	sorted_string_array text[];
+begin
+	select array_agg(string_value)
+	from
+	(
+		select unnest(string_array) as string_value
+		order by string_value
+	) as sorted_strings
+	into sorted_string_array;
+	return sorted_string_array;
+end $$ language 'plpgsql';
+
+create function split_ids(steam_ids_string text) returns text[] as $$
+declare
+	steam_ids text[];
+begin
+	select string_to_array(steam_ids_string, ',') into steam_ids;
+	return sort_string_array(steam_ids);
+end $$ language 'plpgsql';
+
 create function add_players_to_team(round_id integer, team team_type, steam_ids_string text) returns void as $$
 declare
 	steam_ids text[];
 	loop_steam_id text;
 	player_id integer;
 begin
-	select string_to_array(steam_ids_string, ',') into steam_ids;
+	select split_ids(steam_ids_string) into steam_ids;
 	foreach loop_steam_id in array steam_ids loop
 		select get_player_id_by_steam_id(loop_steam_id) into player_id;
 		insert into round_player
@@ -539,7 +561,7 @@ begin
 	if rounds = 0 then
 		return null;
 	end if;
-	return round(purchases::numeric / rounds, 2);
+	return purchases::numeric / rounds;
 end $$ language 'plpgsql';
 
 create function get_player_kills_per_purchase(player_id integer, time_start timestamp, time_end timestamp, weapon text) returns numeric as $$
@@ -567,7 +589,7 @@ begin
 	if purchases = 0 then
 		return null;
 	end if;
-	return round(kills::numeric / purchases, 2);
+	return kills::numeric / purchases;
 end $$ language 'plpgsql';
 
 create function get_player_purchases(player_id integer, time_start timestamp, time_end timestamp) returns table
@@ -589,6 +611,29 @@ begin
 	from purchase
 	where purchase.player_id = get_player_purchases.player_id
 	group by purchase.item;
+end $$ language 'plpgsql';
+
+create function get_outcome(terrorist_score integer, counter_terrorist_score integer, max_rounds integer, team team_type) returns game_outcome as $$
+begin
+	return case
+		when
+			terrorist_score = counter_terrorist_score
+		then
+			'draw'::game_outcome
+		when
+			(
+				terrorist_score > max_rounds / 2 and
+				team = 'terrorist'::team_type
+			) or
+			(
+				counter_terrorist_score > max_rounds / 2 and
+				team = 'counter_terrorist'::team_type
+			)
+		then
+			'win'::game_outcome
+		else
+			'loss'::game_outcome
+	end;
 end $$ language 'plpgsql';
 
 -- player_team, enemy_team and outcome are cast to text to deal with a missing feature in Npgsql 3.0
@@ -640,25 +685,7 @@ begin
 				r.team != round_player.team
 		)::text
 		as enemy_team,
-		(case
-			when
-				round.terrorist_score = round.counter_terrorist_score
-			then
-				'draw'::game_outcome
-			when
-				(
-					round.terrorist_score > round.max_rounds / 2 and
-					round_player.team = 'terrorist'::team_type
-				) or
-				(
-					round.counter_terrorist_score > round.max_rounds / 2 and
-					round_player.team = 'counter_terrorist'::team_type
-				)
-			then
-				'win'::game_outcome
-			else
-				'loss'::game_outcome
-		end)::text
+		get_outcome(round.terrorist_score, round.counter_terrorist_score, round.max_rounds, round_player.team)::text
 		as outcome
 	from
 		round,
@@ -667,11 +694,7 @@ begin
 		round.id = round_player.round_id and
 		matches_time_constraints(round.time, time_start, time_end) and
 		round_player.player_id = get_player_games.player_id and
-		(
-			round.terrorist_score > round.max_rounds / 2 or
-			round.counter_terrorist_score > round.max_rounds / 2 or
-			round.terrorist_score + round.counter_terrorist_score = round.max_rounds
-		)
+		is_end_of_game(round.terrorist_score, round.counter_terrorist_score, round.max_rounds)
 	order by round.time desc;
 end $$ language 'plpgsql';
 
@@ -696,4 +719,108 @@ begin
             set bytes_processed = update_log_state.bytes_processed
             where log_state.file_name = update_log_state.file_name;
     end;
+end $$ language 'plpgsql';
+
+create function get_round_team_steam_ids(round_id integer, team team_type) returns text[] as $$
+declare
+	steam_ids text[];
+begin
+	select array_agg(player.steam_id)
+	from player, round_player
+	where
+		round_player.round_id = get_round_team_steam_ids.round_id and
+		round_player.team = get_round_team_steam_ids.team and
+		player.id = round_player.player_id
+	into steam_ids;
+	return sort_string_array(steam_ids);
+end $$ language 'plpgsql';
+
+create function get_steam_id(player_id_string text) returns text as $$
+declare
+	player_id integer;
+	steam_id text;
+begin
+	player_id := player_id_string::integer;
+	select player.steam_id from player where id = player_id into steam_id;
+	if not found then
+		raise exception 'Invalid player ID: %', player_id;
+	end if;
+	return steam_id;
+end $$ language 'plpgsql';
+
+create function get_steam_ids(player_id_string text) returns text[] as $$
+declare
+	player_ids text[];
+	steam_ids text[];
+begin
+	select split_ids(player_id_string) into player_ids;
+	select array_agg(steam_ids.steam_id) from
+	(
+		select get_steam_id(player_id_strings.player_id) as steam_id
+		from
+		(
+			select unnest(player_ids) as player_id
+		) as player_id_strings
+		order by steam_id
+	) as steam_ids
+	into steam_ids;
+	return steam_ids;
+end $$ language 'plpgsql';
+
+create function count_outcomes(outcomes game_outcome[], outcome game_outcome) returns integer as $$
+begin
+	return
+	(
+			select count(*)::integer
+			from
+			(
+				select unnest(outcomes) as current_outcome
+			) as matching_outcomes
+			where current_outcome = outcome
+	);
+end $$ language 'plpgsql';
+
+create function get_matchup_stats(player_id_string1 text, player_id_string2 text) returns table (
+	losses integer,
+	wins integer,
+	draws integer,
+	win_ratio numeric
+) as $$
+declare
+	steam_ids1 text[];
+	steam_ids2 text[];
+	outcomes1 game_outcome[];
+	outcomes2 game_outcome[];
+	all_outcomes game_outcome[];
+	losses integer;
+	wins integer;
+	draws integer;
+	games integer;
+begin
+	select get_steam_ids(player_id_string1) into steam_ids1;
+	select get_steam_ids(player_id_string2) into steam_ids2;
+	select array_agg(get_outcome(terrorist_score, counter_terrorist_score, max_rounds, 'terrorist'::team_type))
+	from round
+	where
+		is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
+		get_round_team_steam_ids(id, 'terrorist'::team_type) = steam_ids1 and
+		get_round_team_steam_ids(id, 'counter_terrorist'::team_type) = steam_ids2
+	into outcomes1;
+	select array_agg(get_outcome(terrorist_score, counter_terrorist_score, max_rounds, 'counter_terrorist'::team_type))
+	from round
+	where
+		is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
+		get_round_team_steam_ids(id, 'terrorist'::team_type) = steam_ids2 and
+		get_round_team_steam_ids(id, 'counter_terrorist'::team_type) = steam_ids1
+	into outcomes2;
+	all_outcomes := outcomes1 || outcomes2;
+	select count_outcomes(all_outcomes, 'loss'::game_outcome) into losses;
+	select count_outcomes(all_outcomes, 'win'::game_outcome) into wins;
+	select count_outcomes(all_outcomes, 'draw'::game_outcome) into draws;
+	games := losses + wins + draws;
+	return query select
+		losses,
+		wins,
+		draws,
+		wins::numeric / games;
 end $$ language 'plpgsql';
