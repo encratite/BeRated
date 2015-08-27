@@ -767,19 +767,6 @@ begin
 	return steam_ids;
 end $$ language 'plpgsql';
 
-create function count_outcomes(outcomes game_outcome[], outcome game_outcome) returns integer as $$
-begin
-	return
-	(
-			select count(*)::integer
-			from
-			(
-				select unnest(outcomes) as current_outcome
-			) as matching_outcomes
-			where current_outcome = outcome
-	);
-end $$ language 'plpgsql';
-
 create function get_matchup_stats(player_id_string1 text, player_id_string2 text) returns table (
 	losses integer,
 	wins integer,
@@ -789,9 +776,6 @@ create function get_matchup_stats(player_id_string1 text, player_id_string2 text
 declare
 	steam_ids1 text[];
 	steam_ids2 text[];
-	outcomes1 game_outcome[];
-	outcomes2 game_outcome[];
-	all_outcomes game_outcome[];
 	losses integer;
 	wins integer;
 	draws integer;
@@ -799,24 +783,33 @@ declare
 begin
 	select get_steam_ids(player_id_string1) into steam_ids1;
 	select get_steam_ids(player_id_string2) into steam_ids2;
-	select array_agg(get_outcome(terrorist_score, counter_terrorist_score, max_rounds, 'terrorist'::team_type))
-	from round
-	where
-		is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
-		get_round_team_steam_ids(id, 'terrorist'::team_type) = steam_ids1 and
-		get_round_team_steam_ids(id, 'counter_terrorist'::team_type) = steam_ids2
-	into outcomes1;
-	select array_agg(get_outcome(terrorist_score, counter_terrorist_score, max_rounds, 'counter_terrorist'::team_type))
-	from round
-	where
-		is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
-		get_round_team_steam_ids(id, 'terrorist'::team_type) = steam_ids2 and
-		get_round_team_steam_ids(id, 'counter_terrorist'::team_type) = steam_ids1
-	into outcomes2;
-	all_outcomes := outcomes1 || outcomes2;
-	select count_outcomes(all_outcomes, 'loss'::game_outcome) into losses;
-	select count_outcomes(all_outcomes, 'win'::game_outcome) into wins;
-	select count_outcomes(all_outcomes, 'draw'::game_outcome) into draws;
+	with outcomes as
+	(
+		select get_outcome(terrorist_score, counter_terrorist_score, max_rounds, 'terrorist'::team_type) as outcome
+		from round
+		where
+			is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
+			get_round_team_steam_ids(id, 'terrorist'::team_type) = steam_ids1 and
+			get_round_team_steam_ids(id, 'counter_terrorist'::team_type) = steam_ids2
+		union all
+		select get_outcome(terrorist_score, counter_terrorist_score, max_rounds, 'counter_terrorist'::team_type)
+		from round
+		where
+			is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
+			get_round_team_steam_ids(id, 'counter_terrorist'::team_type) = steam_ids1 and
+			get_round_team_steam_ids(id, 'terrorist'::team_type) = steam_ids2
+	)
+	select
+		(
+			select count(*) from outcomes where outcome = 'loss'::game_outcome
+		),
+		(
+			select count(*) from outcomes where outcome = 'win'::game_outcome
+		),
+		(
+			select count(*) from outcomes where outcome = 'draw'::game_outcome
+		)
+	into losses, wins, draws;
 	games := losses + wins + draws;
 	return query select
 		losses,
