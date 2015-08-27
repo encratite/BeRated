@@ -740,21 +740,21 @@ begin
 	end if;
 	return query
 	select get_outcome(terrorist_score, counter_terrorist_score, max_rounds, team) as outcome
-		from round
-		where
-			is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
+	from round
+	where
+		is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds) and
+		(
 			(
-				(
-					not precise and
-					player_ids1 <@ get_round_team_player_ids(id, team) and
-					player_ids2 <@ get_round_team_player_ids(id, other_team)
-				) or
-				(
-					precise and
-					player_ids1 = get_round_team_player_ids(id, team) and
-					player_ids2 = get_round_team_player_ids(id, other_team)
-				)
-			);
+				not precise and
+				player_ids1 <@ get_round_team_player_ids(id, team) and
+				player_ids2 <@ get_round_team_player_ids(id, other_team)
+			) or
+			(
+				precise and
+				player_ids1 = get_round_team_player_ids(id, team) and
+				player_ids2 = get_round_team_player_ids(id, other_team)
+			)
+		);
 end $$ language 'plpgsql';
 
 create function get_matchup_stats(player_id_string1 text, player_id_string2 text, precise boolean) returns table
