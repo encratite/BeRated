@@ -6,7 +6,7 @@ namespace BeRated.Model
 	{
 		public List<PlayerInfo> Team1 { get; set; }
 		public List<PlayerInfo> Team2 { get; set; }
-		public GameOutcomes PreciseOutcomes { get; set; }
 		public GameOutcomes ImpreciseOutcomes { get; set; }
+		public GameOutcomes PreciseOutcomes { get; set; }
 	}
 }

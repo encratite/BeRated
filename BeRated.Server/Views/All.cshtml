@@ -44,9 +44,9 @@
                 <td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
                 <td>@player.Kills</td>
                 <td>@player.Deaths</td>
-                <td>@RatingApp.GetPercentage(player.GameWinRatio)</td>
+                <td>@Helper.Percentage(player.GameWinRatio)</td>
                 <td>@player.GamesPlayed</td>
-                <td>@RatingApp.GetPercentage(player.RoundWinRatio)</td>
+                <td>@Helper.Percentage(player.RoundWinRatio)</td>
                 <td>@player.RoundsPlayed</td>
             </tr>
         }

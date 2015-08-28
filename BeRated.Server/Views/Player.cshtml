@@ -68,7 +68,7 @@
 					<td>@player.Encounters</td>
 					<td>@player.Kills</td>
 					<td>@player.Deaths</td>
-					<td>@RatingApp.GetPercentage(player.WinRatio)</td>
+					<td>@Helper.Percentage(player.WinRatio)</td>
 				</tr>
 			}
 		</table>
@@ -84,7 +84,7 @@
 					<td>@weapon.Weapon</td>
 					<td>@weapon.Kills</td>
 					<td>@weapon.Headshots</td>
-					<td>@RatingApp.GetPercentage(weapon.HeadshotRatio)</td>
+					<td>@Helper.Percentage(weapon.HeadshotRatio)</td>
 				</tr>
 			}
 		</table>

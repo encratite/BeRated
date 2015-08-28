@@ -8,6 +8,14 @@ namespace BeRated.App
 {
 	public class Helper
 	{
+		public static string Percentage(decimal? ratio)
+		{
+			if (ratio.HasValue)
+				return ratio.Value.ToString("P1").Replace(" ", "");
+			else
+				return "-";
+		}
+
 		public static RawString PlayerLink(int id, string name, int? days)
 		{
 			string path = string.Format("/Player?id={0}", id);
@@ -19,7 +27,7 @@ namespace BeRated.App
             return rawString;
         }
 
-		public static RawString PlayerList(List<PlayerInfo> players, int? days)
+		public static RawString PlayerList(List<PlayerInfo> players, int? days = null)
 		{
 			var links = players.Select(player => PlayerLink(player.Id, player.Name, days).ToString());
 			string markup = string.Join(", ", links);

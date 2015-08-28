@@ -18,11 +18,6 @@ namespace BeRated.App
             _Configuration = configuration;
         }
 
-		public static string GetPercentage(decimal ratio)
-		{
-			return ratio.ToString("P1").Replace(" ", "");
-		}
-
 		public override void Dispose()
         {
             if (_Database != null)
@@ -118,8 +113,8 @@ namespace BeRated.App
 			{
 				Team1 = readPlayers(team1),
 				Team2 = readPlayers(team2),
+				ImpreciseOutcomes = readOutcomes(false),
 				PreciseOutcomes = readOutcomes(true),
-				ImpreciseOutcomes = readOutcomes(true),
 			};
 			return matchup;
 		}

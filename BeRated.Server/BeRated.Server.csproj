@@ -123,6 +123,7 @@
     <Content Include="Scripts\Popup.js" />
     <Content Include="Scripts\Table.js" />
     <Content Include="Stylesheets\Layout.css" />
+    <Content Include="Stylesheets\Matchup.css" />
     <Content Include="Stylesheets\Player.css" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

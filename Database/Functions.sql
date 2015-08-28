@@ -58,7 +58,7 @@ declare
 	player_ids integer[];
 begin
 	select get_player_ids(player_id_string) into player_ids;
-	return query select player.id, player.name from player where player.id = any(player_ids);
+	return query select player.id, player.name from player where player.id = any(player_ids) order by player.name;
 end $$ language 'plpgsql';
 
 create function update_player(name text, steam_id text, _time timestamp) returns integer as $$
@@ -774,6 +774,7 @@ end $$ language 'plpgsql';
 
 create function get_matchup_stats(player_id_string1 text, player_id_string2 text, precise boolean) returns table
 (
+	games integer,
 	wins integer,
 	losses integer,
 	draws integer,
@@ -806,6 +807,7 @@ begin
 		win_ratio := wins::numeric / games;
 	end if;
 	return query select
+		games,
 		wins,
 		losses,
 		draws,

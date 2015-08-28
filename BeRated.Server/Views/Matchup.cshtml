@@ -1,9 +1,43 @@
 ﻿@using BeRated.App
 @using BeRated.Model
 
-@model GameOutcomes
+@model TeamMatchupStats
 
 @{
 	Layout = "/Layout";
 	ViewBag.Title = "Matchup evaluation";
 }
+
+@section Stylesheets {
+	<link rel="stylesheet" type="text/css" href="/Stylesheets/Matchup.css">
+}
+
+@helper Outcomes(string description, GameOutcomes outcomes) { 
+	<tr>
+		<td>@description</td>
+		<td>@outcomes.Games</td>
+		<td>@outcomes.Wins</td>
+		<td>@outcomes.Losses</td>
+		<td>@outcomes.Draws</td>
+		<td>@Helper.Percentage(outcomes.WinRatio)</td>
+	</tr>
+}
+
+<h1>Matchup evaluation</h1>
+<p>
+	The following table features an evaluation of the matchup @Helper.PlayerList(Model.Team1) vs. @Helper.PlayerList(Model.Team2), from the first team's perspective.
+	There are two different modes of evaluation shown.
+	The <b>imprecise mode</b> considers any matchup including these players and possibly others, whereas the <b>precise mode</b> only considers this particular matchup and no other players.
+</p>
+<table class="numericTable">
+	<tr>
+		<th>Evaluation mode</th>
+		<th>Games</th>
+		<th>Wins</th>
+		<th>Losses</th>
+		<th>Draws</th>
+		<th>Win ratio</th>
+	</tr>
+	@Outcomes("Imprecise", Model.ImpreciseOutcomes)
+	@Outcomes("Precise", Model.PreciseOutcomes)
+</table>
