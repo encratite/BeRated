@@ -830,6 +830,35 @@ end $$ language 'plpgsql';
 create function get_teams(team team_type) returns table
 (
 	player_ids integer[],
+	games integer,
+	wins integer,
+	losses integer,
+	draws integer
+)
+as $$
+begin
+	return query
+	with games as
+	(
+		select
+			get_round_team_player_ids(id, team) as player_ids,
+			get_outcome(terrorist_score, counter_terrorist_score, max_rounds, team) as outcome
+		from round
+		where is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds)
+	)
+	select
+		current_games.player_ids as player_ids,
+		(select count(*)::integer from games where current_games.player_ids = games.player_ids) as games,
+		(select count(*)::integer from games where current_games.player_ids = games.player_ids and outcome = 'win'::game_outcome) as wins,
+		(select count(*)::integer from games where current_games.player_ids = games.player_ids and outcome = 'loss'::game_outcome) as losses,
+		(select count(*)::integer from games where current_games.player_ids = games.player_ids and outcome = 'draw'::game_outcome) as draws
+	from games as current_games
+	group by current_games.player_ids;
+end $$ language 'plpgsql';
+
+create function get_teams() returns table
+(
+	player_ids integer[],
 	player_names text[],
 	games integer,
 	wins integer,
@@ -842,31 +871,18 @@ begin
 	return query
 	select
 		team.player_ids,
-		team.player_names,
-		team.games,
-		team.wins,
-		team.losses,
-		team.draws,
-		get_ratio(team.wins, team.games) as win_ratio
+		get_player_names(team.player_ids) as player_names,
+		sum(team.games)::integer as games,
+		sum(team.wins)::integer as wins,
+		sum(team.losses)::integer as losses,
+		sum(team.draws)::integer as draws,
+		get_ratio(sum(team.wins)::integer, sum(team.games)::integer) as win_ratio
 	from
 	(
-		with games as
-		(
-			select
-				get_round_team_player_ids(id, team) as player_ids,
-				get_outcome(terrorist_score, counter_terrorist_score, max_rounds, team) as outcome
-			from round
-			where is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds)
-		)
-		select
-			current_games.player_ids as player_ids,
-			get_player_names(current_games.player_ids) as player_names,
-			(select count(*)::integer from games where current_games.player_ids = games.player_ids) as games,
-			(select count(*)::integer from games where current_games.player_ids = games.player_ids and outcome = 'win'::game_outcome) as wins,
-			(select count(*)::integer from games where current_games.player_ids = games.player_ids and outcome = 'loss'::game_outcome) as losses,
-			(select count(*)::integer from games where current_games.player_ids = games.player_ids and outcome = 'draw'::game_outcome) as draws
-		from games as current_games
-		group by current_games.player_ids
-		order by games desc
-	) as team;
+		select * from get_teams('terrorist'::team_type)
+		union all
+		select * from get_teams('counter_terrorist'::team_type)
+	) as team
+	group by team.player_ids
+	order by games desc;
 end $$ language 'plpgsql';
