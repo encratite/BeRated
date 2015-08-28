@@ -67,6 +67,10 @@
 	text-align: center;
 }
 
-#games td:nth-child(n + 4) {
-	width: 225px;
+#games td:nth-child(4) {
+	width: 450px;
+}
+
+#games .fa {
+	margin-left: 5px;
 }

@@ -77,11 +77,13 @@
   <ItemGroup>
     <Compile Include="App\Helper.cs" />
     <Compile Include="Model\AllPlayerStats.cs" />
-    <Compile Include="Model\GamePlayer.cs" />
+    <Compile Include="Model\GameOutcomes.cs" />
+    <Compile Include="Model\PlayerInfo.cs" />
     <Compile Include="Model\GeneralPlayerStats.cs" />
     <Compile Include="Model\PlayerGame.cs" />
     <Compile Include="Model\PlayerStats.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Model\TeamMatchupStats.cs" />
     <Compile Include="Server\BaseApp.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
@@ -106,6 +108,7 @@
     </None>
     <None Include="Views\All.cshtml" />
     <None Include="Views\Layout.cshtml" />
+    <None Include="Views\Matchup.cshtml" />
     <None Include="Views\Player.cshtml" />
   </ItemGroup>
   <ItemGroup>

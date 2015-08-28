@@ -49,6 +49,18 @@ begin
 	return (select player.name from player where id = player_id);
 end $$ language 'plpgsql';
 
+create function get_player_names(player_id_string text) returns table
+(
+	id integer,
+	name text
+) as $$
+declare
+	player_ids integer[];
+begin
+	select get_player_ids(player_id_string) into player_ids;
+	return query select player.id, player.name from player where player.id = any(player_ids);
+end $$ language 'plpgsql';
+
 create function update_player(name text, steam_id text, _time timestamp) returns integer as $$
 declare
 	player_id integer;
@@ -709,7 +721,7 @@ begin
 		round_player.round_id = get_round_team_player_ids.round_id and
 		round_player.team = get_round_team_player_ids.team
 	into player_ids;
-	-- Requires intarray extension
+	-- Requires intarray extension to be enabled for the BeRated database
 	return sort(player_ids);
 end $$ language 'plpgsql';
 
@@ -724,7 +736,10 @@ begin
 		select unnest(player_id_strings)::integer as player_id
 	) as player_ids
 	into player_ids;
-	-- Requires intarray extension
+	if cardinality(player_id_strings) != cardinality(player_ids) then
+		raise exception 'Invalid player ID';
+	end if;
+	-- Requires intarray extension to be enabled for the BeRated database
 	return sort(player_ids);
 end $$ language 'plpgsql';
 
@@ -771,6 +786,7 @@ declare
 	losses integer;
 	draws integer;
 	games integer;
+	win_ratio numeric := null;
 begin
 	select get_player_ids(player_id_string1) into player_ids1;
 	select get_player_ids(player_id_string2) into player_ids2;
@@ -786,9 +802,12 @@ begin
 		(select count(*) from outcomes where outcome = 'draw'::game_outcome)
 	into wins, losses, draws;
 	games := wins + losses + draws;
+	if games > 0 then
+		win_ratio := wins::numeric / games;
+	end if;
 	return query select
 		wins,
 		losses,
 		draws,
-		wins::numeric / games;
+		win_ratio;
 end $$ language 'plpgsql';

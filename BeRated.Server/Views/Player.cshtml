@@ -41,8 +41,7 @@
 				<th>Time</th>
 				<th>Outcome</th>
 				<th>Score</th>
-				<th>Team</th>
-				<th>Enemy team</th>
+				<th>Matchup</th>
 			</tr>
 			@foreach (var game in Model.Games)
 			{
@@ -50,8 +49,7 @@
 					<td>@game.GameTime</td>
 					<td><span class="@game.Outcome">@Helper.Outcome(game.Outcome)</span></td>
 					<td>@game.PlayerScore - @game.EnemyScore</td>
-					<td>@Helper.PlayerList(game.PlayerTeamList, Model.Days)</td>
-					<td>@Helper.PlayerList(game.EnemyTeamList, Model.Days)</td>
+					<td>@Helper.PlayerList(game.PlayerTeamList, Model.Days) vs. @Helper.PlayerList(game.EnemyTeamList, Model.Days) <a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeamList)&team2=@Helper.PlayerIds(game.EnemyTeamList)" title="Analyze this matchup"><i class="fa fa-search"></i></a></td>
 				</tr>
 			}
 		</table>

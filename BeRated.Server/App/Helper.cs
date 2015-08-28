@@ -19,7 +19,7 @@ namespace BeRated.App
             return rawString;
         }
 
-		public static RawString PlayerList(List<GamePlayer> players, int? days)
+		public static RawString PlayerList(List<PlayerInfo> players, int? days)
 		{
 			var links = players.Select(player => PlayerLink(player.Id, player.Name, days).ToString());
 			string markup = string.Join(", ", links);
@@ -30,6 +30,12 @@ namespace BeRated.App
 		public static string Outcome(string outcome)
 		{
 			return char.ToUpper(outcome[0]).ToString() + outcome.Substring(1);
+		}
+
+		public static string PlayerIds(List<PlayerInfo> team)
+		{
+			var idString = team.Select(player => player.Id);
+			return string.Join(",", idString);
 		}
 	}
 }

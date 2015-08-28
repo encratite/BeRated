@@ -28,13 +28,13 @@ namespace BeRated.Model
 			}
 		}
 
-		public List<GamePlayer> PlayerTeamList { get; private set; }
-		public List<GamePlayer> EnemyTeamList { get; private set; }
+		public List<PlayerInfo> PlayerTeamList { get; private set; }
+		public List<PlayerInfo> EnemyTeamList { get; private set; }
 
-        private List<GamePlayer> GetPlayers(string playerString)
+        private List<PlayerInfo> GetPlayers(string playerString)
 		{
 			var pattern = new Regex("\"\\((\\d+),(?:\\\\\"(.+?)\\\\\"|(.+?))\\)\"[,}]");
-			var players = new List<GamePlayer>();
+			var players = new List<PlayerInfo>();
 			foreach (Match match in pattern.Matches(playerString))
 			{
 				var groups = match.Groups;
@@ -42,7 +42,7 @@ namespace BeRated.Model
 				string name1 = groups[2].Value;
 				string name2 = groups[3].Value;
 				string name = !string.IsNullOrEmpty(name1) ? name1 : name2;
-				var player = new GamePlayer(playerId, name);
+				var player = new PlayerInfo(playerId, name);
 				players.Add(player);
 			}
 			players = players.OrderBy(player => player.Name).ToList();
