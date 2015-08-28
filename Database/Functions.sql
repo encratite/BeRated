@@ -827,7 +827,7 @@ begin
 	return player_names;
 end $$ language 'plpgsql';
 
-create function get_teams(team team_type) returns table
+create function get_teams(team team_type, time_start timestamp, time_end timestamp) returns table
 (
 	player_ids integer[],
 	games integer,
@@ -844,7 +844,9 @@ begin
 			get_round_team_player_ids(id, team) as player_ids,
 			get_outcome(terrorist_score, counter_terrorist_score, max_rounds, team) as outcome
 		from round
-		where is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds)
+		where
+			matches_time_constraints(time, time_start, time_end) and
+			is_end_of_game(terrorist_score, counter_terrorist_score, max_rounds)
 	)
 	select
 		current_games.player_ids as player_ids,
@@ -856,7 +858,7 @@ begin
 	group by current_games.player_ids;
 end $$ language 'plpgsql';
 
-create function get_teams() returns table
+create function get_teams(time_start timestamp, time_end timestamp) returns table
 (
 	player_ids integer[],
 	player_names text[],
@@ -879,9 +881,9 @@ begin
 		get_ratio(sum(team.wins)::integer, sum(team.games)::integer) as win_ratio
 	from
 	(
-		select * from get_teams('terrorist'::team_type)
+		select * from get_teams('terrorist'::team_type, time_start, time_end)
 		union all
-		select * from get_teams('counter_terrorist'::team_type)
+		select * from get_teams('counter_terrorist'::team_type, time_start, time_end)
 	) as team
 	group by team.player_ids
 	order by games desc;
