@@ -1,0 +1,89 @@
+﻿@using BeRated.App
+@using BeRated.Model
+@using System.Collections.Generic
+
+@model GeneralStats
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = "Overview";
+}
+
+@section Stylesheets {
+	<link rel="stylesheet" type="text/css" href="/Stylesheets/General.css">
+}
+
+@section Scripts {
+	<script src="/Scripts/Popup.js"></script>
+	<script>
+			$(function() {
+				$("#overviewTabs").tabs();
+			});
+	</script>
+}
+
+<div id="overviewTabs">
+	<ul class="tableOfContents"><li><a href="#players">Players</a></li><li><a href="#teams">Teams</a></li></ul>
+	<div class="rightSide">
+		<h1 class="title">Player Class</h1>
+		<div class="frameworkSelector">
+			<span>.NET Framework 4.6 and 4.5</span>
+			<span id="frameworkSelector">Other Versions <i class="fa fa-caret-down"></i></span>
+			<ul id="frameworkPopup">
+				<li><a href="/General?days=7">Past week</a></li>
+				<li><a href="/General?days=14">Past two weeks</a></li>
+				<li><a href="/General?days=21">Past three weeks</a></li>
+				<li><a href="/General?days=30">Past month</a></li>
+				<li><a href="/General?days=60">Past two months</a></li>
+				<li><a href="/General?days=90">Past three months</a></li>
+				<li><a href="/">Everything</a></li>
+			</ul>
+		</div>
+		<table id="players" class="sortable numericTable">
+			<tr>
+				<th class="string">Name</th>
+				<th>Kill/death ratio</th>
+				<th>Kills</th>
+				<th>Deaths</th>
+				<th>Games won</th>
+				<th>Games played</th>
+				<th>Rounds won</th>
+				<th>Rounds played</th>
+			</tr>
+			@foreach (var player in Model.Players)
+			{
+				<tr>
+					<td>@Helper.PlayerLink(player.Id, player.Name, Model.Days)</td>
+					<td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
+					<td>@player.Kills</td>
+					<td>@player.Deaths</td>
+					<td>@Helper.Percentage(player.GameWinRatio)</td>
+					<td>@player.GamesPlayed</td>
+					<td>@Helper.Percentage(player.RoundWinRatio)</td>
+					<td>@player.RoundsPlayed</td>
+				</tr>
+			}
+		</table>
+		<table id="teams" class="sortable numericTable">
+			<tr>
+				<th class="string">Team</th>
+				<th>Games</th>
+				<th>Wins</th>
+				<th>Losses</th>
+				<th>Draws</th>
+				<th>Win ratio</th>
+			</tr>
+			@foreach (var team in Model.Teams)
+			{
+				<tr>
+					<td>@Helper.PlayerList(team.PlayerInfo)</td>
+					<td>@team.Games</td>
+					<td>@team.Wins</td>
+					<td>@team.Losses</td>
+					<td>@team.Draws</td>
+					<td>@Helper.Percentage(team.WinRatio)</td>
+				</tr>
+			}
+		</table>
+	</div>
+</div>

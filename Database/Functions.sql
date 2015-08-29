@@ -327,7 +327,8 @@ begin
 		get_player_rounds(player.id, time_start, time_end, null, true) as games_played,
 		get_player_game_win_ratio(player.id, time_start, time_end) as game_win_ratio
 	from player
-	where get_player_rounds(player.id, time_start, time_end) > 0;
+	where get_player_rounds(player.id, time_start, time_end) > 0
+	order by name;
 end $$ language 'plpgsql';
 
 create function get_player_weapon_kills(player_id integer, time_start timestamp, time_end timestamp, weapon text, headshots_only boolean) returns integer as $$
@@ -641,7 +642,7 @@ create function get_player_games(player_id integer, time_start timestamp, time_e
 begin
 	perform check_player_id(player_id);
 	return query select
-		round.time as time,
+		round.time as game_time,
 		case
 			when round_player.team = 'terrorist'::team_type
 			then round.terrorist_score
@@ -817,16 +818,6 @@ begin
 		get_ratio(wins, games);
 end $$ language 'plpgsql';
 
-create function get_player_names(player_ids integer[]) returns text[] as $$
-declare
-	player_names text[];
-begin
-	select array_agg((select name from player where id = player_id))
-	from unnest(player_ids) as player_id
-	into player_names;
-	return player_names;
-end $$ language 'plpgsql';
-
 create function get_teams(team team_type, time_start timestamp, time_end timestamp) returns table
 (
 	player_ids integer[],
@@ -858,10 +849,20 @@ begin
 	group by current_games.player_ids;
 end $$ language 'plpgsql';
 
+create function get_player_info(player_ids integer[]) returns player_information[] as $$
+declare
+	player_info player_information[];
+begin
+	select array_agg(row(player_id, get_player_name(player_id))::player_information)
+	from unnest(player_ids) as player_id
+	into player_info;
+	return player_info;
+end $$ language 'plpgsql';
+
 create function get_teams(time_start timestamp, time_end timestamp) returns table
 (
-	player_ids integer[],
-	player_names text[],
+	-- Should be player_information[]
+	players text,
 	games integer,
 	wins integer,
 	losses integer,
@@ -872,8 +873,7 @@ as $$
 begin
 	return query
 	select
-		team.player_ids,
-		get_player_names(team.player_ids) as player_names,
+		get_player_info(team.player_ids)::text as players,
 		sum(team.games)::integer as games,
 		sum(team.wins)::integer as wins,
 		sum(team.losses)::integer as losses,
@@ -885,6 +885,8 @@ begin
 		union all
 		select * from get_teams('counter_terrorist'::team_type, time_start, time_end)
 	) as team
+	-- Workaround for possibly broken games
+	where team.player_ids is not null
 	group by team.player_ids
 	order by games desc;
 end $$ language 'plpgsql';

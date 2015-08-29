@@ -36,23 +36,25 @@ namespace BeRated.App
         }
 
         [Controller]
-        public AllPlayerStats All(int? days)
+        public GeneralStats General(int? days)
         {
 			var constraints = new TimeConstraints(days);
             var startParameter = new CommandParameter("time_start", constraints.Start);
             var endParameter = new CommandParameter("time_end", constraints.End);
+			var stats = new GeneralStats
+			{
+				Days = days,
+			};
             using (var reader = _Database.ReadFunction("get_all_player_stats", startParameter, endParameter))
             {
-                var players = reader.ReadAll<GeneralPlayerStats>();
-				var sortedPlayers = players.OrderBy(player => player.Name).ToList();
-				var stats = new AllPlayerStats
-				{
-					Days = days,
-					Players = sortedPlayers,
-				};
-				return stats;
+				stats.Players = reader.ReadAll<GeneralPlayerStats>();
             }
-        }
+			using (var reader = _Database.ReadFunction("get_teams", startParameter, endParameter))
+			{
+				stats.Teams = reader.ReadAll<TeamStats>();
+			}
+			return stats;
+		}
 
         [Controller]
         public PlayerStats Player(int id, int? days)

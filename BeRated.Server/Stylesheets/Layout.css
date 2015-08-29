@@ -192,12 +192,6 @@ h1 {
 	font-size: 90%;
 }
 
-.title {
-	font-size: 36px;
-	font-weight: normal;
-	margin-bottom: 25px;
-}
-
 .content {
 	margin-left: 50px;
 	margin-right: 50px;
@@ -218,10 +212,6 @@ h1 {
 	border-right: 1px solid #bdbdbd;
 	padding-right: 10px;
 	margin-right: 5px;
-}
-
-.description {
-	margin-bottom: 30px;
 }
 
 .bottom {
@@ -247,30 +237,26 @@ h1 {
 	clear: both;
 }
 
-#frameworkSelector {
-	color: #00709f;
+ul.tableOfContents {
+    margin: 0;
+    margin-top: -5px;
+    margin-left: -24px;
+    margin-right: 20px;
+    padding: 0;
+    float: left;
+    width: 275px;
 }
 
-#frameworkSelector:hover {
-	color: #3390b1;
+.tableOfContents li {
+    border-left: 1px solid #bebebe;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
-#frameworkSelector i {
-	font-size: 90%;
-	margin-left: 3px;
-}
-
-#frameworkPopup {
-	display: none;
-	border: 1px solid #bdbdbd;
-	padding: 10px;
-	position: absolute;
-	background-color: #ffffff;
-	margin-top: 30px;
-	margin-left: -100px;
-}
-
-#frameworkPopup li {
-	margin: 0;
-	padding: 0;
+.tableOfContents li.ui-tabs-active {
+    background-color: rgb(235, 248, 254);
+    border-left: 3px solid rgb(0, 164, 239);
+    margin-left: -1px;
 }

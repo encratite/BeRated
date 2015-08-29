@@ -23,17 +23,14 @@
 }
 
 @section Scripts {
-	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script>
+		$(function() {
+			$("#playerTabs").tabs();
+		});
+	</script>
 }
-
-<script>
-	$(function() {
-		$("#playerTabs").tabs();
-	});
-</script>
 <div id="playerTabs">
-	<ul><li><a href="#games">Match history</a></li><li><a href="#weapons">Weapons used</a></li><li><a href="#purchases">Item purchases and weapon efficiency</a></li><li><a href="#encounters">Performance against individual players</a></li></ul>
+	<ul class="tableOfContents"><li><a href="#games">Match history</a></li><li><a href="#weapons">Weapons used</a></li><li><a href="#purchases">Item purchases and weapon efficiency</a></li><li><a href="#encounters">Performance against individual players</a></li></ul>
 	<div class="rightSide">
 		<h1>@Model.Name</h1>
 		<table id="games">

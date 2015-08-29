@@ -27,7 +27,7 @@ http {
 		}
 		
 		location = / {
-			rewrite .* /All;
+			rewrite .* /General;
 		}
 		
 		location / {

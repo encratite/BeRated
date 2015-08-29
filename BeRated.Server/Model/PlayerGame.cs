@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BeRated.Model
 {
@@ -31,7 +31,7 @@ namespace BeRated.Model
 		public List<PlayerInfo> PlayerTeamList { get; private set; }
 		public List<PlayerInfo> EnemyTeamList { get; private set; }
 
-        private List<PlayerInfo> GetPlayers(string playerString)
+        public static List<PlayerInfo> GetPlayers(string playerString)
 		{
 			var pattern = new Regex("\"\\((\\d+),(?:\\\\\"(.+?)\\\\\"|(.+?))\\)\"[,}]");
 			var players = new List<PlayerInfo>();

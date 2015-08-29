@@ -76,7 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Helper.cs" />
-    <Compile Include="Model\AllPlayerStats.cs" />
+    <Compile Include="Model\GeneralStats.cs" />
     <Compile Include="Model\GameOutcomes.cs" />
     <Compile Include="Model\PlayerInfo.cs" />
     <Compile Include="Model\GeneralPlayerStats.cs" />
@@ -84,6 +84,7 @@
     <Compile Include="Model\PlayerStats.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Model\TeamMatchupStats.cs" />
+    <Compile Include="Model\TeamStats.cs" />
     <Compile Include="Server\BaseApp.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
@@ -106,7 +107,7 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Views\All.cshtml" />
+    <None Include="Views\General.cshtml" />
     <None Include="Views\Layout.cshtml" />
     <None Include="Views\Matchup.cshtml" />
     <None Include="Views\Player.cshtml" />
@@ -122,6 +123,7 @@
     <Content Include="Images\Logo.png" />
     <Content Include="Scripts\Popup.js" />
     <Content Include="Scripts\Table.js" />
+    <Content Include="Stylesheets\General.css" />
     <Content Include="Stylesheets\Layout.css" />
     <Content Include="Stylesheets\Matchup.css" />
     <Content Include="Stylesheets\Player.css" />
