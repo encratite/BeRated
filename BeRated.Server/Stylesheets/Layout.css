@@ -3,10 +3,20 @@
     outline: none;
 }
 
-body, div {
-	margin: 0;
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+	margin: 0 0 100px;
 	padding: 0;
 	font-size: 13px;
+}
+
+div {
+	margin: 0;
+	padding: 0;
 }
 
 a {
@@ -46,6 +56,34 @@ li {
 
 h1 {
 	font-weight: normal;
+}
+
+footer {
+	position: absolute;
+	width: 100%;
+	height: 100px;
+	left: 0;
+	bottom: 0;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	background-color: #eeeeee;
+	clear: both;
+}
+
+footer a {
+	font-size: 11px;
+}
+
+footer ul {
+	float: left;
+}
+
+footer ul {
+	margin-left: 150px;
+}
+
+.clear {
+	clear: both;
 }
 
 .firstRow {
@@ -195,7 +233,7 @@ h1 {
 .content {
 	margin-left: 50px;
 	margin-right: 50px;
-	margin-bottom: 80px;
+	margin-bottom: 150px;
 }
 
 .content table {
@@ -212,29 +250,6 @@ h1 {
 	border-right: 1px solid #bdbdbd;
 	padding-right: 10px;
 	margin-right: 5px;
-}
-
-.bottom {
-	padding-top: 20px;
-	padding-bottom: 20px;
-	background-color: #eeeeee;
-	clear: both;
-}
-
-.bottom a {
-	font-size: 11px;
-}
-
-.bottom ul {
-	float: left;
-}
-
-.bottom ul {
-	margin-left: 150px;
-}
-
-.bottom .clear {
-	clear: both;
 }
 
 ul.tableOfContents {
