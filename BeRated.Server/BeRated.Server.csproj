@@ -94,6 +94,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="App\RatingApp.cs" />
     <Compile Include="Server\ControllerAttribute.cs" />
+    <Compile Include="Server\PerformanceWatch.cs" />
     <Compile Include="Server\TemplateManager.cs" />
     <Compile Include="Server\TemplateState.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />

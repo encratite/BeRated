@@ -1,45 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Ashod;
 using Ashod.Database;
 using BeRated.Model;
 using BeRated.Server;
 using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BeRated.App
 {
-	public class RatingApp : BaseApp
+	public class RatingApp : BaseApp, IQueryPerformanceLogger
     {
         private Configuration _Configuration;
-        private DatabaseConnection _Database = null;
 
         public RatingApp(Configuration configuration)
         {
             _Configuration = configuration;
         }
 
-		public override void Dispose()
-        {
-            if (_Database != null)
-            {
-                _Database.Dispose();
-                _Database = null;
-            }
-            base.Dispose();
-        }
-
         public void Initialize()
         {
             base.Initialize(_Configuration.ViewPath);
-            var connection = new NpgsqlConnection(_Configuration.ConnectionString);
-            _Database = new DatabaseConnection(connection);
+        }
+
+        void IQueryPerformanceLogger.OnQueryEnd(string commandText, TimeSpan timeSpan)
+        {
+            Logger.Log("Query: {0}\nTime elapsed: {1} ms", commandText, timeSpan.TotalMilliseconds);
         }
 
         [Controller]
         public GeneralStats General(int? days)
         {
-            lock (_Database)
+            var watch = new PerformanceWatch();
+            using (var connection = GetConnection())
             {
+                watch.Print("Controller/General/GetConnection");
 			    var constraints = new TimeConstraints(days);
                 var startParameter = new CommandParameter("time_start", constraints.Start);
                 var endParameter = new CommandParameter("time_end", constraints.End);
@@ -47,14 +42,16 @@ namespace BeRated.App
 			    {
 				    Days = days,
 			    };
-                using (var reader = _Database.ReadFunction("get_all_player_stats", startParameter, endParameter))
+                using (var reader = connection.ReadFunction("get_all_player_stats", startParameter, endParameter))
                 {
 				    stats.Players = reader.ReadAll<GeneralPlayerStats>();
                 }
-			    using (var reader = _Database.ReadFunction("get_teams", startParameter, endParameter))
+                watch.Print("Controller/General/get_all_player_stats");
+			    using (var reader = connection.ReadFunction("get_teams", startParameter, endParameter))
 			    {
 				    stats.Teams = reader.ReadAll<TeamStats>();
-			    }
+                }
+                watch.Print("Controller/get_teams");
 			    return stats;
             }
 		}
@@ -62,7 +59,8 @@ namespace BeRated.App
         [Controller]
         public PlayerStats Player(int id, int? days)
         {
-            lock (_Database)
+            var watch = new PerformanceWatch();
+            using (var connection = GetConnection())
             {
                 var constraints = new TimeConstraints(days);
                 var playerStats = new PlayerStats();
@@ -70,28 +68,29 @@ namespace BeRated.App
                 var idParameter = new CommandParameter("player_id", id);
                 var startParameter = new CommandParameter("time_start", constraints.Start);
                 var endParameter = new CommandParameter("time_end", constraints.End);
-                playerStats.Name = _Database.ScalarFunction<string>("get_player_name", idParameter);
+                playerStats.Name = connection.ScalarFunction<string>("get_player_name", idParameter);
 			    playerStats.Days = days;
-			    using (var reader = _Database.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
+			    using (var reader = connection.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
 			    {
 				    var games = reader.ReadAll<PlayerGame>();
 				    playerStats.Games = games.OrderByDescending(game => game.GameTime).ToList();
 			    }
-			    using (var reader = _Database.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
+			    using (var reader = connection.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
 			    {
 				    var encounters = reader.ReadAll<PlayerEncounterStats>();
 				    playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
 			    }
-			    using (var reader = _Database.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
+			    using (var reader = connection.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
                 {
                     var weapons = reader.ReadAll<PlayerWeaponStats>();
 				    playerStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
                 }
-                using (var reader = _Database.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
+                using (var reader = connection.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
                 {
                     var purchases = reader.ReadAll<PlayerItemStats>();
 				    playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
                 }
+                watch.Print("Controller/Player");
                 return playerStats;
             }
         }
@@ -99,12 +98,13 @@ namespace BeRated.App
 		[Controller]
 		public TeamMatchupStats Matchup(string team1, string team2)
 		{
-            lock (_Database)
+            var watch = new PerformanceWatch();
+            using (var connection = GetConnection())
             {
                 Func<string, List<PlayerInfo>> readPlayers = (playerIdString) =>
 			    {
 				    var playerIdParameter = new CommandParameter("player_id_string", playerIdString);
-				    using (var reader = _Database.ReadFunction("get_player_names", playerIdParameter))
+				    using (var reader = connection.ReadFunction("get_player_names", playerIdParameter))
 				    {
 					    return reader.ReadAll<PlayerInfo>();
 				    }
@@ -114,7 +114,7 @@ namespace BeRated.App
 				    var teamParameter1 = new CommandParameter("player_id_string1", team1);
 				    var teamParameter2 = new CommandParameter("player_id_string2", team2);
 				    var preciseParameter = new CommandParameter("precise", precise);
-				    using (var reader = _Database.ReadFunction("get_matchup_stats", teamParameter1, teamParameter2, preciseParameter))
+				    using (var reader = connection.ReadFunction("get_matchup_stats", teamParameter1, teamParameter2, preciseParameter))
 				    {
 					    return reader.ReadAll<GameOutcomes>().First();
 				    }
@@ -126,8 +126,16 @@ namespace BeRated.App
 				    ImpreciseOutcomes = readOutcomes(false),
 				    PreciseOutcomes = readOutcomes(true),
 			    };
+                watch.Print("Controller/Player");
 			    return matchup;
             }
 		}
+
+        private DatabaseConnection GetConnection()
+        {
+            var sqlConnection = new NpgsqlConnection(_Configuration.ConnectionString);
+            var connection = new DatabaseConnection(sqlConnection, this);
+            return connection;
+        }
     }
 }
