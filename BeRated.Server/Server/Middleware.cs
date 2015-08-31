@@ -79,7 +79,7 @@ namespace BeRated.Server
 				string remoteAddress = context.Request.RemoteIpAddress;
 				bool isLocal = remoteAddress == "127.0.0.1" || remoteAddress == "::1";
                 if (exception.GetType() == typeof(MiddlewareException) || isLocal)
-                    message = exception.Message;
+                    message = string.Format("{0}\n{1}", exception.Message, exception.StackTrace);
                 else
                     message = "An error occurred.";
 

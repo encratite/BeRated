@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BeRated</RootNamespace>
-    <AssemblyName>BeRated.Web.Logs</AssemblyName>
+    <AssemblyName>BeRated.Logs</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
