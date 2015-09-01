@@ -23,18 +23,22 @@ namespace BeRated.App
             base.Initialize(_Configuration.ViewPath);
         }
 
-        void IQueryPerformanceLogger.OnQueryEnd(string commandText, TimeSpan timeSpan)
+        void IQueryPerformanceLogger.OnQueryEnd(string query, TimeSpan timeSpan)
         {
-            Logger.Log("Query: {0}\nTime elapsed: {1} ms", commandText, timeSpan.TotalMilliseconds);
+            string message = string.Format("Executed query in {0} ms: {1}", timeSpan.TotalMilliseconds, query);
+            if (timeSpan.TotalMilliseconds < 250)
+                Logger.Log(message);
+            else if (timeSpan.TotalMilliseconds < 1000)
+                Logger.Warning(message);
+            else
+                Logger.Error(message);
         }
 
         [Controller]
         public GeneralStats General(int? days)
         {
-            var watch = new PerformanceWatch();
             using (var connection = GetConnection())
             {
-                watch.Print("Controller/General/GetConnection");
 			    var constraints = new TimeConstraints(days);
                 var startParameter = new CommandParameter("time_start", constraints.Start);
                 var endParameter = new CommandParameter("time_end", constraints.End);
@@ -46,12 +50,10 @@ namespace BeRated.App
                 {
 				    stats.Players = reader.ReadAll<GeneralPlayerStats>();
                 }
-                watch.Print("Controller/General/get_all_player_stats");
 			    using (var reader = connection.ReadFunction("get_teams", startParameter, endParameter))
 			    {
 				    stats.Teams = reader.ReadAll<TeamStats>();
                 }
-                watch.Print("Controller/get_teams");
 			    return stats;
             }
 		}
@@ -59,7 +61,6 @@ namespace BeRated.App
         [Controller]
         public PlayerStats Player(int id, int? days)
         {
-            var watch = new PerformanceWatch();
             using (var connection = GetConnection())
             {
                 var constraints = new TimeConstraints(days);
@@ -90,7 +91,6 @@ namespace BeRated.App
                     var purchases = reader.ReadAll<PlayerItemStats>();
 				    playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
                 }
-                watch.Print("Controller/Player");
                 return playerStats;
             }
         }
@@ -98,7 +98,6 @@ namespace BeRated.App
 		[Controller]
 		public TeamMatchupStats Matchup(string team1, string team2)
 		{
-            var watch = new PerformanceWatch();
             using (var connection = GetConnection())
             {
                 Func<string, List<PlayerInfo>> readPlayers = (playerIdString) =>
@@ -126,7 +125,6 @@ namespace BeRated.App
 				    ImpreciseOutcomes = readOutcomes(false),
 				    PreciseOutcomes = readOutcomes(true),
 			    };
-                watch.Print("Controller/Player");
 			    return matchup;
             }
 		}

@@ -61,15 +61,15 @@ namespace BeRated.Server
                 Type modelType;
                 var watch = new PerformanceWatch();
                 object model = Invoke(method, arguments, out modelType);
-                watch.Print("Controller");
+                // watch.Print("Controller");
                 string markup = _Instance.Render(uri.AbsolutePath, modelType, model);
-                watch.Print("Render");
+                // watch.Print("Render");
 				markup = markup.Replace("\r", "");
 				var whitespacePattern = new Regex(@"^\s+|\n{2,}", RegexOptions.ECMAScript | RegexOptions.Multiline);
 				markup = whitespacePattern.Replace(markup, "");
                 response.ContentType = "text/html";
                 var task = context.Response.WriteAsync(markup);
-                watch.Print("Post-processing");
+                // watch.Print("Post-processing");
                 return task;
             }
             catch (Exception exception)
@@ -95,9 +95,7 @@ namespace BeRated.Server
         private object Invoke(string method, Dictionary<string, string> arguments, out Type modelType)
         {
             var notFoundException = new MiddlewareException("No such method.");
-            var watch = new PerformanceWatch();
             var methodInfo = _Instance.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.Public);
-            watch.Print("GetMethod");
             if (methodInfo == null)
                 throw notFoundException;
             var attribute = methodInfo.GetCustomAttribute(typeof(ControllerAttribute));
@@ -132,7 +130,6 @@ namespace BeRated.Server
                 invokeParameters.Add(convertedParameter);
             }
             var output = methodInfo.Invoke(_Instance, invokeParameters.ToArray());
-            watch.Print("Invoke");
             modelType = methodInfo.ReturnType;
             return output;
         }
