@@ -6,6 +6,7 @@ using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Owin;
 
 namespace BeRated.App
 {
@@ -13,10 +14,43 @@ namespace BeRated.App
     {
         private Configuration _Configuration;
 
+		private Dictionary<string, CacheEntry> _Cache = new Dictionary<string, CacheEntry>();
+
         public RatingApp(Configuration configuration)
         {
             _Configuration = configuration;
         }
+
+		public override string GetCachedResponse(IOwinContext context)
+		{
+			CacheEntry entry;
+			if (!_Cache.TryGetValue(context.Request.Uri.PathAndQuery, out entry))
+				return null;
+			using (var connection = GetConnection())
+			{
+				var time = connection.ScalarFunction<DateTime>("get_time_of_most_recent_kill");
+				if (time > entry.Time)
+					return null;
+				return entry.Markup;
+			}
+		}
+
+		public override void OnResponse(IOwinContext context, string markup)
+		{
+			_Cache[context.Request.Uri.PathAndQuery] = new CacheEntry(markup);
+			int maximumCacheSize = _Configuration.CacheSize.Value * 1024 * 1024;
+			int cacheSize = 0;
+			foreach (var pair in _Cache)
+				cacheSize += pair.Value.Markup.Length;
+			var pairs = _Cache.OrderBy(pair => pair.Value.Time).ToList();
+			while (cacheSize > maximumCacheSize && pairs.Any())
+			{
+				var pair = pairs.First();
+				pairs.RemoveAt(0);
+				_Cache.Remove(pair.Key);
+				cacheSize -= pair.Value.Markup.Length;
+			}
+		}
 
         public void Initialize()
         {

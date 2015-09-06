@@ -6,11 +6,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Ashod;
 using Microsoft.Owin;
-using System.Diagnostics;
 
 namespace BeRated.Server
 {
-    public class Middleware : OwinMiddleware
+	public class Middleware : OwinMiddleware
     {
         private BaseApp _Instance;
 
@@ -34,42 +33,14 @@ namespace BeRated.Server
                     response.StatusCode = 404;
                     return response.WriteAsync("Not found.");
                 }
-                var requestPattern = new Regex(@"^/(?<method>\w+?)(?:\?(?:(?<firstArgument>\w+?)=(?<firstValue>[^?=&]*))(?:&(?<arguments>\w+?)=(?<values>[^?=&]*))*)?$", RegexOptions.ECMAScript);
-                var match = requestPattern.Match(path);
-                if (!match.Success)
-                    throw new MiddlewareException("Malformed request.");
-                var groups = match.Groups;
-                var methodGroup = groups["method"];
-                var firstArgumentGroup = groups["firstArgument"];
-                var firstValueGroup = groups["firstValue"];
-                var argumentGroup = groups["arguments"];
-                var valueGroup = groups["values"];
-                string method = methodGroup.Value;
-                var arguments = new Dictionary<string, string>();
-                if (firstArgumentGroup.Success)
-                {
-                    arguments[firstArgumentGroup.Value] = firstValueGroup.Value;
-                    var valueEnumerator = valueGroup.Captures.GetEnumerator();
-                    valueEnumerator.MoveNext();
-                    foreach (Capture argument in argumentGroup.Captures)
-                    {
-                        var value = (Capture)valueEnumerator.Current;
-                        arguments[argument.Value] = value.Value;
-                        valueEnumerator.MoveNext();
-                    }
-                }
-                Type modelType;
-                var watch = new PerformanceWatch();
-                object model = Invoke(method, arguments, out modelType);
-                // watch.Print("Controller");
-                string markup = _Instance.Render(uri.AbsolutePath, modelType, model);
-                // watch.Print("Render");
-				markup = markup.Replace("\r", "");
-				var whitespacePattern = new Regex(@"^\s+|\n{2,}", RegexOptions.ECMAScript | RegexOptions.Multiline);
-				markup = whitespacePattern.Replace(markup, "");
-                response.ContentType = "text/html";
+				string markup = _Instance.GetCachedResponse(context);
+				if (markup == null)
+				{
+					markup = ProcessRequest(uri, path);
+					_Instance.OnResponse(context, markup);
+				}
+				response.ContentType = "text/html";
                 var task = context.Response.WriteAsync(markup);
-                // watch.Print("Post-processing");
                 return task;
             }
             catch (Exception exception)
@@ -92,7 +63,43 @@ namespace BeRated.Server
             }
         }
 
-        private object Invoke(string method, Dictionary<string, string> arguments, out Type modelType)
+		private string ProcessRequest(Uri uri, string path)
+		{
+			string markup;
+			var requestPattern = new Regex(@"^/(?<method>\w+?)(?:\?(?:(?<firstArgument>\w+?)=(?<firstValue>[^?=&]*))(?:&(?<arguments>\w+?)=(?<values>[^?=&]*))*)?$", RegexOptions.ECMAScript);
+			var match = requestPattern.Match(path);
+			if (!match.Success)
+				throw new MiddlewareException("Malformed request.");
+			var groups = match.Groups;
+			var methodGroup = groups["method"];
+			var firstArgumentGroup = groups["firstArgument"];
+			var firstValueGroup = groups["firstValue"];
+			var argumentGroup = groups["arguments"];
+			var valueGroup = groups["values"];
+			string method = methodGroup.Value;
+			var arguments = new Dictionary<string, string>();
+			if (firstArgumentGroup.Success)
+			{
+				arguments[firstArgumentGroup.Value] = firstValueGroup.Value;
+				var valueEnumerator = valueGroup.Captures.GetEnumerator();
+				valueEnumerator.MoveNext();
+				foreach (Capture argument in argumentGroup.Captures)
+				{
+					var value = (Capture)valueEnumerator.Current;
+					arguments[argument.Value] = value.Value;
+					valueEnumerator.MoveNext();
+				}
+			}
+			Type modelType;
+			object model = Invoke(method, arguments, out modelType);
+			markup = _Instance.Render(uri.AbsolutePath, modelType, model);
+			markup = markup.Replace("\r", "");
+			var whitespacePattern = new Regex(@"^\s+|\n{2,}", RegexOptions.ECMAScript | RegexOptions.Multiline);
+			markup = whitespacePattern.Replace(markup, "");
+			return markup;
+		}
+
+		private object Invoke(string method, Dictionary<string, string> arguments, out Type modelType)
         {
             var notFoundException = new MiddlewareException("No such method.");
             var methodInfo = _Instance.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.Public);

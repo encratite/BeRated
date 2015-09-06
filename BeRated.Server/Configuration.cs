@@ -10,9 +10,14 @@ namespace BeRated
 
         public string ViewPath { get; set; }
 
+		/// <summary>
+		/// Approximate size of HTTP cache, in MiB.
+		/// </summary>
+		public int? CacheSize { get; set; }
+
         public void Validate()
 		{
-			if (ServerUrl == null || ConnectionString == null || ViewPath == null)
+			if (ServerUrl == null || ConnectionString == null || ViewPath == null || !CacheSize.HasValue || CacheSize.Value <= 0)
 				throw new ApplicationException("Invalid configuration");
 		}
     }

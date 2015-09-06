@@ -890,3 +890,7 @@ begin
 	group by team.player_ids
 	order by games desc;
 end $$ language 'plpgsql';
+
+create function get_time_of_most_recent_kill() returns timestamp as $$
+	select max(time) from kill;
+$$ language sql;
