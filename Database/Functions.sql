@@ -264,7 +264,10 @@ begin
 			(
 				get_rounds_won is null or
 				(
-					(get_rounds_won and get_winning_team(round.sfui_notice) = round_player.team) or
+					(
+						get_rounds_won and get_winning_team(round.sfui_notice) = round_player.team and
+						(not end_of_game or round.terrorist_score != round.counter_terrorist_score)
+					) or
 					(not get_rounds_won and get_winning_team(round.sfui_notice) != round_player.team)
 				)
 			) and
