@@ -1,17 +1,28 @@
-﻿using Ashod;
-using Ashod.Database;
-using BeRated.Model;
-using BeRated.Server;
-using Npgsql;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Ashod;
+using Ashod.Database;
+using BeRated.Model;
+using BeRated.Model.Encounter;
+using BeRated.Model.General;
+using BeRated.Model.Item;
+using BeRated.Model.Weapon;
+using BeRated.Server;
 using Microsoft.Owin;
+using Npgsql;
 
 namespace BeRated.App
 {
 	public class RatingApp : BaseApp, IQueryPerformanceLogger
     {
+		private readonly static StatsTimeSpan[] _TimeSpans = new []
+		{
+			new StatsTimeSpan(0, "Today"),
+			new StatsTimeSpan(30, "Past 30 days"),
+			new StatsTimeSpan(null, "All stats"),
+		};
+
         private Configuration _Configuration;
 
 		private Dictionary<string, CacheEntry> _Cache = new Dictionary<string, CacheEntry>();
@@ -69,65 +80,139 @@ namespace BeRated.App
         }
 
         [Controller]
-        public GeneralStats General(int? days)
+        public List<TimeSpanGeneralPlayerStats> Players()
         {
-            using (var connection = GetConnection())
-            {
-			    var constraints = new TimeConstraints(days);
-                var startParameter = new CommandParameter("time_start", constraints.Start);
-                var endParameter = new CommandParameter("time_end", constraints.End);
-			    var stats = new GeneralStats
-			    {
-				    Days = days,
-			    };
-                using (var reader = connection.ReadFunction("get_all_player_stats", startParameter, endParameter))
-                {
-				    stats.Players = reader.ReadAll<GeneralPlayerStats>();
-                }
-			    using (var reader = connection.ReadFunction("get_teams", startParameter, endParameter))
-			    {
-				    stats.Teams = reader.ReadAll<TeamStats>();
-                }
-			    return stats;
-            }
+			using (var connection = GetConnection())
+			{
+				var output = _TimeSpans.Select((statsTimeSpan) =>
+				{
+					var constraints = new TimeConstraints(statsTimeSpan.Days);
+					var stats = new TimeSpanGeneralPlayerStats
+					{
+						TimeSpan = statsTimeSpan
+					};
+					using (var reader = connection.ReadFunction("get_all_player_stats", constraints.StartParameter, constraints.EndParameter))
+					{
+						stats.Players = reader.ReadAll<GeneralPlayerStats>();
+					}
+					return stats;
+				}).ToList();
+				return output;
+			}
+		}
+
+		[Controller]
+        public List<TimeSpanTeamStats> Teams()
+        {
+			using (var connection = GetConnection())
+			{
+				var output = _TimeSpans.Select((timeSpan) =>
+				{
+					var constraints = new TimeConstraints(timeSpan.Days);
+					var stats = new TimeSpanTeamStats
+					{
+						TimeSpan = timeSpan
+					};
+					using (var reader = connection.ReadFunction("get_teams", constraints.StartParameter, constraints.EndParameter))
+					{
+						stats.Stats = reader.ReadAll<TeamStats>();
+					}
+					return stats;
+				}).ToList();
+				return output;
+			}
 		}
 
         [Controller]
-        public PlayerStats Player(int id, int? days)
+        public PlayerGameStats Games(int id)
         {
             using (var connection = GetConnection())
-            {
-                var constraints = new TimeConstraints(days);
-                var playerStats = new PlayerStats();
-                playerStats.Id = id;
-                var idParameter = new CommandParameter("player_id", id);
-                var startParameter = new CommandParameter("time_start", constraints.Start);
-                var endParameter = new CommandParameter("time_end", constraints.End);
-                playerStats.Name = connection.ScalarFunction<string>("get_player_name", idParameter);
-			    playerStats.Days = days;
-			    using (var reader = connection.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
-			    {
-				    var games = reader.ReadAll<PlayerGame>();
-				    playerStats.Games = games.OrderByDescending(game => game.GameTime).ToList();
-			    }
-			    using (var reader = connection.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
-			    {
-				    var encounters = reader.ReadAll<PlayerEncounterStats>();
-				    playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
-			    }
-			    using (var reader = connection.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
-                {
-                    var weapons = reader.ReadAll<PlayerWeaponStats>();
-				    playerStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
-                }
-                using (var reader = connection.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
-                {
-                    var purchases = reader.ReadAll<PlayerItemStats>();
-				    playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
-                }
-                return playerStats;
-            }
-        }
+			{
+				var playerStats = CreatePlayerStats<PlayerGameStats>(connection, id);
+				var idParameter = GetIdParameter(id);
+				using (var reader = connection.ReadFunction("get_player_games", idParameter))
+				{
+					var games = reader.ReadAll<PlayerGame>();
+					playerStats.Games = games.OrderByDescending(game => game.GameTime).ToList();
+				}
+				return playerStats;
+			}
+		}
+
+		[Controller]
+        public AllPlayerEncounterStats Encounters(int id)
+        {
+            using (var connection = GetConnection())
+			{
+				var playerStats = CreatePlayerStats<AllPlayerEncounterStats>(connection, id);
+				playerStats.Encounters = _TimeSpans.Select((timeSpan) =>
+				{
+					var constraints = new TimeConstraints(timeSpan.Days);
+					var encounterStats = new TimeSpanPlayerEncounterStats
+					{
+						TimeSpan = timeSpan,
+					};
+					var idParameter = GetIdParameter(id);
+					using (var reader = connection.ReadFunction("get_player_encounter_stats", idParameter, constraints.StartParameter, constraints.EndParameter))
+					{
+						var encounters = reader.ReadAll<PlayerEncounterStats>();
+						encounterStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
+					}
+					return encounterStats;
+				}).ToList();
+				return playerStats;
+			}
+		}
+
+		[Controller]
+        public AllPlayerWeaponStats Weapons(int id)
+        {
+            using (var connection = GetConnection())
+			{
+				var playerStats = CreatePlayerStats<AllPlayerWeaponStats>(connection, id);
+				playerStats.Weapons = _TimeSpans.Select((timeSpan) =>
+				{
+					var constraints = new TimeConstraints(timeSpan.Days);
+					var weaponStats = new TimeSpanPlayerWeaponStats
+					{
+						TimeSpan = timeSpan,
+					};
+					var idParameter = GetIdParameter(id);
+					using (var reader = connection.ReadFunction("get_player_weapon_stats", idParameter, constraints.StartParameter, constraints.EndParameter))
+					{
+						var weapons = reader.ReadAll<PlayerWeaponStats>();
+						weaponStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
+					}
+					return weaponStats;
+				}).ToList();
+				return playerStats;
+			}
+		}
+
+		[Controller]
+        public AllPlayerItemStats Purchases(int id)
+        {
+			using (var connection = GetConnection())
+			{
+				var playerStats = CreatePlayerStats<AllPlayerItemStats>(connection, id);
+				playerStats.Items = _TimeSpans.Select((timeSpan) =>
+				{
+					var constraints = new TimeConstraints(timeSpan.Days);
+					var itemStats = new TimeSpanPlayerItemStats
+					{
+						TimeSpan = timeSpan,
+					};
+					var idParameter = GetIdParameter(id);
+					using (var reader = connection.ReadFunction("get_player_purchases", idParameter, constraints.StartParameter, constraints.EndParameter))
+					{
+						var items = reader.ReadAll<PlayerItemStats>();
+						itemStats.Purchases = items.OrderByDescending(weapon => weapon.TimesPurchased).ToList();
+					}
+					return itemStats;
+				}).ToList();
+				return playerStats;
+			}
+		}
 
 		[Controller]
 		public TeamMatchupStats Matchup(string team1, string team2)
@@ -169,5 +254,27 @@ namespace BeRated.App
             var connection = new DatabaseConnection(sqlConnection, this);
             return connection;
         }
+
+		private CommandParameter GetIdParameter(int id)
+		{
+			return new CommandParameter("player_id", id);
+		}
+
+		private string GetPlayerName(DatabaseConnection connection, int id)
+		{
+			var idParameter = GetIdParameter(id);
+			return connection.ScalarFunction<string>("get_player_name", idParameter);
+		}
+		
+		private PlayerStatsType CreatePlayerStats<PlayerStatsType>(DatabaseConnection connection, int id)
+			where PlayerStatsType : BasePlayerStats, new()
+		{
+			var playerStats = new PlayerStatsType()
+			{
+				Id = id,
+				Name = GetPlayerName(connection, id)
+			};
+			return playerStats;
+		}
     }
 }

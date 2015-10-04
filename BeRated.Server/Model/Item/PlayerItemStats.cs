@@ -1,4 +1,4 @@
-﻿namespace BeRated.Model
+﻿namespace BeRated.Model.Item
 {
 	public class PlayerItemStats
 	{

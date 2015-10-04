@@ -633,7 +633,7 @@ end $$ language 'plpgsql';
 
 -- player_team, enemy_team and outcome are cast to text to deal with a missing feature in Npgsql 3.0
 -- It's supposed to get fixed in Npgsql 3.1, though
-create function get_player_games(player_id integer, time_start timestamp, time_end timestamp) returns table
+create function get_player_games(player_id integer) returns table
 (
 	game_time timestamp,
 	player_score integer,
@@ -687,7 +687,6 @@ begin
 		round_player
 	where
 		round.id = round_player.round_id and
-		matches_time_constraints(round.time, time_start, time_end) and
 		round_player.player_id = get_player_games.player_id and
 		is_end_of_game(round.terrorist_score, round.counter_terrorist_score, round.max_rounds)
 	order by round.time desc;
