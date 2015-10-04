@@ -84,13 +84,10 @@ namespace BeRated.App
         {
 			using (var connection = GetConnection())
 			{
-				var output = _TimeSpans.Select((statsTimeSpan) =>
+				var output = _TimeSpans.Select((timeSpan) =>
 				{
-					var constraints = new TimeConstraints(statsTimeSpan.Days);
-					var stats = new TimeSpanGeneralPlayerStats
-					{
-						TimeSpan = statsTimeSpan
-					};
+					var constraints = new TimeConstraints(timeSpan.Days);
+					var stats = CreateTimeSpanStats<TimeSpanGeneralPlayerStats>(timeSpan);
 					using (var reader = connection.ReadFunction("get_all_player_stats", constraints.StartParameter, constraints.EndParameter))
 					{
 						stats.Players = reader.ReadAll<GeneralPlayerStats>();
@@ -148,10 +145,7 @@ namespace BeRated.App
 				playerStats.Encounters = _TimeSpans.Select((timeSpan) =>
 				{
 					var constraints = new TimeConstraints(timeSpan.Days);
-					var encounterStats = new TimeSpanPlayerEncounterStats
-					{
-						TimeSpan = timeSpan,
-					};
+					var encounterStats = CreateTimeSpanStats<TimeSpanPlayerEncounterStats>(timeSpan);
 					var idParameter = GetIdParameter(id);
 					using (var reader = connection.ReadFunction("get_player_encounter_stats", idParameter, constraints.StartParameter, constraints.EndParameter))
 					{
@@ -173,10 +167,7 @@ namespace BeRated.App
 				playerStats.Weapons = _TimeSpans.Select((timeSpan) =>
 				{
 					var constraints = new TimeConstraints(timeSpan.Days);
-					var weaponStats = new TimeSpanPlayerWeaponStats
-					{
-						TimeSpan = timeSpan,
-					};
+					var weaponStats = CreateTimeSpanStats<TimeSpanPlayerWeaponStats>(timeSpan);
 					var idParameter = GetIdParameter(id);
 					using (var reader = connection.ReadFunction("get_player_weapon_stats", idParameter, constraints.StartParameter, constraints.EndParameter))
 					{
@@ -198,10 +189,7 @@ namespace BeRated.App
 				playerStats.Items = _TimeSpans.Select((timeSpan) =>
 				{
 					var constraints = new TimeConstraints(timeSpan.Days);
-					var itemStats = new TimeSpanPlayerItemStats
-					{
-						TimeSpan = timeSpan,
-					};
+					var itemStats = CreateTimeSpanStats<TimeSpanPlayerItemStats>(timeSpan);
 					var idParameter = GetIdParameter(id);
 					using (var reader = connection.ReadFunction("get_player_purchases", idParameter, constraints.StartParameter, constraints.EndParameter))
 					{
@@ -275,6 +263,16 @@ namespace BeRated.App
 				Name = GetPlayerName(connection, id)
 			};
 			return playerStats;
+		}
+
+		private TimeSpanStatsType CreateTimeSpanStats<TimeSpanStatsType>(StatsTimeSpan timeSpan)
+			where TimeSpanStatsType : TimeSpanStats, new()
+		{
+			var stats = new TimeSpanStatsType
+			{
+				TimeSpan = timeSpan
+			};
+			return stats;
 		}
     }
 }
