@@ -87,6 +87,7 @@
     <Compile Include="Model\TeamStats.cs" />
     <Compile Include="Server\BaseApp.cs" />
     <Compile Include="Server\CacheEntry.cs" />
+    <Compile Include="Server\Context.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
     <Compile Include="Model\PlayerEncounterStats.cs" />

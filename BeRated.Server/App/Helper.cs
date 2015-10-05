@@ -16,20 +16,18 @@ namespace BeRated.App
 				return "-";
 		}
 
-		public static RawString PlayerLink(int id, string name, int? days)
+		public static RawString PlayerLink(int id, string name)
 		{
 			string path = string.Format("/Player?id={0}", id);
-			if (days.HasValue)
-				path += string.Format("&days={0}", days.Value);
 			var encodedName = HttpUtility.HtmlEncode(name);
             string markup = string.Format("<a href=\"{0}\">{1}</a>", path, encodedName);
 			var rawString = new RawString(markup);
             return rawString;
         }
 
-		public static RawString PlayerList(List<PlayerInfo> players, int? days = null)
+		public static RawString PlayerList(List<PlayerInfo> players)
 		{
-			var links = players.Select(player => PlayerLink(player.Id, player.Name, days).ToString());
+			var links = players.Select(player => PlayerLink(player.Id, player.Name).ToString());
 			string markup = string.Join(", ", links);
 			var rawString = new RawString(markup);
 			return rawString;

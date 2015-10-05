@@ -69,17 +69,14 @@ namespace BeRated.App
         }
 
         [Controller]
-        public GeneralStats General(int? days)
+        public GeneralStats General()
         {
             using (var connection = GetConnection())
             {
-			    var constraints = new TimeConstraints(days);
+			    var constraints = GetTimeConstraints();
                 var startParameter = new CommandParameter("time_start", constraints.Start);
                 var endParameter = new CommandParameter("time_end", constraints.End);
-			    var stats = new GeneralStats
-			    {
-				    Days = days,
-			    };
+			    var stats = new GeneralStats();
                 using (var reader = connection.ReadFunction("get_all_player_stats", startParameter, endParameter))
                 {
 				    stats.Players = reader.ReadAll<GeneralPlayerStats>();
@@ -93,19 +90,18 @@ namespace BeRated.App
 		}
 
         [Controller]
-        public PlayerStats Player(int id, int? days)
+        public PlayerStats Player(int id)
         {
             using (var connection = GetConnection())
             {
-                var constraints = new TimeConstraints(days);
+				var constraints = GetTimeConstraints();
                 var playerStats = new PlayerStats();
                 playerStats.Id = id;
                 var idParameter = new CommandParameter("player_id", id);
                 var startParameter = new CommandParameter("time_start", constraints.Start);
                 var endParameter = new CommandParameter("time_end", constraints.End);
                 playerStats.Name = connection.ScalarFunction<string>("get_player_name", idParameter);
-			    playerStats.Days = days;
-			    using (var reader = connection.ReadFunction("get_player_games", idParameter, startParameter, endParameter))
+			    using (var reader = connection.ReadFunction("get_player_games", idParameter))
 			    {
 				    var games = reader.ReadAll<PlayerGame>();
 				    playerStats.Games = games.OrderByDescending(game => game.GameTime).ToList();
@@ -169,5 +165,26 @@ namespace BeRated.App
             var connection = new DatabaseConnection(sqlConnection, this);
             return connection;
         }
+
+		private TimeConstraints GetTimeConstraints()
+		{
+			int? days = GetDays();
+			var timeConstraints = new TimeConstraints(days);
+			return timeConstraints;
+		}
+
+		private int? GetDays()
+		{
+			int? days = 0;
+			string daysString;
+			if (Context.Current.Cookies.TryGetValue("days", out daysString))
+			{
+				if (daysString != string.Empty)
+					days = int.Parse(daysString);
+				else
+					days = null;
+			}
+			return days;
+		}
     }
 }

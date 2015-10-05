@@ -21,6 +21,13 @@ namespace BeRated.Server
 
         public override Task Invoke(IOwinContext context)
         {
+			var cookies = new Dictionary<string, string>();
+			foreach (var pair in context.Request.Cookies)
+				cookies.Add(pair.Key, pair.Value);
+			Context.Current = new Context
+			{
+				Cookies = cookies,
+			};
             var response = context.Response;
             try
             {
@@ -61,6 +68,10 @@ namespace BeRated.Server
 
                 return response.WriteAsync(message);
             }
+			finally
+			{
+				Context.Current = null;
+			}
         }
 
 		private string ProcessRequest(Uri uri, string path)

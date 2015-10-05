@@ -13,31 +13,3 @@
 	max-width: 810px;
 	margin-bottom: 50px;
 }
-
-#frameworkSelector {
-	color: #00709f;
-}
-
-#frameworkSelector:hover {
-	color: #3390b1;
-}
-
-#frameworkSelector i {
-	font-size: 90%;
-	margin-left: 3px;
-}
-
-#frameworkPopup {
-	display: none;
-	border: 1px solid #bdbdbd;
-	padding: 10px;
-	position: absolute;
-	background-color: #ffffff;
-	margin-top: 30px;
-	margin-left: -100px;
-}
-
-#frameworkPopup li {
-	margin: 0;
-	padding: 0;
-}
