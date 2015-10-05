@@ -1,4 +1,4 @@
-﻿namespace BeRated.Model.General
+﻿namespace BeRated.Model
 {
 	public class GeneralPlayerStats
 	{

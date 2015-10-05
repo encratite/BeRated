@@ -1,5 +1,4 @@
 ﻿using System;
-using Ashod.Database;
 
 namespace BeRated.App
 {
@@ -7,22 +6,6 @@ namespace BeRated.App
 	{
 		public DateTime? Start { get; set; }
 		public DateTime? End { get; set; }
-
-		public CommandParameter StartParameter
-		{
-			get
-			{
-				return new CommandParameter("time_start", Start);
-			}
-		}
-
-		public CommandParameter EndParameter
-		{
-			get
-			{
-				return new CommandParameter("time_end", End);
-			}
-		}
 
 		public TimeConstraints(int? days)
 		{

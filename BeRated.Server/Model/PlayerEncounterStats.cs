@@ -1,4 +1,4 @@
-﻿namespace BeRated.Model.Encounter
+﻿namespace BeRated.Model
 {
 	public class PlayerEncounterStats
 	{

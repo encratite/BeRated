@@ -1,4 +1,4 @@
-﻿namespace BeRated.Model.Weapon
+﻿namespace BeRated.Model
 {
 	public class PlayerWeaponStats
 	{
