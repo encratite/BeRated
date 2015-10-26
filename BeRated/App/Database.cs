@@ -8,7 +8,7 @@ using BeRated.Logging;
 
 namespace BeRated.App
 {
-	class Uploader
+	class Database : IDisposable
 	{
 		private const int MaxRoundsDefault = 30;
         private const int UpdateInterval = 10 * 1000;
@@ -18,13 +18,30 @@ namespace BeRated.App
 		private int _MaxRounds = MaxRoundsDefault;
 		private Dictionary<string, string> _Players = new Dictionary<string, string>();
 
-		public Uploader(string logPath, string connectionString)
+		private Thread _ReaderThread = null;
+
+		public Database(string logPath, string connectionString)
 		{
 			_LogPath = logPath;
 			_ConnectionString = connectionString;
 		}
 
+		public void Dispose()
+		{
+			if (_ReaderThread != null)
+			{
+				_ReaderThread.Abort();
+				_ReaderThread = null;
+			}
+		}
+
 		public void Run()
+		{
+			_ReaderThread = new Thread(RunReader);
+			_ReaderThread.Start();
+		}
+
+		private void RunReader()
 		{
             while (true)
             {
@@ -44,39 +61,48 @@ namespace BeRated.App
 
 		private void ProcessLog(string path)
 		{
-			_MaxRounds = MaxRoundsDefault;
-			_Players = new Dictionary<string, string>();
-            string fileName = Path.GetFileName(path);
-            var fileInfo = new FileInfo(path);
-            long currentFileSize = fileInfo.Length;
-            var getLogStateParameters = new[]
+			lock (this)
 			{
-				new CommandParameter("file_name", fileName),
-			};
-            var content = File.ReadAllText(path);
-            content = content.Replace("\r", "");
-            if (content.Length == 0 || content.Last() != '\n')
-            {
-                // The log file is currently being written to or has been abandoned, skip it
-                return;
-            }
-            Console.WriteLine("{0} Processing {1}", DateTime.Now, path);
-            var lines = content.Split('\n');
-			int lineCounter = 1;
-			foreach (var line in lines)
-			{
-				ProcessLine(line, lineCounter);
-				lineCounter++;
+				_MaxRounds = MaxRoundsDefault;
+				_Players = new Dictionary<string, string>();
+				string fileName = Path.GetFileName(path);
+				var fileInfo = new FileInfo(path);
+				long currentFileSize = fileInfo.Length;
+				var getLogStateParameters = new[]
+				{
+					new CommandParameter("file_name", fileName),
+				};
+				long? bytesProcessed = _Database.ScalarFunction<long?>("get_log_state", getLogStateParameters);
+				if (bytesProcessed != null && bytesProcessed >= currentFileSize)
+				{
+					// This file has already been processed
+					return;
+				}
+				var content = File.ReadAllText(path);
+				content = content.Replace("\r", "");
+				if (content.Length == 0 || content.Last() != '\n')
+				{
+					// The log file is currently being written to or has been abandoned, skip it
+					return;
+				}
+				Console.WriteLine("{0} Processing {1}", DateTime.Now, path);
+				var lines = content.Split('\n');
+				int lineCounter = 1;
+				foreach (var line in lines)
+				{
+					ProcessLine(line, lineCounter);
+					lineCounter++;
+				}
+				var updateLogStateParameters = new[]
+				{
+					new CommandParameter("file_name", fileName),
+					new CommandParameter("bytes_processed", currentFileSize),
+				};
+				_Database.NonQueryFunction("update_log_state", updateLogStateParameters);
 			}
-            var updateLogStateParameters = new[]
-            {
-                new CommandParameter("file_name", fileName),
-                new CommandParameter("bytes_processed", currentFileSize),
-            };
-            _Database.NonQueryFunction("update_log_state", updateLogStateParameters);
 		}
 
-		void ProcessLine(string line, int lineCounter)
+		private void ProcessLine(string line, int lineCounter)
 		{
 			var kill = LogParser.ReadPlayerKill(line);
 			if (kill != null)
@@ -174,7 +200,7 @@ namespace BeRated.App
 			}
 		}
 
-		string GetSteamIdsString(string team)
+		private string GetSteamIdsString(string team)
 		{
 			var players = _Players.Where(pair => pair.Value == team).Select(pair => pair.Key).ToArray();
 			string output = string.Join(",", players);

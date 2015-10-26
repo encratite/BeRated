@@ -12,12 +12,14 @@ namespace BeRated.App
 	public class RatingApp : BaseApp, IQueryPerformanceLogger
     {
         private Configuration _Configuration;
+		private Database _Database;
 
 		private Dictionary<string, CacheEntry> _Cache = new Dictionary<string, CacheEntry>();
 
         public RatingApp(Configuration configuration)
         {
             _Configuration = configuration;
+			_Database = new Database(_Configuration.LogDirectory, _Configuration.ConnectionString);
         }
 
 		public override void OnResponse(IOwinContext context, string markup)
@@ -40,6 +42,7 @@ namespace BeRated.App
         public void Initialize()
         {
             base.Initialize(_Configuration.ViewPath);
+			_Database.Run();
         }
 
         void IQueryPerformanceLogger.OnQueryEnd(string query, TimeSpan timeSpan)
