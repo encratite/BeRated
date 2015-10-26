@@ -91,17 +91,18 @@ footer ul {
 	height: 39px;
 }
 
-.firstRow a {
+.firstRow .link {
 	color: #ffffff;
 	font-size: 11px;
 }
 
-.firstRow a:hover {
+.firstRow span:hover {
 	color: #9c9c9c;
 }
 
 .firstRow .textLink {
 	margin-right: 25px;
+    cursor: pointer;
 }
 
 .firstRow .fa {
@@ -116,7 +117,7 @@ footer ul {
 	margin-right: 21px;
 }
 
-.firstRow span {
+.firstRow .developerNetwork {
 	float: left;
 	color: #a0a0a0;
 	font-size: 16px;
@@ -146,7 +147,7 @@ footer ul {
 	margin-left: 25px;
 }
 
-.categoryLinks a {
+.categoryLinks span {
 	color: #ffffff;
 	font-size: 20px;
 	font-family: wf_segoe-ui_light, "Segoe UI Light", "Segoe WP Light", wf_segoe-ui_normal, "Segoe UI", Segoe, "Segoe WP", Tahoma, Verdana, Arial, sans-serif;
@@ -158,7 +159,7 @@ footer ul {
 	height: 34px;
 }
 
-.categoryLinks a:hover {
+.categoryLinks span:hover {
 	border-bottom: solid 5px #ffffff;
 }
 
@@ -213,12 +214,12 @@ footer ul {
 	margin-bottom: 40px;
 }
 
-.libraryLinks a {
+.libraryLinks span {
 	color: #000000;
 	margin-right: 8px;
 }
 
-.libraryLinks a:hover {
+.libraryLinks span:hover {
 	color: #8c8c8c;
 }
 
@@ -274,4 +275,13 @@ ul.tableOfContents {
     background-color: rgb(235, 248, 254);
     border-left: 3px solid rgb(0, 164, 239);
     margin-left: -1px;
+}
+
+.link {
+	text-decoration: none;
+	color: #00709f;
+}
+
+.link:hover {
+	color: #3390b1;
 }

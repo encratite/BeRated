@@ -21,20 +21,6 @@ namespace BeRated.App
             _Configuration = configuration;
         }
 
-		public override string GetCachedResponse(IOwinContext context)
-		{
-			CacheEntry entry;
-			if (!_Cache.TryGetValue(context.Request.Uri.PathAndQuery, out entry))
-				return null;
-			using (var connection = GetConnection())
-			{
-				var time = connection.ScalarFunction<DateTime>("get_time_of_most_recent_kill");
-				if (time > entry.Time)
-					return null;
-				return entry.Markup;
-			}
-		}
-
 		public override void OnResponse(IOwinContext context, string markup)
 		{
 			_Cache[context.Request.Uri.PathAndQuery] = new CacheEntry(markup);
