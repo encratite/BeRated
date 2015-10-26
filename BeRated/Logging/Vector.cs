@@ -4,9 +4,9 @@ namespace BeRated.Logging
 {
 	public class Vector
 	{
-		public readonly int X;
-		public readonly int Y;
-		public readonly int Z;
+		public int X { get; private set; }
+		public int Y { get; private set; }
+		public int Z { get; private set; }
 
 		public Vector(int x, int y, int z)
 		{

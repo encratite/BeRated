@@ -4,14 +4,14 @@ namespace BeRated.Logging.Data
 {
 	public class PlayerKill
 	{
-		public DateTime Time;
-		public PlayerIdentity Killer;
-		public string KillerTeam;
-		public Vector KillerPosition;
-		public PlayerIdentity Victim;
-		public string VictimTeam;
-		public Vector VictimPosition;
-		public bool Headshot;
-		public string Weapon;
+		public DateTime Time { get; set; }
+		public PlayerIdentity Killer { get; set; }
+		public string KillerTeam { get; set; }
+		public Vector KillerPosition { get; set; }
+		public PlayerIdentity Victim { get; set; }
+		public string VictimTeam { get; set; }
+		public Vector VictimPosition { get; set; }
+		public bool Headshot { get; set; }
+		public string Weapon { get; set; }
 	}
 }

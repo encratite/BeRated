@@ -10,17 +10,17 @@ namespace BeRated.Logging
 		public const string TerroristTeam = "TERRORIST";
 		public const string CounterTerroristTeam = "CT";
 
-		const string DatePrefix = "^L (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): ";
-		const string PlayerPattern = "\"(.+?)<\\d+><(.+?)><(.*?)>\"";
-		const string PlayerWithoutTeamPattern = "\"(.+?)<\\d+><(.+?)>\"";
+		private const string DatePrefix = "^L (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): ";
+		private const string PlayerPattern = "\"(.+?)<\\d+><(.+?)><(.*?)>\"";
+		private const string PlayerWithoutTeamPattern = "\"(.+?)<\\d+><(.+?)>\"";
 
-		static Regex KillPattern = new Regex(DatePrefix + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed " + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
-		static Regex MaxRoundsPattern = new Regex(DatePrefix + "server_cvar: \"mp_maxrounds\" \"(\\d+)\"");
+		private static Regex KillPattern = new Regex(DatePrefix + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed " + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
+		private static Regex MaxRoundsPattern = new Regex(DatePrefix + "server_cvar: \"mp_maxrounds\" \"(\\d+)\"");
 		// grep -h -E -o "SFUI_[^""]+" * | sort | uniq
-		static Regex EndOfRoundPattern = new Regex(DatePrefix + "Team \"(TERRORIST|CT)\" triggered \"(SFUI_Notice_All_Hostages_Rescued|SFUI_Notice_Bomb_Defused|SFUI_Notice_CTs_Win|SFUI_Notice_Hostages_Not_Rescued|SFUI_Notice_Target_Bombed|SFUI_Notice_Target_Saved|SFUI_Notice_Terrorists_Win)\" \\(CT \"(\\d+)\"\\) \\(T \"(\\d+)\"\\)");
-		static Regex TeamSwitchPattern = new Regex(DatePrefix + PlayerWithoutTeamPattern + " switched from team <(.+?)> to <(.+?)>");
-		static Regex DisconnectPattern = new Regex(DatePrefix + PlayerPattern + " disconnected \\(reason \"(.+?)\"\\)");
-		static Regex PurchasePattern = new Regex(DatePrefix + PlayerPattern + " purchased \"(.+?)\"");
+		private static Regex EndOfRoundPattern = new Regex(DatePrefix + "Team \"(TERRORIST|CT)\" triggered \"(SFUI_Notice_All_Hostages_Rescued|SFUI_Notice_Bomb_Defused|SFUI_Notice_CTs_Win|SFUI_Notice_Hostages_Not_Rescued|SFUI_Notice_Target_Bombed|SFUI_Notice_Target_Saved|SFUI_Notice_Terrorists_Win)\" \\(CT \"(\\d+)\"\\) \\(T \"(\\d+)\"\\)");
+		private static Regex TeamSwitchPattern = new Regex(DatePrefix + PlayerWithoutTeamPattern + " switched from team <(.+?)> to <(.+?)>");
+		private static Regex DisconnectPattern = new Regex(DatePrefix + PlayerPattern + " disconnected \\(reason \"(.+?)\"\\)");
+		private static Regex PurchasePattern = new Regex(DatePrefix + PlayerPattern + " purchased \"(.+?)\"");
 
 		static DateTime ReadDate(MatchReader reader)
 		{

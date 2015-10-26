@@ -2,8 +2,8 @@
 {
 	public class PlayerIdentity
 	{
-		public readonly string SteamId;
-		public readonly string Name;
+		public string SteamId { get; private set; }
+		public string Name { get; private set; }
 
 		public PlayerIdentity(string name, string steamId)
 		{

@@ -4,8 +4,8 @@ namespace BeRated.Logging
 {
 	class MatchReader
 	{
-		int _Offset = 1;
-		Match _Match;
+		private int _Offset = 1;
+		private Match _Match;
 
 		public MatchReader(Match match)
 		{
