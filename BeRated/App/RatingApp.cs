@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ashod;
 using Ashod.Database;
+using BeRated.Cache;
 using BeRated.Model;
 using BeRated.Server;
 using Microsoft.Owin;
@@ -12,15 +13,21 @@ namespace BeRated.App
 	public class RatingApp : BaseApp, IQueryPerformanceLogger
     {
         private Configuration _Configuration;
-		private Database _Database;
+		private CacheManager _Database;
 
 		private Dictionary<string, CacheEntry> _Cache = new Dictionary<string, CacheEntry>();
 
         public RatingApp(Configuration configuration)
         {
             _Configuration = configuration;
-			_Database = new Database(_Configuration.LogDirectory, _Configuration.ConnectionString);
+			_Database = new CacheManager(_Configuration.LogDirectory, _Configuration.ConnectionString);
         }
+
+		public override void Dispose()
+		{
+			_Database.Dispose();
+			base.Dispose();
+		}
 
 		public override void OnResponse(IOwinContext context, string markup)
 		{
@@ -59,100 +66,84 @@ namespace BeRated.App
         [Controller]
         public GeneralStats General()
         {
-            using (var connection = GetConnection())
+			var constraints = GetTimeConstraints();
+            var startParameter = new CommandParameter("time_start", constraints.Start);
+            var endParameter = new CommandParameter("time_end", constraints.End);
+			var stats = new GeneralStats();
+            using (var reader = connection.ReadFunction("get_all_player_stats", startParameter, endParameter))
             {
-			    var constraints = GetTimeConstraints();
-                var startParameter = new CommandParameter("time_start", constraints.Start);
-                var endParameter = new CommandParameter("time_end", constraints.End);
-			    var stats = new GeneralStats();
-                using (var reader = connection.ReadFunction("get_all_player_stats", startParameter, endParameter))
-                {
-				    stats.Players = reader.ReadAll<GeneralPlayerStats>();
-                }
-			    using (var reader = connection.ReadFunction("get_teams", startParameter, endParameter))
-			    {
-				    stats.Teams = reader.ReadAll<TeamStats>();
-                }
-			    return stats;
+				stats.Players = reader.ReadAll<GeneralPlayerStats>();
             }
+			using (var reader = connection.ReadFunction("get_teams", startParameter, endParameter))
+			{
+				stats.Teams = reader.ReadAll<TeamStats>();
+            }
+			return stats;
 		}
 
         [Controller]
         public PlayerStats Player(int id)
         {
-            using (var connection = GetConnection())
+			var constraints = GetTimeConstraints();
+            var playerStats = new PlayerStats();
+            playerStats.Id = id;
+            var idParameter = new CommandParameter("player_id", id);
+            var startParameter = new CommandParameter("time_start", constraints.Start);
+            var endParameter = new CommandParameter("time_end", constraints.End);
+            playerStats.Name = connection.ScalarFunction<string>("get_player_name", idParameter);
+			using (var reader = connection.ReadFunction("get_player_games", idParameter))
+			{
+				var games = reader.ReadAll<PlayerGame>();
+				playerStats.Games = games.OrderByDescending(game => game.GameTime).ToList();
+			}
+			using (var reader = connection.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
+			{
+				var encounters = reader.ReadAll<PlayerEncounterStats>();
+				playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
+			}
+			using (var reader = connection.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
             {
-				var constraints = GetTimeConstraints();
-                var playerStats = new PlayerStats();
-                playerStats.Id = id;
-                var idParameter = new CommandParameter("player_id", id);
-                var startParameter = new CommandParameter("time_start", constraints.Start);
-                var endParameter = new CommandParameter("time_end", constraints.End);
-                playerStats.Name = connection.ScalarFunction<string>("get_player_name", idParameter);
-			    using (var reader = connection.ReadFunction("get_player_games", idParameter))
-			    {
-				    var games = reader.ReadAll<PlayerGame>();
-				    playerStats.Games = games.OrderByDescending(game => game.GameTime).ToList();
-			    }
-			    using (var reader = connection.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
-			    {
-				    var encounters = reader.ReadAll<PlayerEncounterStats>();
-				    playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
-			    }
-			    using (var reader = connection.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
-                {
-                    var weapons = reader.ReadAll<PlayerWeaponStats>();
-				    playerStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
-                }
-                using (var reader = connection.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
-                {
-                    var purchases = reader.ReadAll<PlayerItemStats>();
-				    playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
-                }
-                return playerStats;
+                var weapons = reader.ReadAll<PlayerWeaponStats>();
+				playerStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
             }
+            using (var reader = connection.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
+            {
+                var purchases = reader.ReadAll<PlayerItemStats>();
+				playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
+            }
+            return playerStats;
         }
 
 		[Controller]
 		public TeamMatchupStats Matchup(string team1, string team2)
 		{
-            using (var connection = GetConnection())
-            {
-                Func<string, List<PlayerInfo>> readPlayers = (playerIdString) =>
-			    {
-				    var playerIdParameter = new CommandParameter("player_id_string", playerIdString);
-				    using (var reader = connection.ReadFunction("get_player_names", playerIdParameter))
-				    {
-					    return reader.ReadAll<PlayerInfo>();
-				    }
-			    };
-			    Func<bool, GameOutcomes> readOutcomes = (precise) =>
-			    {
-				    var teamParameter1 = new CommandParameter("player_id_string1", team1);
-				    var teamParameter2 = new CommandParameter("player_id_string2", team2);
-				    var preciseParameter = new CommandParameter("precise", precise);
-				    using (var reader = connection.ReadFunction("get_matchup_stats", teamParameter1, teamParameter2, preciseParameter))
-				    {
-					    return reader.ReadAll<GameOutcomes>().First();
-				    }
-			    };
-			    var matchup = new TeamMatchupStats
-			    {
-				    Team1 = readPlayers(team1),
-				    Team2 = readPlayers(team2),
-				    ImpreciseOutcomes = readOutcomes(false),
-				    PreciseOutcomes = readOutcomes(true),
-			    };
-			    return matchup;
-            }
+            Func<string, List<PlayerInfo>> readPlayers = (playerIdString) =>
+			{
+				var playerIdParameter = new CommandParameter("player_id_string", playerIdString);
+				using (var reader = connection.ReadFunction("get_player_names", playerIdParameter))
+				{
+					return reader.ReadAll<PlayerInfo>();
+				}
+			};
+			Func<bool, GameOutcomes> readOutcomes = (precise) =>
+			{
+				var teamParameter1 = new CommandParameter("player_id_string1", team1);
+				var teamParameter2 = new CommandParameter("player_id_string2", team2);
+				var preciseParameter = new CommandParameter("precise", precise);
+				using (var reader = connection.ReadFunction("get_matchup_stats", teamParameter1, teamParameter2, preciseParameter))
+				{
+					return reader.ReadAll<GameOutcomes>().First();
+				}
+			};
+			var matchup = new TeamMatchupStats
+			{
+				Team1 = readPlayers(team1),
+				Team2 = readPlayers(team2),
+				ImpreciseOutcomes = readOutcomes(false),
+				PreciseOutcomes = readOutcomes(true),
+			};
+			return matchup;
 		}
-
-        private DatabaseConnection GetConnection()
-        {
-            var sqlConnection = new NpgsqlConnection(_Configuration.ConnectionString);
-            var connection = new DatabaseConnection(sqlConnection, this);
-            return connection;
-        }
 
 		private TimeConstraints GetTimeConstraints()
 		{

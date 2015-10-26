@@ -6,9 +6,9 @@ using System.Threading;
 using Ashod.Database;
 using BeRated.Logging;
 
-namespace BeRated.App
+namespace BeRated.Cache
 {
-	class Database : IDisposable
+	class CacheManager : IDisposable
 	{
 		private const int MaxRoundsDefault = 30;
         private const int UpdateInterval = 10 * 1000;
@@ -20,7 +20,7 @@ namespace BeRated.App
 
 		private Thread _ReaderThread = null;
 
-		public Database(string logPath, string connectionString)
+		public CacheManager(string logPath, string connectionString)
 		{
 			_LogPath = logPath;
 			_ConnectionString = connectionString;
