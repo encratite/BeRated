@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BeRated
+namespace BeRated.Logging.Data
 {
 	public class TeamSwitch
 	{

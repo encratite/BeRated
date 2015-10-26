@@ -1,11 +1,10 @@
-﻿using Ashod;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Ashod;
 using Ashod.Database;
 using BeRated.Model;
 using BeRated.Server;
-using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Owin;
 
 namespace BeRated.App

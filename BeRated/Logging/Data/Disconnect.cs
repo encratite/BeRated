@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace BeRated
+namespace BeRated.Logging.Data
 {
-	public class Purchase
+	public class Disconnect
 	{
 		public DateTime Time;
 		public PlayerIdentity Player;
 		public string Team;
-		public string Item;
+		public string Reason;
 	}
 }

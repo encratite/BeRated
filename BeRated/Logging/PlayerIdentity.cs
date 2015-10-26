@@ -1,4 +1,4 @@
-﻿namespace BeRated
+﻿namespace BeRated.Logging
 {
 	public class PlayerIdentity
 	{

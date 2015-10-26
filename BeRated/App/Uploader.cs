@@ -1,33 +1,27 @@
-﻿using Ashod.Database;
-using Npgsql;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Ashod.Database;
+using BeRated.Logging;
 
-namespace BeRated
+namespace BeRated.App
 {
-	class Uploader: IDisposable
+	class Uploader
 	{
-		const int MaxRoundsDefault = 30;
-        const int UpdateInterval = 10 * 1000;
+		private const int MaxRoundsDefault = 30;
+        private const int UpdateInterval = 10 * 1000;
 
-		string _LogPath;
-		string _ConnectionString;
-		DatabaseConnection _Database;
-		int _MaxRounds = MaxRoundsDefault;
-		Dictionary<string, string> _Players = new Dictionary<string, string>();
+		private string _LogPath;
+		private string _ConnectionString;
+		private int _MaxRounds = MaxRoundsDefault;
+		private Dictionary<string, string> _Players = new Dictionary<string, string>();
 
 		public Uploader(string logPath, string connectionString)
 		{
 			_LogPath = logPath;
 			_ConnectionString = connectionString;
-		}
-
-		void IDisposable.Dispose()
-		{
-            Disconnect();
 		}
 
 		public void Run()
@@ -36,8 +30,6 @@ namespace BeRated
             {
                 try
                 {
-                    var connection = new NpgsqlConnection(_ConnectionString);
-                    _Database = new DatabaseConnection(connection);
                     var files = Directory.GetFiles(_LogPath);
                     foreach (var file in files)
                         ProcessLog(file);
@@ -46,12 +38,11 @@ namespace BeRated
                 {
                     Console.WriteLine("Failed to update database: {0} ({1})", exception.Message, exception.GetType());
                 }
-                Disconnect();
                 Thread.Sleep(UpdateInterval);
             }
 		}
 
-		void ProcessLog(string path)
+		private void ProcessLog(string path)
 		{
 			_MaxRounds = MaxRoundsDefault;
 			_Players = new Dictionary<string, string>();
@@ -62,12 +53,6 @@ namespace BeRated
 			{
 				new CommandParameter("file_name", fileName),
 			};
-            long? bytesProcessed = _Database.ScalarFunction<long?>("get_log_state", getLogStateParameters);
-            if (bytesProcessed != null && bytesProcessed >= currentFileSize)
-            {
-                // This file has already been processed
-                return;
-            }
             var content = File.ReadAllText(path);
             content = content.Replace("\r", "");
             if (content.Length == 0 || content.Last() != '\n')
@@ -195,14 +180,5 @@ namespace BeRated
 			string output = string.Join(",", players);
 			return output;
 		}
-
-        void Disconnect()
-        {
-            if (_Database != null)
-            {
-                _Database.Dispose();
-                _Database = null;
-            }
-        }
 	}
 }
