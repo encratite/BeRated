@@ -124,7 +124,7 @@
   <ItemGroup>
     <Content Include="Images\Favicon.ico" />
     <Content Include="Images\Logo.png" />
-    <Content Include="Scripts\Popup.js" />
+    <Content Include="Scripts\Cookies.js" />
     <Content Include="Scripts\Table.js" />
     <Content Include="Stylesheets\General.css" />
     <Content Include="Stylesheets\Layout.css" />
