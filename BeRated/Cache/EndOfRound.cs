@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace BeRated.Logging.Data
+namespace BeRated.Cache
 {
-	public class EndOfRound
+	class EndOfRound
 	{
 		public DateTime Time { get; set; }
 		public string TriggeringTeam { get; set; }

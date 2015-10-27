@@ -1,6 +1,6 @@
-﻿namespace BeRated.Logging
+﻿namespace BeRated.Cache
 {
-	public class PlayerIdentity
+	class PlayerIdentity
 	{
 		public string SteamId { get; private set; }
 		public string Name { get; private set; }

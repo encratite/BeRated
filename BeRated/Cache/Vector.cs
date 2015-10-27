@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace BeRated.Logging
+namespace BeRated.Cache
 {
-	public class Vector
+	class Vector
 	{
 		public int X { get; private set; }
 		public int Y { get; private set; }

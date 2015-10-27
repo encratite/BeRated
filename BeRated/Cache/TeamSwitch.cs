@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace BeRated.Logging.Data
+namespace BeRated.Cache
 {
-	public class TeamSwitch
+	class TeamSwitch
 	{
 		public DateTime Time { get; set; }
 		public PlayerIdentity Player { get; set; }

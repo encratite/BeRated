@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace BeRated.Logging
+namespace BeRated.Cache
 {
 	class MatchReader
 	{

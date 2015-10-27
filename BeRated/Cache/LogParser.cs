@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using BeRated.Logging.Data;
 
-namespace BeRated.Logging
+namespace BeRated.Cache
 {
-    public static class LogParser
+	static class LogParser
     {
 		public const string BotId = "BOT";
 		public const string TerroristTeam = "TERRORIST";
@@ -34,7 +33,7 @@ namespace BeRated.Logging
 			return output;
 		}
 
-		public static PlayerKill ReadPlayerKill(string line)
+		public static Kill ReadPlayerKill(string line)
 		{
 			var match = KillPattern.Match(line);
 			if (!match.Success)
@@ -55,7 +54,7 @@ namespace BeRated.Logging
 			int victimZ = reader.Int();
 			string weapon = reader.String();
 			bool headshot = reader.String() != "";
-			var output = new PlayerKill
+			var output = new Kill
 			{
 				Time = time,
 				Killer = new PlayerIdentity(killerName, killerSteamId),

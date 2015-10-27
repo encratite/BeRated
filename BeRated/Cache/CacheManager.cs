@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Ashod.Database;
-using BeRated.Logging;
 
 namespace BeRated.Cache
 {
