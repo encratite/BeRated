@@ -16,9 +16,12 @@ namespace BeRated.Cache
 		private string _LogPath;
 		private string _ConnectionString;
 		private int _MaxRounds = MaxRoundsDefault;
-		private Dictionary<string, string> _Players = new Dictionary<string, string>();
 
 		private Thread _ReaderThread = null;
+
+		private Dictionary<string, long> _LogStates = new Dictionary<string, long>();
+
+		private Dictionary<string, string> _PlayerTeams = new Dictionary<string, string>();
 
 		public CacheManager(string logPath, string connectionString)
 		{
@@ -64,16 +67,12 @@ namespace BeRated.Cache
 			lock (this)
 			{
 				_MaxRounds = MaxRoundsDefault;
-				_Players = new Dictionary<string, string>();
+				_PlayerTeams = new Dictionary<string, string>();
 				string fileName = Path.GetFileName(path);
 				var fileInfo = new FileInfo(path);
 				long currentFileSize = fileInfo.Length;
-				var getLogStateParameters = new[]
-				{
-					new CommandParameter("file_name", fileName),
-				};
-				long? bytesProcessed = _Database.ScalarFunction<long?>("get_log_state", getLogStateParameters);
-				if (bytesProcessed != null && bytesProcessed >= currentFileSize)
+				long bytesProcessed;
+				if (_LogStates.TryGetValue(fileName, out bytesProcessed) && bytesProcessed >= currentFileSize)
 				{
 					// This file has already been processed
 					return;
@@ -93,12 +92,7 @@ namespace BeRated.Cache
 					ProcessLine(line, lineCounter);
 					lineCounter++;
 				}
-				var updateLogStateParameters = new[]
-				{
-					new CommandParameter("file_name", fileName),
-					new CommandParameter("bytes_processed", currentFileSize),
-				};
-				_Database.NonQueryFunction("update_log_state", updateLogStateParameters);
+				_LogStates[fileName] = currentFileSize;
 			}
 		}
 
@@ -141,7 +135,7 @@ namespace BeRated.Cache
 				string team = teamSwitch.CurrentTeam;
 				if (steamId == LogParser.BotId || (team != LogParser.TerroristTeam && team != LogParser.CounterTerroristTeam))
 					return;
-				_Players[steamId] = team;
+				_PlayerTeams[steamId] = team;
 				var parameters = new[]
 				{
 					new CommandParameter("name", teamSwitch.Player.Name),
@@ -157,7 +151,7 @@ namespace BeRated.Cache
 				string steamId = disconnect.Player.SteamId;
 				if (steamId == LogParser.BotId)
 					return;
-				_Players.Remove(steamId);
+				_PlayerTeams.Remove(steamId);
 			}
 			var endOfRound = LogParser.ReadEndOfRound(line);
 			if (endOfRound != null)
@@ -186,7 +180,7 @@ namespace BeRated.Cache
 				string steamId = purchase.Player.SteamId;
 				if (steamId == LogParser.BotId)
 					return;
-				string team = _Players[steamId];
+				string team = _PlayerTeams[steamId];
 				var parameters = new[]
 				{
 					new CommandParameter("steam_id", steamId),
@@ -202,7 +196,7 @@ namespace BeRated.Cache
 
 		private string GetSteamIdsString(string team)
 		{
-			var players = _Players.Where(pair => pair.Value == team).Select(pair => pair.Key).ToArray();
+			var players = _PlayerTeams.Where(pair => pair.Value == team).Select(pair => pair.Key).ToArray();
 			string output = string.Join(",", players);
 			return output;
 		}
