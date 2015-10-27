@@ -72,6 +72,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Helper.cs" />
+    <Compile Include="Cache\Kill.cs" />
+    <Compile Include="Cache\Player.cs" />
+    <Compile Include="Cache\Team.cs" />
     <Compile Include="Logging\LogParser.cs" />
     <Compile Include="Logging\Data\Disconnect.cs" />
     <Compile Include="Logging\Data\EndOfRound.cs" />
@@ -81,7 +84,7 @@
     <Compile Include="Logging\MatchReader.cs" />
     <Compile Include="Logging\PlayerIdentity.cs" />
     <Compile Include="Logging\Vector.cs" />
-    <Compile Include="App\Uploader.cs" />
+    <Compile Include="Cache\CacheManager.cs" />
     <Compile Include="Model\GeneralStats.cs" />
     <Compile Include="Model\GameOutcomes.cs" />
     <Compile Include="Model\PlayerInfo.cs" />

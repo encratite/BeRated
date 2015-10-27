@@ -119,7 +119,7 @@ namespace BeRated.Cache
 					new CommandParameter("weapon", kill.Weapon),
 					new CommandParameter("headshot", kill.Headshot),
 				};
-				_Database.NonQueryFunction("process_kill", parameters);
+				// _Database.NonQueryFunction("process_kill", parameters);
 				return;
 			}
 			int? maxRounds = LogParser.ReadMaxRounds(line);
@@ -142,7 +142,7 @@ namespace BeRated.Cache
 					new CommandParameter("steam_id", steamId),
                     new CommandParameter("_time", teamSwitch.Time),
                 };
-				_Database.NonQueryFunction("update_player", parameters);
+				// _Database.NonQueryFunction("update_player", parameters);
 				return;
 			}
 			var disconnect = LogParser.ReadDisconnect(line);
@@ -171,7 +171,7 @@ namespace BeRated.Cache
 					new CommandParameter("terrorist_steam_ids", terroristIds),
 					new CommandParameter("counter_terrorist_steam_ids", counterTerroristIds),
 				};
-				_Database.NonQueryFunction("process_end_of_round", parameters);
+				// _Database.NonQueryFunction("process_end_of_round", parameters);
 				return;
 			}
 			var purchase = LogParser.ReadPurchase(line);
@@ -189,7 +189,7 @@ namespace BeRated.Cache
 					new CommandParameter("team", team),
 					new CommandParameter("item", purchase.Item),
 				};
-				_Database.NonQueryFunction("process_purchase", parameters);
+				// _Database.NonQueryFunction("process_purchase", parameters);
 				return;
 			}
 		}

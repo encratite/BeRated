@@ -70,6 +70,7 @@ namespace BeRated.App
             var startParameter = new CommandParameter("time_start", constraints.Start);
             var endParameter = new CommandParameter("time_end", constraints.End);
 			var stats = new GeneralStats();
+			/*
             using (var reader = connection.ReadFunction("get_all_player_stats", startParameter, endParameter))
             {
 				stats.Players = reader.ReadAll<GeneralPlayerStats>();
@@ -78,6 +79,7 @@ namespace BeRated.App
 			{
 				stats.Teams = reader.ReadAll<TeamStats>();
             }
+			*/
 			return stats;
 		}
 
@@ -90,6 +92,7 @@ namespace BeRated.App
             var idParameter = new CommandParameter("player_id", id);
             var startParameter = new CommandParameter("time_start", constraints.Start);
             var endParameter = new CommandParameter("time_end", constraints.End);
+			/*
             playerStats.Name = connection.ScalarFunction<string>("get_player_name", idParameter);
 			using (var reader = connection.ReadFunction("get_player_games", idParameter))
 			{
@@ -111,6 +114,7 @@ namespace BeRated.App
                 var purchases = reader.ReadAll<PlayerItemStats>();
 				playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
             }
+			*/
             return playerStats;
         }
 
@@ -120,20 +124,26 @@ namespace BeRated.App
             Func<string, List<PlayerInfo>> readPlayers = (playerIdString) =>
 			{
 				var playerIdParameter = new CommandParameter("player_id_string", playerIdString);
+				/*
 				using (var reader = connection.ReadFunction("get_player_names", playerIdParameter))
 				{
 					return reader.ReadAll<PlayerInfo>();
 				}
+				*/
+				throw new NotImplementedException();
 			};
 			Func<bool, GameOutcomes> readOutcomes = (precise) =>
 			{
 				var teamParameter1 = new CommandParameter("player_id_string1", team1);
 				var teamParameter2 = new CommandParameter("player_id_string2", team2);
 				var preciseParameter = new CommandParameter("precise", precise);
+				/*
 				using (var reader = connection.ReadFunction("get_matchup_stats", teamParameter1, teamParameter2, preciseParameter))
 				{
 					return reader.ReadAll<GameOutcomes>().First();
 				}
+				*/
+				throw new NotImplementedException();
 			};
 			var matchup = new TeamMatchupStats
 			{
