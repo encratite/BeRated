@@ -42,13 +42,13 @@ namespace BeRated.Cache
 			var time = ReadDate(reader);
 			string killerName = reader.String();
 			string killerSteamId = reader.String();
-			string killerTeam = reader.String();
+			var killerTeam = reader.Team();
 			int killerX = reader.Int();
 			int killerY = reader.Int();
 			int killerZ = reader.Int();
 			string victimName = reader.String();
 			string victimSteamId = reader.String();
-			string victimTeam = reader.String();
+			var victimTeam = reader.Team();
 			int victimX = reader.Int();
 			int victimY = reader.Int();
 			int victimZ = reader.Int();
@@ -111,8 +111,8 @@ namespace BeRated.Cache
 			var time = ReadDate(reader);
 			string name = reader.String();
 			string steamId = reader.String();
-			string previousTeam = reader.String();
-			string currentTeam = reader.String();
+			var previousTeam = reader.Team();
+			var currentTeam = reader.Team();
 			var output = new TeamSwitch
 			{
 				Time = time,
@@ -153,7 +153,7 @@ namespace BeRated.Cache
 			var time = ReadDate(reader);
 			string name = reader.String();
 			string steamId = reader.String();
-			string team = reader.String();
+			var team = reader.Team();
 			string item = reader.String();
 			var output = new Purchase
 			{

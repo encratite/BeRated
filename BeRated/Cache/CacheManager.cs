@@ -20,7 +20,7 @@ namespace BeRated.Cache
 
 		private Dictionary<string, long> _LogStates = new Dictionary<string, long>();
 
-		private Dictionary<string, string> _PlayerTeams = new Dictionary<string, string>();
+		private Dictionary<string, Team> _PlayerTeams = null;
 
 		public CacheManager(string logPath, string connectionString)
 		{
@@ -66,7 +66,7 @@ namespace BeRated.Cache
 			lock (this)
 			{
 				_MaxRounds = MaxRoundsDefault;
-				_PlayerTeams = new Dictionary<string, string>();
+				_PlayerTeams = new Dictionary<string, Team>();
 				string fileName = Path.GetFileName(path);
 				var fileInfo = new FileInfo(path);
 				long currentFileSize = fileInfo.Length;
@@ -131,8 +131,8 @@ namespace BeRated.Cache
 			if (teamSwitch != null)
 			{
 				string steamId = teamSwitch.Player.SteamId;
-				string team = teamSwitch.CurrentTeam;
-				if (steamId == LogParser.BotId || (team != LogParser.TerroristTeam && team != LogParser.CounterTerroristTeam))
+				var team = teamSwitch.CurrentTeam;
+				if (steamId == LogParser.BotId)
 					return;
 				_PlayerTeams[steamId] = team;
 				var parameters = new[]
@@ -179,7 +179,7 @@ namespace BeRated.Cache
 				string steamId = purchase.Player.SteamId;
 				if (steamId == LogParser.BotId)
 					return;
-				string team = _PlayerTeams[steamId];
+				var team = _PlayerTeams[steamId];
 				var parameters = new[]
 				{
 					new CommandParameter("steam_id", steamId),
@@ -195,9 +195,7 @@ namespace BeRated.Cache
 
 		private string GetSteamIdsString(string team)
 		{
-			var players = _PlayerTeams.Where(pair => pair.Value == team).Select(pair => pair.Key).ToArray();
-			string output = string.Join(",", players);
-			return output;
+			throw new NotImplementedException();
 		}
 	}
 }

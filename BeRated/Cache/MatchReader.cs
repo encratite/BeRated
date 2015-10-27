@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace BeRated.Cache
 {
@@ -24,6 +25,17 @@ namespace BeRated.Cache
 			string intString = String();
 			int output = int.Parse(intString);
 			return output;
+		}
+
+		public Team Team()
+		{
+			string team = String();
+			if (team == LogParser.TerroristTeam)
+				return BeRated.Cache.Team.Terrorist;
+			else if (team == LogParser.CounterTerroristTeam)
+				return BeRated.Cache.Team.CounterTerrorist;
+			else
+				throw new ArgumentException("Invalid team string");
 		}
 	}
 }
