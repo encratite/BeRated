@@ -56,6 +56,7 @@ namespace BeRated.Cache
 			else
 			{
 				player = new Player(name, steamId);
+				_Players[steamId] = player;
 			}
 			return player;
 		}
