@@ -22,6 +22,8 @@ namespace BeRated.Cache
 
 		private Dictionary<string, Team> _PlayerTeams = null;
 
+		private Dictionary<string, Player> _Players = new Dictionary<string, Player>();
+
 		public CacheManager(string logPath, string connectionString)
 		{
 			_LogPath = logPath;
@@ -41,6 +43,21 @@ namespace BeRated.Cache
 		{
 			_ReaderThread = new Thread(RunReader);
 			_ReaderThread.Start();
+		}
+
+		public Player GetPlayer(string name, string steamId)
+		{
+			Player player;
+			if (_Players.TryGetValue(steamId, out player))
+			{
+				// Update name, just in case
+				player.Name = name;
+			}
+			else
+			{
+				player = new Player(name, steamId);
+			}
+			return player;
 		}
 
 		private void RunReader()
@@ -97,7 +114,8 @@ namespace BeRated.Cache
 
 		private void ProcessLine(string line, int lineCounter)
 		{
-			var kill = LogParser.ReadPlayerKill(line);
+			var logParser = new LogParser(this);
+			var kill = logParser.ReadPlayerKill(line);
 			if (kill != null)
 			{
 				if (kill.Killer.SteamId == LogParser.BotId || kill.Victim.SteamId == LogParser.BotId)
@@ -121,13 +139,13 @@ namespace BeRated.Cache
 				// _Database.NonQueryFunction("process_kill", parameters);
 				return;
 			}
-			int? maxRounds = LogParser.ReadMaxRounds(line);
+			int? maxRounds = logParser.ReadMaxRounds(line);
 			if (maxRounds != null)
 			{
 				_MaxRounds = maxRounds.Value;
 				return;
 			}
-			var teamSwitch = LogParser.ReadTeamSwitch(line);
+			var teamSwitch = logParser.ReadTeamSwitch(line);
 			if (teamSwitch != null)
 			{
 				string steamId = teamSwitch.Player.SteamId;
@@ -144,7 +162,7 @@ namespace BeRated.Cache
 				// _Database.NonQueryFunction("update_player", parameters);
 				return;
 			}
-			var disconnect = LogParser.ReadDisconnect(line);
+			var disconnect = logParser.ReadDisconnect(line);
 			if (disconnect != null)
 			{
 				string steamId = disconnect.Player.SteamId;
@@ -152,7 +170,7 @@ namespace BeRated.Cache
 					return;
 				_PlayerTeams.Remove(steamId);
 			}
-			var endOfRound = LogParser.ReadEndOfRound(line);
+			var endOfRound = logParser.ReadEndOfRound(line);
 			if (endOfRound != null)
 			{
 				if (endOfRound.TerroristScore == 0 && endOfRound.CounterTerroristScore == 0)
@@ -173,7 +191,7 @@ namespace BeRated.Cache
 				// _Database.NonQueryFunction("process_end_of_round", parameters);
 				return;
 			}
-			var purchase = LogParser.ReadPurchase(line);
+			var purchase = logParser.ReadPurchase(line);
 			if (purchase != null)
 			{
 				string steamId = purchase.Player.SteamId;

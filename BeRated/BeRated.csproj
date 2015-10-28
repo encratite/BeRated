@@ -81,7 +81,6 @@
     <Compile Include="Cache\Purchase.cs" />
     <Compile Include="Cache\TeamSwitch.cs" />
     <Compile Include="Cache\MatchReader.cs" />
-    <Compile Include="Cache\PlayerIdentity.cs" />
     <Compile Include="Cache\Vector.cs" />
     <Compile Include="Cache\CacheManager.cs" />
     <Compile Include="Model\GeneralStats.cs" />

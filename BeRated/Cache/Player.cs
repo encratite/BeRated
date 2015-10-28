@@ -12,10 +12,10 @@ namespace BeRated.Cache
 
 		public List<Kill> Deaths { get; set; }
 
-		public Player(PlayerIdentity playerIdentity)
+		public Player(string name, string steamId)
 		{
-			Name = playerIdentity.Name;
-			SteamId = playerIdentity.Name;
+			Name = name;
+			SteamId = steamId;
 			Kills = new List<Kill>();
 			Deaths = new List<Kill>();
 		}

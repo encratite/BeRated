@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace BeRated.Cache
 {
-	static class LogParser
+	class LogParser
     {
 		public const string BotId = "BOT";
 		public const string TerroristTeam = "TERRORIST";
@@ -21,19 +21,14 @@ namespace BeRated.Cache
 		private static Regex DisconnectPattern = new Regex(DatePrefix + PlayerPattern + " disconnected \\(reason \"(.+?)\"\\)");
 		private static Regex PurchasePattern = new Regex(DatePrefix + PlayerPattern + " purchased \"(.+?)\"");
 
-		static DateTime ReadDate(MatchReader reader)
+		private CacheManager _Cache;
+
+		public LogParser(CacheManager cache)
 		{
-			int month = reader.Int();
-			int day = reader.Int();
-			int year = reader.Int();
-			int hour = reader.Int();
-			int minute = reader.Int();
-			int second = reader.Int();
-			var output = new DateTime(year, month, day, hour, minute, second);
-			return output;
+			_Cache = cache;
 		}
 
-		public static Kill ReadPlayerKill(string line)
+		public Kill ReadPlayerKill(string line)
 		{
 			var match = KillPattern.Match(line);
 			if (!match.Success)
@@ -57,10 +52,10 @@ namespace BeRated.Cache
 			var output = new Kill
 			{
 				Time = time,
-				Killer = new PlayerIdentity(killerName, killerSteamId),
+				Killer = GetPlayer(killerName, killerSteamId),
 				KillerTeam = killerTeam,
 				KillerPosition = new Vector(killerX, killerY, killerZ),
-				Victim = new PlayerIdentity(victimName, victimSteamId),
+				Victim = GetPlayer(victimName, victimSteamId),
 				VictimTeam = victimTeam,
 				VictimPosition = new Vector(victimX, victimY, victimZ),
 				Headshot = headshot,
@@ -69,7 +64,7 @@ namespace BeRated.Cache
 			return output;
 		}
 
-		public static int? ReadMaxRounds(string line)
+		public int? ReadMaxRounds(string line)
 		{
 			var match = MaxRoundsPattern.Match(line);
 			if (!match.Success)
@@ -80,7 +75,7 @@ namespace BeRated.Cache
 			return maxRounds;
 		}
 
-		public static EndOfRound ReadEndOfRound(string line)
+		public EndOfRound ReadEndOfRound(string line)
 		{
 			var match = EndOfRoundPattern.Match(line);
 			if (!match.Success)
@@ -102,7 +97,7 @@ namespace BeRated.Cache
 			return output;
 		}
 
-		public static TeamSwitch ReadTeamSwitch(string line)
+		public TeamSwitch ReadTeamSwitch(string line)
 		{
 			var match = TeamSwitchPattern.Match(line);
 			if (!match.Success)
@@ -116,14 +111,14 @@ namespace BeRated.Cache
 			var output = new TeamSwitch
 			{
 				Time = time,
-				Player = new PlayerIdentity(name, steamId),
+				Player = GetPlayer(name, steamId),
 				PreviousTeam = previousTeam,
 				CurrentTeam = currentTeam,
 			};
 			return output;
 		}
 
-		public static Disconnect ReadDisconnect(string line)
+		public Disconnect ReadDisconnect(string line)
 		{
 			var match = DisconnectPattern.Match(line);
 			if (!match.Success)
@@ -137,14 +132,14 @@ namespace BeRated.Cache
 			var output = new Disconnect
 			{
 				Time = time,
-				Player = new PlayerIdentity(name, steamId),
+				Player = GetPlayer(name, steamId),
 				Team = team,
 				Reason = reason,
 			};
 			return output;
 		}
 
-		public static Purchase ReadPurchase(string line)
+		public Purchase ReadPurchase(string line)
 		{
 			var match = PurchasePattern.Match(line);
 			if (!match.Success)
@@ -158,11 +153,29 @@ namespace BeRated.Cache
 			var output = new Purchase
 			{
 				Time = time,
-				Player = new PlayerIdentity(name, steamId),
+				Player = GetPlayer(name, steamId),
 				Team = team,
 				Item = item
 			};
 			return output;
+		}
+
+		private DateTime ReadDate(MatchReader reader)
+		{
+			int month = reader.Int();
+			int day = reader.Int();
+			int year = reader.Int();
+			int hour = reader.Int();
+			int minute = reader.Int();
+			int second = reader.Int();
+			var output = new DateTime(year, month, day, hour, minute, second);
+			return output;
+		}
+
+		private Player GetPlayer(string name, string steamId)
+		{
+			var player = _Cache.GetPlayer(name, steamId);
+			return player;
 		}
     }
 }
