@@ -75,18 +75,18 @@ namespace BeRated.Cache
 			return maxRounds;
 		}
 
-		public EndOfRound ReadEndOfRound(string line)
+		public Round ReadEndOfRound(string line)
 		{
 			var match = EndOfRoundPattern.Match(line);
 			if (!match.Success)
 				return null;
 			var reader = new MatchReader(match);
 			var time = ReadDate(reader);
-			string triggeringTeam = reader.String();
+			var triggeringTeam = reader.Team();
 			string sfuiNotice = reader.String();
 			int counterTerroristScore = reader.Int();
 			int terroristScore = reader.Int();
-			var output = new EndOfRound
+			var output = new Round
 			{
 				Time = time,
 				TriggeringTeam = triggeringTeam,
@@ -158,6 +158,29 @@ namespace BeRated.Cache
 				Item = item
 			};
 			return output;
+		}
+
+		public Team GetWinningTeam(string sfuiNotice)
+		{
+			switch (sfuiNotice)
+			{
+				case "SFUI_Notice_All_Hostages_Rescued":
+					return Team.CounterTerrorist;
+				case "SFUI_Notice_Bomb_Defused":
+					return Team.CounterTerrorist;
+				case "SFUI_Notice_CTs_Win":
+					return Team.CounterTerrorist;
+				case "SFUI_Notice_Hostages_Not_Rescued":
+					return Team.Terrorist;
+				case "SFUI_Notice_Target_Bombed":
+					return Team.Terrorist;
+				case "SFUI_Notice_Target_Saved":
+					return Team.CounterTerrorist;
+				case "SFUI_Notice_Terrorists_Win":
+					return Team.Terrorist;
+				default:
+					throw new ArgumentException("Unknown SFUI notice");
+			}
 		}
 
 		private DateTime ReadDate(MatchReader reader)

@@ -20,9 +20,10 @@ namespace BeRated.Cache
 
 		private Dictionary<string, long> _LogStates = new Dictionary<string, long>();
 
-		private Dictionary<string, Team> _PlayerTeams = null;
-
 		private Dictionary<string, Player> _Players = new Dictionary<string, Player>();
+
+		private Dictionary<string, Team> _PlayerTeams = null;
+		private List<Round> _Rounds = new List<Round>();
 
 		public CacheManager(string logPath, string connectionString)
 		{
@@ -67,7 +68,8 @@ namespace BeRated.Cache
             {
                 try
                 {
-                    var files = Directory.GetFiles(_LogPath);
+                    var files = Directory.GetFiles(_LogPath).ToList();
+					files.Sort();
                     foreach (var file in files)
                         ProcessLog(file);
                 }
@@ -119,25 +121,10 @@ namespace BeRated.Cache
 			var kill = logParser.ReadPlayerKill(line);
 			if (kill != null)
 			{
-				if (kill.Killer.SteamId == LogParser.BotId || kill.Victim.SteamId == LogParser.BotId)
+				if (kill.Killer.SteamId == LogParser.BotId || kill.Victim.SteamId == LogParser.BotId || kill.Killer == kill.Victim)
 					return;
-				var parameters = new []
-				{
-					new CommandParameter("kill_time", kill.Time),
-					new CommandParameter("killer_steam_id", kill.Killer.SteamId),
-					new CommandParameter("killer_team", kill.KillerTeam),
-					new CommandParameter("killer_x", kill.KillerPosition.X),
-					new CommandParameter("killer_y", kill.KillerPosition.Y),
-					new CommandParameter("killer_z", kill.KillerPosition.Z),
-					new CommandParameter("victim_steam_id", kill.Victim.SteamId),
-					new CommandParameter("victim_team", kill.VictimTeam),
-					new CommandParameter("victim_x", kill.VictimPosition.X),
-					new CommandParameter("victim_y", kill.VictimPosition.Y),
-					new CommandParameter("victim_z", kill.VictimPosition.Z),
-					new CommandParameter("weapon", kill.Weapon),
-					new CommandParameter("headshot", kill.Headshot),
-				};
-				// _Database.NonQueryFunction("process_kill", parameters);
+				kill.Killer.Kills.Add(kill);
+				kill.Victim.Deaths.Add(kill);
 				return;
 			}
 			int? maxRounds = logParser.ReadMaxRounds(line);
@@ -154,13 +141,6 @@ namespace BeRated.Cache
 				if (steamId == LogParser.BotId)
 					return;
 				_PlayerTeams[steamId] = team;
-				var parameters = new[]
-				{
-					new CommandParameter("name", teamSwitch.Player.Name),
-					new CommandParameter("steam_id", steamId),
-                    new CommandParameter("_time", teamSwitch.Time),
-                };
-				// _Database.NonQueryFunction("update_player", parameters);
 				return;
 			}
 			var disconnect = logParser.ReadDisconnect(line);
@@ -171,25 +151,53 @@ namespace BeRated.Cache
 					return;
 				_PlayerTeams.Remove(steamId);
 			}
-			var endOfRound = logParser.ReadEndOfRound(line);
-			if (endOfRound != null)
+			var round = logParser.ReadEndOfRound(line);
+			if (round != null)
 			{
-				if (endOfRound.TerroristScore == 0 && endOfRound.CounterTerroristScore == 0)
+				if (round.TerroristScore == 0 && round.CounterTerroristScore == 0)
 					return;
-				string terroristIds = GetSteamIdsString(LogParser.TerroristTeam);
-				string counterTerroristIds = GetSteamIdsString(LogParser.CounterTerroristTeam);
-				var parameters = new[]
+				int roundsPlayed = round.TerroristScore + round.CounterTerroristScore;
+				if (roundsPlayed == 1)
+					_Rounds.Clear();
+				_Rounds.Add(round);
+				var winningTeam = logParser.GetWinningTeam(round.SfuiNotice);
+				foreach (var pair in _PlayerTeams)
 				{
-					new CommandParameter("end_of_round_time", endOfRound.Time),
-					new CommandParameter("triggering_team", endOfRound.TriggeringTeam),
-					new CommandParameter("sfui_notice", endOfRound.SfuiNotice),
-					new CommandParameter("terrorist_score", endOfRound.TerroristScore),
-					new CommandParameter("counter_terrorist_score", endOfRound.CounterTerroristScore),
-					new CommandParameter("max_rounds", _MaxRounds),
-					new CommandParameter("terrorist_steam_ids", terroristIds),
-					new CommandParameter("counter_terrorist_steam_ids", counterTerroristIds),
-				};
-				// _Database.NonQueryFunction("process_end_of_round", parameters);
+					var player = _Players[pair.Key];
+					var playerTeam = pair.Value;
+					var container = playerTeam == winningTeam ? player.RoundsWon : player.RoundsLost;
+					container.Add(round);
+				}
+				int roundsToWin = _MaxRounds / 2 + 1;
+				bool terroristsWinGame = round.TerroristScore >= roundsToWin;
+				bool counterTerroristsWinGame = round.CounterTerroristScore >= roundsToWin;
+				bool draw = roundsPlayed >= _MaxRounds;
+				if (terroristsWinGame || counterTerroristsWinGame || draw)
+				{
+					var game = new Game(_Rounds);
+					foreach (var pair in _PlayerTeams)
+					{
+						var player = _Players[pair.Key];
+						var playerTeam = pair.Value;
+						List<Game> container;
+						if (draw)
+						{
+							container = player.Draws;
+						}
+						else if (
+							(terroristsWinGame && playerTeam == Team.Terrorist) ||
+							(counterTerroristsWinGame && playerTeam == Team.CounterTerrorist)
+						)
+						{
+							container = player.Wins;
+						}
+						else
+						{
+							container = player.Losses;
+						}
+						container.Add(game);
+					}
+				}
 				return;
 			}
 			var purchase = logParser.ReadPurchase(line);
@@ -198,23 +206,9 @@ namespace BeRated.Cache
 				string steamId = purchase.Player.SteamId;
 				if (steamId == LogParser.BotId)
 					return;
-				var team = _PlayerTeams[steamId];
-				var parameters = new[]
-				{
-					new CommandParameter("steam_id", steamId),
-					new CommandParameter("line", lineCounter),
-					new CommandParameter("purchase_time", purchase.Time),
-					new CommandParameter("team", team),
-					new CommandParameter("item", purchase.Item),
-				};
-				// _Database.NonQueryFunction("process_purchase", parameters);
+				purchase.Player.Purchases.Add(purchase);
 				return;
 			}
-		}
-
-		private string GetSteamIdsString(string team)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

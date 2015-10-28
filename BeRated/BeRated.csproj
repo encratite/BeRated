@@ -72,11 +72,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Helper.cs" />
+    <Compile Include="Cache\Game.cs" />
     <Compile Include="Cache\Player.cs" />
     <Compile Include="Cache\Team.cs" />
     <Compile Include="Cache\LogParser.cs" />
     <Compile Include="Cache\Disconnect.cs" />
-    <Compile Include="Cache\EndOfRound.cs" />
+    <Compile Include="Cache\Round.cs" />
     <Compile Include="Cache\Kill.cs" />
     <Compile Include="Cache\Purchase.cs" />
     <Compile Include="Cache\TeamSwitch.cs" />
