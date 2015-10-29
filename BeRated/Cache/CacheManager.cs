@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Ashod.Database;
 
 namespace BeRated.Cache
 {
@@ -57,7 +56,8 @@ namespace BeRated.Cache
 			else
 			{
 				player = new Player(name, steamId);
-				_Players[steamId] = player;
+				if (steamId != LogParser.BotId)
+					_Players[steamId] = player;
 			}
 			return player;
 		}

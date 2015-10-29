@@ -36,5 +36,10 @@ namespace BeRated.Cache
 
 			Purchases = new List<Purchase>();
 		}
+
+		public override string ToString()
+		{
+			return string.Format("{0} ({1})", Name, SteamId);
+		}
 	}
 }
