@@ -30,10 +30,14 @@ namespace BeRated.Cache
 		public Team Team()
 		{
 			string team = String();
-			if (team == LogParser.TerroristTeam)
+			if (team == LogParser.UnassignedTeam)
+				return BeRated.Cache.Team.Unassigned;
+			else if (team == LogParser.TerroristTeam)
 				return BeRated.Cache.Team.Terrorist;
 			else if (team == LogParser.CounterTerroristTeam)
 				return BeRated.Cache.Team.CounterTerrorist;
+			else if (team == LogParser.SpectatorTeam)
+				return BeRated.Cache.Team.Spectator;
 			else
 				throw new ArgumentException("Invalid team string");
 		}

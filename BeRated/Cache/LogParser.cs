@@ -8,6 +8,8 @@ namespace BeRated.Cache
 		public const string BotId = "BOT";
 		public const string TerroristTeam = "TERRORIST";
 		public const string CounterTerroristTeam = "CT";
+		public const string UnassignedTeam = "Unassigned";
+		public const string SpectatorTeam = "Spectator";
 
 		private const string DatePrefix = "^L (\\d{2})\\/(\\d{2})\\/(\\d+) - (\\d{2}):(\\d{2}):(\\d{2}): ";
 		private const string PlayerPattern = "\"(.+?)<\\d+><(.+?)><(.*?)>\"";
