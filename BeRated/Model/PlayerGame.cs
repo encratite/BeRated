@@ -33,16 +33,16 @@ namespace BeRated.Model
 
         public static List<PlayerInfo> GetPlayers(string playerString)
 		{
-			var pattern = new Regex("\"\\((\\d+),(?:\\\\\"(.+?)\\\\\"|(.+?))\\)\"[,}]");
+			var pattern = new Regex("\"\\((\\.+?),(?:\\\\\"(.+?)\\\\\"|(.+?))\\)\"[,}]");
 			var players = new List<PlayerInfo>();
 			foreach (Match match in pattern.Matches(playerString))
 			{
 				var groups = match.Groups;
-				int playerId = int.Parse(groups[1].Value);
+				string steamId = groups[1].Value;
 				string name1 = groups[2].Value;
 				string name2 = groups[3].Value;
 				string name = !string.IsNullOrEmpty(name1) ? name1 : name2;
-				var player = new PlayerInfo(playerId, name);
+				var player = new PlayerInfo(steamId, name);
 				players.Add(player);
 			}
 			players = players.OrderBy(player => player.Name).ToList();

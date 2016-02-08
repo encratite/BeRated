@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="App\Helper.cs" />
     <Compile Include="Cache\Game.cs" />
+    <Compile Include="Cache\GameOutcome.cs" />
     <Compile Include="Cache\Player.cs" />
     <Compile Include="Cache\Team.cs" />
     <Compile Include="Cache\LogParser.cs" />

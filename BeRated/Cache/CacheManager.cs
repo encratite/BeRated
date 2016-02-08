@@ -11,6 +11,22 @@ namespace BeRated.Cache
 		private const int MaxRoundsDefault = 30;
         private const int UpdateInterval = 10 * 1000;
 
+        public IEnumerable<Player> Players
+        {
+            get
+            {
+                return _Players.Values;
+            }
+        }
+
+        public IEnumerable<Game> Games
+        {
+            get
+            {
+                return _Games.AsReadOnly();
+            }
+        }
+
 		private string _LogPath;
 		private string _ConnectionString;
 		private int _MaxRounds = MaxRoundsDefault;
@@ -20,6 +36,8 @@ namespace BeRated.Cache
 		private Dictionary<string, long> _LogStates = new Dictionary<string, long>();
 
 		private Dictionary<string, Player> _Players = new Dictionary<string, Player>();
+
+        private List<Game> _Games = new List<Game>();
 
 		private Dictionary<string, Team> _PlayerTeams = null;
 		private List<Round> _Rounds = new List<Round>();
@@ -174,28 +192,36 @@ namespace BeRated.Cache
 				bool draw = roundsPlayed >= _MaxRounds;
 				if (terroristsWinGame || counterTerroristsWinGame || draw)
 				{
-					var game = new Game(_Rounds);
+                    var outcome = GameOutcome.Draw;
+                    if (terroristsWinGame)
+                        outcome = GameOutcome.TerroristsWin;
+                    else if (counterTerroristsWinGame)
+                        outcome = GameOutcome.CounterTerroristsWin;
+					var game = new Game(_Rounds, outcome);
+                    _Games.Add(game);
 					foreach (var pair in _PlayerTeams)
 					{
 						var player = _Players[pair.Key];
 						var playerTeam = pair.Value;
-						List<Game> container;
+						List<Game> games;
 						if (draw)
 						{
-							container = player.Draws;
+							games = player.Draws;
 						}
 						else if (
 							(terroristsWinGame && playerTeam == Team.Terrorist) ||
 							(counterTerroristsWinGame && playerTeam == Team.CounterTerrorist)
 						)
 						{
-							container = player.Wins;
+							games = player.Wins;
 						}
 						else
 						{
-							container = player.Losses;
+							games = player.Losses;
 						}
-						container.Add(game);
+						games.Add(game);
+                        var players = playerTeam == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
+                        players.Add(player);
 					}
 				}
 				return;

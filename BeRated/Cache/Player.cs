@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace BeRated.Cache
 {
@@ -13,9 +14,25 @@ namespace BeRated.Cache
 		public List<Round> RoundsWon { get; private set; }
 		public List<Round> RoundsLost { get; private set; }
 
+        public IEnumerable<Round> Rounds
+        {
+            get
+            {
+                return RoundsWon.Concat(RoundsLost);
+            }
+        }
+
 		public List<Game> Wins { get; private set; }
 		public List<Game> Losses { get; private set; }
 		public List<Game> Draws { get; private set; }
+
+        public IEnumerable<Game> Games
+        {
+            get
+            {
+                return Wins.Concat(Losses).Concat(Draws);
+            }
+        }
 
 		public List<Purchase> Purchases { get; private set; }
 

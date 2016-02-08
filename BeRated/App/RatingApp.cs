@@ -67,19 +67,11 @@ namespace BeRated.App
         public GeneralStats General()
         {
 			var constraints = GetTimeConstraints();
-            var startParameter = new CommandParameter("time_start", constraints.Start);
-            var endParameter = new CommandParameter("time_end", constraints.End);
-			var stats = new GeneralStats();
-			/*
-            using (var reader = connection.ReadFunction("get_all_player_stats", startParameter, endParameter))
+			var stats = new GeneralStats
             {
-				stats.Players = reader.ReadAll<GeneralPlayerStats>();
-            }
-			using (var reader = connection.ReadFunction("get_teams", startParameter, endParameter))
-			{
-				stats.Teams = reader.ReadAll<TeamStats>();
-            }
-			*/
+                Players = GetGeneralPlayerStats(constraints),
+                Teams = GetTeamStats(constraints),
+            };
 			return stats;
 		}
 
@@ -175,5 +167,89 @@ namespace BeRated.App
 			}
 			return days;
 		}
+
+        private decimal? GetRatio(int numerator, int denominator)
+        {
+            if (denominator != 0)
+                return (decimal)numerator / denominator;
+            else
+                return null;
+        }
+
+        private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
+        {
+            var stats = _Cache.Players.Select(player =>
+            {
+                var matchingKills = player.Kills.Where(kill => constraints.Match(kill.Time));
+                var matchingDeaths = player.Deaths.Where(death => constraints.Match(death.Time));
+                int kills = matchingKills.Count();
+                int deaths = matchingDeaths.Count();
+
+                var matchingWins = player.Wins.Where(game => constraints.Match(game.Time));
+                var matchingGames = player.Games.Where(game => constraints.Match(game.Time));
+                int wins = matchingWins.Count();
+                int games = matchingGames.Count();
+
+                var matchingRounds = player.Rounds.Where(round => constraints.Match(round.Time));
+                var matchingRoundsWon = player.RoundsWon.Where(round => constraints.Match(round.Time));
+                int roundsWon = matchingRoundsWon.Count();
+                int roundsPlayed = matchingRounds.Count();
+
+                return new GeneralPlayerStats
+                {
+                    SteamId = player.SteamId,
+		            Name = player.Name,
+		            KillDeathRatio = GetRatio(kills, deaths),
+		            Kills = kills,
+		            Deaths = deaths,
+		            GamesPlayed = games,
+		            GameWinRatio = GetRatio(wins, games),
+		            RoundsPlayed = roundsPlayed,
+		            RoundWinRatio = GetRatio(roundsWon, roundsPlayed),
+                };
+            }).ToList();
+            return stats;
+        }
+
+        private List<TeamStats> GetTeamStats(TimeConstraints constraints)
+        {
+            var teams = new List<TeamStats>();
+            var games = _Cache.Games.Where(game => constraints.Match(game.Time));
+            foreach (var game in games)
+            {
+                AddGameToTeamStats(game.Terrorists, true, game.Outcome, teams);
+                AddGameToTeamStats(game.CounterTerrorists, false, game.Outcome, teams);
+            }
+            return teams;
+        }
+
+        private bool IsSameTeam(List<PlayerInfo> team1, List<Player> team2)
+        {
+            if (team1.Count != team2.Count)
+                return false;
+            foreach (var player1 in team1)
+            {
+                if (!team2.Any(player2 => player1.SteamId == player2.SteamId))
+                    return false;
+            }
+            return true;
+        }
+
+        private void AddGameToTeamStats(List<Player> players, bool isTerroristTeam, GameOutcome outcome, List<TeamStats> teams)
+        {
+            var team = teams.FirstOrDefault(teamStats => IsSameTeam(teamStats.Players, players));
+            if (team == null)
+            {
+                var playerInfos = players.Select(player => new PlayerInfo(player.SteamId, player.Name)).ToList();
+                team = new TeamStats(playerInfos);
+                teams.Add(team);
+            }
+            if (outcome == GameOutcome.Draw)
+                team.Draws++;
+            else if (isTerroristTeam && outcome == GameOutcome.TerroristsWin)
+                team.Wins++;
+            else
+                team.Losses++;
+        }
     }
 }
