@@ -1,52 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace BeRated.Model
 {
-	public class PlayerGame
+    public class PlayerGame
 	{
-		public DateTime GameTime { get; set; }
+		public DateTimeOffset Time { get; set; }
 		public int PlayerScore { get; set; }
 		public int EnemyScore { get; set; }
-		public string Outcome { get; set; }
+		public PlayerGameOutcome Outcome { get; set; }
 
-		public string PlayerTeam
-		{
-			set
-			{
-				PlayerTeamList = GetPlayers(value);
-            }
-		}
-
-		public string EnemyTeam
-		{
-			set
-			{
-				EnemyTeamList = GetPlayers(value);
-			}
-		}
-
-		public List<PlayerInfo> PlayerTeamList { get; private set; }
-		public List<PlayerInfo> EnemyTeamList { get; private set; }
-
-        public static List<PlayerInfo> GetPlayers(string playerString)
-		{
-			var pattern = new Regex("\"\\((\\.+?),(?:\\\\\"(.+?)\\\\\"|(.+?))\\)\"[,}]");
-			var players = new List<PlayerInfo>();
-			foreach (Match match in pattern.Matches(playerString))
-			{
-				var groups = match.Groups;
-				string steamId = groups[1].Value;
-				string name1 = groups[2].Value;
-				string name2 = groups[3].Value;
-				string name = !string.IsNullOrEmpty(name1) ? name1 : name2;
-				var player = new PlayerInfo(steamId, name);
-				players.Add(player);
-			}
-			players = players.OrderBy(player => player.Name).ToList();
-			return players;
-		}
+		public List<PlayerInfo> PlayerTeam { get; set; }
+		public List<PlayerInfo> EnemyTeam { get; set; }
 	}
 }

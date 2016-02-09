@@ -66,6 +66,14 @@ namespace BeRated.Cache
 			_ReaderThread.Start();
 		}
 
+        public Player GetPlayer(string steamId)
+        {
+            Player player;
+            if (!_Players.TryGetValue(steamId, out player))
+                throw new ArgumentException("Unknown Steam ID");
+            return player;
+        }
+
 		public Player GetPlayer(string name, string steamId)
 		{
 			Player player;

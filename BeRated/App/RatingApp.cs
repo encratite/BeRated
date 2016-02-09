@@ -76,21 +76,17 @@ namespace BeRated.App
 		}
 
         [Controller]
-        public PlayerStats Player(int id)
+        public PlayerStats Player(string id)
         {
+            var player = _Cache.GetPlayer(id);
 			var constraints = GetTimeConstraints();
-            var playerStats = new PlayerStats();
-            playerStats.Id = id;
-            var idParameter = new CommandParameter("player_id", id);
-            var startParameter = new CommandParameter("time_start", constraints.Start);
-            var endParameter = new CommandParameter("time_end", constraints.End);
+            var playerStats = new PlayerStats
+            {
+                SteamId = player.SteamId,
+                Name = player.Name,
+                Games = GetPlayerGames(player, constraints),
+            };
 			/*
-            playerStats.Name = connection.ScalarFunction<string>("get_player_name", idParameter);
-			using (var reader = connection.ReadFunction("get_player_games", idParameter))
-			{
-				var games = reader.ReadAll<PlayerGame>();
-				playerStats.Games = games.OrderByDescending(game => game.GameTime).ToList();
-			}
 			using (var reader = connection.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
 			{
 				var encounters = reader.ReadAll<PlayerEncounterStats>();
@@ -176,6 +172,8 @@ namespace BeRated.App
                 return null;
         }
 
+        #region Cache access
+
         private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
         {
             var stats = _Cache.Players.Select(player =>
@@ -223,6 +221,44 @@ namespace BeRated.App
             return teams;
         }
 
+        private List<PlayerGame> GetPlayerGames(Player player, TimeConstraints constraints)
+        {
+            var matchingGames = player.Games.Where(game =>
+                constraints.Match(game.Time) &&
+                (game.Terrorists.Contains(player) || game.CounterTerrorists.Contains(player))
+            );
+            var games = matchingGames.Select(game =>
+            {
+                bool isTerrorist = game.Terrorists.Contains(player);
+                int terroristScore = game.TerroristScore;
+                int counterTerroristScore = game.CounterTerroristScore;
+                var terrorists = GetPlayerInfos(game.Terrorists);
+                var counterTerrorists = GetPlayerInfos(game.CounterTerrorists);
+                PlayerGameOutcome outcome;
+                if (game.Outcome == GameOutcome.Draw)
+                    outcome = PlayerGameOutcome.Draw;
+                else if (
+                    isTerrorist && game.Outcome == GameOutcome.TerroristsWin ||
+                    !isTerrorist && game.Outcome == GameOutcome.CounterTerroristsWin
+                )
+                    outcome = PlayerGameOutcome.Win;
+                else
+                    outcome = PlayerGameOutcome.Loss;
+                return new PlayerGame
+                {
+                    Time = game.Time,
+                    PlayerScore = isTerrorist ? terroristScore : counterTerroristScore,
+                    EnemyScore = isTerrorist ? counterTerroristScore : terroristScore,
+                    Outcome = outcome,
+                    PlayerTeam = isTerrorist ? terrorists : counterTerrorists,
+                    EnemyTeam = isTerrorist ? counterTerrorists : terrorists,
+                };
+            }).ToList();
+            return games;
+        }
+
+        #endregion
+
         private bool IsSameTeam(List<PlayerInfo> team1, List<Player> team2)
         {
             if (team1.Count != team2.Count)
@@ -240,7 +276,7 @@ namespace BeRated.App
             var team = teams.FirstOrDefault(teamStats => IsSameTeam(teamStats.Players, players));
             if (team == null)
             {
-                var playerInfos = players.Select(player => new PlayerInfo(player.SteamId, player.Name)).ToList();
+                var playerInfos = players.Select(player => GetPlayerInfo(player)).ToList();
                 team = new TeamStats(playerInfos);
                 teams.Add(team);
             }
@@ -250,6 +286,16 @@ namespace BeRated.App
                 team.Wins++;
             else
                 team.Losses++;
+        }
+
+        private PlayerInfo GetPlayerInfo(Player player)
+        {
+            return new PlayerInfo(player.SteamId, player.Name);
+        }
+
+        private List<PlayerInfo> GetPlayerInfos(List<Player> team)
+        {
+            return team.Select(player => GetPlayerInfo(player)).ToList();
         }
     }
 }

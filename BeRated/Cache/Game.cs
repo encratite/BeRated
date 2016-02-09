@@ -6,20 +6,19 @@ namespace BeRated.Cache
 {
     class Game
 	{
-		public DateTimeOffset Time
-		{
-			get
-			{
-				return Rounds.Last().Time;
-            }
-		}
+		public DateTimeOffset Time { get { return LastRound.Time; } }
 
 		public List<Round> Rounds { get; private set; }
+
+        public int TerroristScore { get { return LastRound.TerroristScore; } }
+        public int CounterTerroristScore { get { return LastRound.CounterTerroristScore; } }
 
         public GameOutcome Outcome { get; private set; }
 
         public List<Player> Terrorists { get; private set; }
         public List<Player> CounterTerrorists { get; private set; }
+
+        private Round LastRound { get { return Rounds.Last(); } }
 
 		public Game(List<Round> rounds, GameOutcome outcome)
 		{

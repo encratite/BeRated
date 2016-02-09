@@ -4,7 +4,7 @@ namespace BeRated.Model
 {
 	public class PlayerStats
 	{
-		public int Id { get; set; }
+		public string SteamId { get; set; }
 		public string Name { get; set; }
 		public List<PlayerWeaponStats> Weapons { get; set; }
 		public List<PlayerItemStats> Purchases { get; set; }
