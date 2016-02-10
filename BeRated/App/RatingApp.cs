@@ -85,24 +85,10 @@ namespace BeRated.App
                 SteamId = player.SteamId,
                 Name = player.Name,
                 Games = GetPlayerGames(player, constraints),
+				Encounters = GetPlayerEncounterStats(player, constraints),
+				Weapons = GetPlayerWeaponStats(player, constraints),
+				Purchases = GetPlayerItemStats(player, constraints),
             };
-			/*
-			using (var reader = connection.ReadFunction("get_player_encounter_stats", idParameter, startParameter, endParameter))
-			{
-				var encounters = reader.ReadAll<PlayerEncounterStats>();
-				playerStats.Encounters = encounters.OrderByDescending(player => player.Encounters).ToList();
-			}
-			using (var reader = connection.ReadFunction("get_player_weapon_stats", idParameter, startParameter, endParameter))
-            {
-                var weapons = reader.ReadAll<PlayerWeaponStats>();
-				playerStats.Weapons = weapons.OrderByDescending(weapon => weapon.Kills).ToList();
-            }
-            using (var reader = connection.ReadFunction("get_player_purchases", idParameter, startParameter, endParameter))
-            {
-                var purchases = reader.ReadAll<PlayerItemStats>();
-				playerStats.Purchases = purchases.OrderByDescending(item => item.TimesPurchased).ToList();
-            }
-			*/
             return playerStats;
         }
 
@@ -256,6 +242,21 @@ namespace BeRated.App
             }).ToList();
             return games;
         }
+
+		private List<PlayerEncounterStats> GetPlayerEncounterStats(Player player, TimeConstraints constraints)
+		{
+			throw new NotImplementedException();
+		}
+
+		private List<PlayerWeaponStats> GetPlayerWeaponStats(Player player, TimeConstraints constraints)
+		{
+			throw new NotImplementedException();
+		}
+
+		private List<PlayerItemStats> GetPlayerItemStats(Player player, TimeConstraints constraints)
+		{
+			throw new NotImplementedException();
+		}
 
         #endregion
 
