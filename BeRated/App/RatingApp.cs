@@ -238,15 +238,10 @@ namespace BeRated.App
 
 		private List<PlayerEncounterStats> GetPlayerEncounterStats(Player player, TimeConstraints constraints)
 		{
-			var statsDictionary = new Dictionary<string, PlayerEncounterStats>();
+			var statsDictionary = new InitializerDictionary<string, PlayerEncounterStats>();
 			Func<Player, PlayerEncounterStats> getStats = (Player statsPlayer) =>
 			{
-				PlayerEncounterStats stats;
-				if (!statsDictionary.TryGetValue(statsPlayer.SteamId, out stats))
-				{
-					stats = new PlayerEncounterStats(statsPlayer.Name, statsPlayer.SteamId);
-					statsDictionary[statsPlayer.SteamId] = stats;
-				}
+				var stats = statsDictionary.Get(statsPlayer.SteamId, () => new PlayerEncounterStats(statsPlayer.Name, statsPlayer.SteamId));
 				return stats;
 			};
 			var kills = player.Kills.Where(kill => constraints.Match(kill.Time));
@@ -267,7 +262,16 @@ namespace BeRated.App
 
 		private List<PlayerWeaponStats> GetPlayerWeaponStats(Player player, TimeConstraints constraints)
 		{
-			throw new NotImplementedException();
+			var statsDictionary = new InitializerDictionary<string, PlayerWeaponStats>();
+			foreach (var kill in player.Kills)
+			{
+				var stats = statsDictionary.Get(kill.Weapon, () => new PlayerWeaponStats(kill.Weapon));
+				stats.Kills++;
+				if (kill.Headshot)
+					stats.Headshots++;
+			}
+			var weapons = statsDictionary.Values.ToList();
+			return weapons;
 		}
 
 		private List<PlayerItemStats> GetPlayerItemStats(Player player, TimeConstraints constraints)

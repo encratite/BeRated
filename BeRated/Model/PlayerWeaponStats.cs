@@ -9,5 +9,16 @@ namespace BeRated.Model
 		public int Headshots { get; set; }
 
 		public decimal HeadshotRatio { get { return Ratio.Get(Headshots, Kills).Value; } }
+
+		private PlayerWeaponStats()
+		{
+		}
+
+		public PlayerWeaponStats(string weapon)
+		{
+			Weapon = weapon;
+			Kills = 0;
+			Headshots = 0;
+		}
 	}
 }
