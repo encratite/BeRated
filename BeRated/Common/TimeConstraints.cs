@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BeRated.App
+namespace BeRated.Common
 {
 	class TimeConstraints
 	{

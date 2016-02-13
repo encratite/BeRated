@@ -20,7 +20,7 @@ namespace BeRated
         public void Validate()
 		{
 			if (ServerUrl == null || ConnectionString == null || LogDirectory == null || ViewPath == null || !CacheSize.HasValue || CacheSize.Value <= 0)
-				throw new ApplicationException("Invalid configuration");
+				throw new ApplicationException("Invalid configuration.");
 		}
     }
 }

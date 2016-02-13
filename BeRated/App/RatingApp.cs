@@ -4,6 +4,7 @@ using System.Linq;
 using Ashod;
 using Ashod.Database;
 using BeRated.Cache;
+using BeRated.Common;
 using BeRated.Model;
 using BeRated.Server;
 using Microsoft.Owin;
@@ -150,14 +151,6 @@ namespace BeRated.App
 			return days;
 		}
 
-        private decimal? GetRatio(int numerator, int denominator)
-        {
-            if (denominator != 0)
-                return (decimal)numerator / denominator;
-            else
-                return null;
-        }
-
         #region Cache access
 
         private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
@@ -183,13 +176,13 @@ namespace BeRated.App
                 {
                     SteamId = player.SteamId,
 		            Name = player.Name,
-		            KillDeathRatio = GetRatio(kills, deaths),
+		            KillDeathRatio = Ratio.Get(kills, deaths),
 		            Kills = kills,
 		            Deaths = deaths,
 		            GamesPlayed = games,
-		            GameWinRatio = GetRatio(wins, games),
+		            GameWinRatio = Ratio.Get(wins, games),
 		            RoundsPlayed = roundsPlayed,
-		            RoundWinRatio = GetRatio(roundsWon, roundsPlayed),
+		            RoundWinRatio = Ratio.Get(roundsWon, roundsPlayed),
                 };
             }).ToList();
             return stats;
@@ -245,7 +238,31 @@ namespace BeRated.App
 
 		private List<PlayerEncounterStats> GetPlayerEncounterStats(Player player, TimeConstraints constraints)
 		{
-			throw new NotImplementedException();
+			var statsDictionary = new Dictionary<string, PlayerEncounterStats>();
+			Func<Player, PlayerEncounterStats> getStats = (Player statsPlayer) =>
+			{
+				PlayerEncounterStats stats;
+				if (!statsDictionary.TryGetValue(statsPlayer.SteamId, out stats))
+				{
+					stats = new PlayerEncounterStats(statsPlayer.Name, statsPlayer.SteamId);
+					statsDictionary[statsPlayer.SteamId] = stats;
+				}
+				return stats;
+			};
+			var kills = player.Kills.Where(kill => constraints.Match(kill.Time));
+			var deaths = player.Deaths.Where(kill => constraints.Match(kill.Time));
+			foreach (var kill in kills)
+			{
+				var stats = getStats(kill.Victim);
+				stats.Kills++;
+			}
+			foreach (var death in deaths)
+			{
+				var stats = getStats(death.Killer);
+				stats.Deaths++;
+			}
+			var encounters = statsDictionary.Values.ToList();
+			return encounters;
 		}
 
 		private List<PlayerWeaponStats> GetPlayerWeaponStats(Player player, TimeConstraints constraints)

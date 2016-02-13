@@ -85,6 +85,7 @@
     <Compile Include="Cache\MatchReader.cs" />
     <Compile Include="Cache\Vector.cs" />
     <Compile Include="Cache\CacheManager.cs" />
+    <Compile Include="Common\Ratio.cs" />
     <Compile Include="Model\PlayerGameOutcome.cs" />
     <Compile Include="Model\GeneralStats.cs" />
     <Compile Include="Model\GameOutcomes.cs" />
@@ -111,7 +112,7 @@
     <Compile Include="Server\TemplateState.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />
     <Compile Include="Server\MiddlewareApp.cs" />
-    <Compile Include="App\TimeConstraints.cs" />
+    <Compile Include="Common\TimeConstraints.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
