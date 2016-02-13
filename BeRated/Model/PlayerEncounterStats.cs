@@ -13,10 +13,6 @@ namespace BeRated.Model
 
 		public decimal? WinRatio { get { return Ratio.Get(Kills, Encounters); } }
 
-		private PlayerEncounterStats()
-		{
-		}
-
 		public PlayerEncounterStats(string name, string steamId)
 		{
 			OpponentSteamId = steamId;

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using BeRated.Common;
 
 namespace BeRated.Model
 {
@@ -18,17 +19,7 @@ namespace BeRated.Model
             }
         }
 
-		public decimal? WinRatio
-        {
-            get
-            {
-                int games = Games;
-                if (games > 0)
-                    return (decimal)Wins / games;
-                else
-                    return null;
-            }
-        }
+		public decimal? WinRatio { get { return Ratio.Get(Wins, Games); } }
 
         public TeamStats(List<PlayerInfo> players)
         {

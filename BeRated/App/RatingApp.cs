@@ -263,7 +263,8 @@ namespace BeRated.App
 		private List<PlayerWeaponStats> GetPlayerWeaponStats(Player player, TimeConstraints constraints)
 		{
 			var statsDictionary = new InitializerDictionary<string, PlayerWeaponStats>();
-			foreach (var kill in player.Kills)
+			var kills = player.Kills.Where(kill => constraints.Match(kill.Time));
+			foreach (var kill in kills)
 			{
 				var stats = statsDictionary.Get(kill.Weapon, () => new PlayerWeaponStats(kill.Weapon));
 				stats.Kills++;
@@ -276,7 +277,22 @@ namespace BeRated.App
 
 		private List<PlayerItemStats> GetPlayerItemStats(Player player, TimeConstraints constraints)
 		{
-			throw new NotImplementedException();
+			var statsDictionary = new InitializerDictionary<string, PlayerItemStats>();
+			var purchases = player.Purchases.Where(purchase => constraints.Match(purchase.Time));
+			int kills = player.Kills.Count(kill => constraints.Match(kill.Time));
+			int rounds = player.Rounds.Count(round => constraints.Match(round.Time));
+			foreach (var purchase in player.Purchases)
+			{
+				var stats = statsDictionary.Get(purchase.Item, () => new PlayerItemStats(purchase.Item));
+				stats.TimesPurchased++;
+			}
+			var items = statsDictionary.Values.ToList();
+			foreach (var item in items)
+			{
+				item.PurchasesPerRound = Ratio.Get(item.TimesPurchased, rounds);
+				item.KillsPerPurchase = Ratio.Get(item.TimesPurchased, kills);
+			}
+			return items;
 		}
 
         #endregion
