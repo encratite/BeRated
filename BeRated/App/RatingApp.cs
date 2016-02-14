@@ -314,7 +314,7 @@ namespace BeRated.App
             var ids1 = GetSteamIds(team1);
 			var ids2 = GetSteamIds(team2);
 			if (precise)
-				return ids1.Equals(ids2);
+				return ids1.SetEquals(ids2);
 			else
 				return ids1.IsSubsetOf(ids2);
         }
@@ -355,7 +355,8 @@ namespace BeRated.App
 
         private List<PlayerInfo> GetPlayerInfos(List<Player> team)
         {
-            return team.Select(player => GetPlayerInfo(player)).ToList();
+			var players = team.OrderBy(player => player.Name);
+            return players.Select(player => GetPlayerInfo(player)).ToList();
         }
 
 		private TimeConstraints GetTimeConstraints()
