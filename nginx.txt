@@ -15,7 +15,7 @@ http {
 		server_name localhost;
 		
 		location /Static {
-			alias X:/BeRated/BeRated.Server/;
+			alias X:/BeRated/BeRated/;
 		}
 		
 		location ~ ^/(Images|Scripts|Stylesheets)/ {

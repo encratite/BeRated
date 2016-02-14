@@ -344,23 +344,8 @@ namespace BeRated.App
 
 		private TimeConstraints GetTimeConstraints()
 		{
-			int? days = GetDays();
-			var timeConstraints = new TimeConstraints(days);
+			var timeConstraints = new TimeConstraints();
 			return timeConstraints;
-		}
-
-		private int? GetDays()
-		{
-			int? days = 0;
-			string daysString;
-			if (Context.Current.Cookies.TryGetValue("days", out daysString))
-			{
-				if (daysString != string.Empty)
-					days = int.Parse(daysString);
-				else
-					days = null;
-			}
-			return days;
 		}
     }
 }

@@ -7,6 +7,10 @@ namespace BeRated.Common
 		public DateTimeOffset? Start { get; set; }
 		public DateTimeOffset? End { get; set; }
 
+		public TimeConstraints()
+		{
+		}
+
 		public TimeConstraints(int? days)
 		{
             Start = null;
