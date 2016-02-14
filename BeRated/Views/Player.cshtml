@@ -43,10 +43,10 @@
 			@foreach (var game in Model.Games)
 			{
 				<tr>
-					<td>@game.GameTime</td>
+					<td>@game.Time</td>
 					<td><span class="@game.Outcome">@Helper.Outcome(game.Outcome)</span></td>
 					<td>@game.PlayerScore - @game.EnemyScore</td>
-					<td>@Helper.PlayerList(game.PlayerTeamList) vs. @Helper.PlayerList(game.EnemyTeamList) <a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeamList)&team2=@Helper.PlayerIds(game.EnemyTeamList)" title="Analyze this matchup"><i class="fa fa-search"></i></a></td>
+					<td>@Helper.PlayerList(game.PlayerTeam) vs. @Helper.PlayerList(game.EnemyTeam) <a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)" title="Analyze this matchup"><i class="fa fa-search"></i></a></td>
 				</tr>
 			}
 		</table>
@@ -61,7 +61,7 @@
 			@foreach (var player in Model.Encounters)
 			{
 				<tr>
-					<td>@Helper.PlayerLink(player.OpponentId, player.OpponentName)</td>
+					<td>@Helper.PlayerLink(player.OpponentSteamId, player.OpponentName)</td>
 					<td>@player.Encounters</td>
 					<td>@player.Kills</td>
 					<td>@player.Deaths</td>

@@ -33,9 +33,9 @@ namespace BeRated.App
 			return rawString;
 		}
 
-		public static string Outcome(string outcome)
+		public static string Outcome(PlayerGameOutcome outcome)
 		{
-			return char.ToUpper(outcome[0]).ToString() + outcome.Substring(1);
+			return outcome.ToString();
 		}
 
 		public static string PlayerIds(List<PlayerInfo> team)
