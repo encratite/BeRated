@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Ashod;
-using Ashod.Database;
 using BeRated.Cache;
 using BeRated.Common;
 using BeRated.Model;
@@ -22,6 +21,7 @@ namespace BeRated.App
         {
             _Configuration = configuration;
 			_Cache = new CacheManager(_Configuration.LogDirectory, _Configuration.ConnectionString);
+			_Cache.OnUpdate += OnCacheUpdate;
         }
 
 		public override void Dispose()
@@ -30,39 +30,19 @@ namespace BeRated.App
 			base.Dispose();
 		}
 
+		public override string GetCachedResponse(IOwinContext context)
+		{
+			CacheEntry cacheEntry;
+			if (_WebCache.TryGetValue(context.Request.Uri.PathAndQuery, out cacheEntry))
+				return cacheEntry.Markup;
+			else
+				return null;
+		}
+
 		public override void OnResponse(IOwinContext context, string markup, TimeSpan invokeDuration, TimeSpan renderDuration)
 		{
 			UpdateCache(context, markup);
 			PrintPerformanceMessage(context, invokeDuration, renderDuration);
-		}
-
-		private void UpdateCache(IOwinContext context, string markup)
-		{
-			_WebCache[context.Request.Uri.PathAndQuery] = new CacheEntry(markup);
-			int maximumCacheSize = _Configuration.CacheSize.Value * 1024 * 1024;
-			int cacheSize = 0;
-			foreach (var pair in _WebCache)
-				cacheSize += pair.Value.Markup.Length;
-			var pairs = _WebCache.OrderBy(pair => pair.Value.Time).ToList();
-			while (cacheSize > maximumCacheSize && pairs.Any())
-			{
-				var pair = pairs.First();
-				pairs.RemoveAt(0);
-				_WebCache.Remove(pair.Key);
-				cacheSize -= pair.Value.Markup.Length;
-			}
-		}
-
-		private void PrintPerformanceMessage(IOwinContext context, TimeSpan invokeDuration, TimeSpan renderDuration)
-		{
-			string message = string.Format("Processed request {0} (controller: {1} ms; rendering: {2} ms)", context.Request.Uri.PathAndQuery, invokeDuration.TotalMilliseconds, renderDuration.TotalMilliseconds);
-			TimeSpan duration = invokeDuration + renderDuration;
-			if (duration.TotalMilliseconds < 250)
-				Logger.Log(message);
-			else if (duration.TotalMilliseconds < 1000)
-				Logger.Warning(message);
-			else
-				Logger.Error(message);
 		}
 
 		public void Initialize()
@@ -300,6 +280,35 @@ namespace BeRated.App
 
         #endregion
 
+		private void UpdateCache(IOwinContext context, string markup)
+		{
+			_WebCache[context.Request.Uri.PathAndQuery] = new CacheEntry(markup);
+			int maximumCacheSize = _Configuration.CacheSize.Value * 1024 * 1024;
+			int cacheSize = 0;
+			foreach (var pair in _WebCache)
+				cacheSize += pair.Value.Markup.Length;
+			var pairs = _WebCache.OrderBy(pair => pair.Value.Time).ToList();
+			while (cacheSize > maximumCacheSize && pairs.Any())
+			{
+				var pair = pairs.First();
+				pairs.RemoveAt(0);
+				_WebCache.Remove(pair.Key);
+				cacheSize -= pair.Value.Markup.Length;
+			}
+		}
+
+		private void PrintPerformanceMessage(IOwinContext context, TimeSpan invokeDuration, TimeSpan renderDuration)
+		{
+			string message = string.Format("Processed request {0} (controller: {1} ms; rendering: {2} ms)", context.Request.Uri.PathAndQuery, invokeDuration.TotalMilliseconds, renderDuration.TotalMilliseconds);
+			TimeSpan duration = invokeDuration + renderDuration;
+			if (duration.TotalMilliseconds < 250)
+				Logger.Log(message);
+			else if (duration.TotalMilliseconds < 1000)
+				Logger.Warning(message);
+			else
+				Logger.Error(message);
+		}
+
         private bool IsSameTeam(List<PlayerInfo> team1, List<Player> team2, bool precise = true)
         {
             var ids1 = GetSteamIds(team1);
@@ -353,6 +362,11 @@ namespace BeRated.App
 		{
 			var timeConstraints = new TimeConstraints();
 			return timeConstraints;
+		}
+
+		private void OnCacheUpdate()
+		{
+			_WebCache.Clear();
 		}
     }
 }

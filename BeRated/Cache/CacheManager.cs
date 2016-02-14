@@ -27,6 +27,8 @@ namespace BeRated.Cache
             }
         }
 
+		public Action OnUpdate { get; set; }
+
 		private string _LogPath;
 		private string _ConnectionString;
 		private int _MaxRounds = MaxRoundsDefault;
@@ -159,8 +161,10 @@ namespace BeRated.Cache
             {
                 bool done = reader(line);
                 if (done)
-                    return;
+                    break;
             }
+			if (OnUpdate != null)
+				OnUpdate();
 		}
 
         #region Line processing methods
