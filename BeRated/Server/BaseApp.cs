@@ -12,7 +12,7 @@ namespace BeRated.Server
 			return null;
 		}
 
-		public virtual void OnResponse(IOwinContext context, string markup)
+		public virtual void OnResponse(IOwinContext context, string markup, TimeSpan invokeDuration, TimeSpan renderDuration)
 		{
 		}
 

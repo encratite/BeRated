@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -43,8 +44,10 @@ namespace BeRated.Server
 				string markup = _Instance.GetCachedResponse(context);
 				if (markup == null)
 				{
-					markup = ProcessRequest(uri, path);
-					_Instance.OnResponse(context, markup);
+					TimeSpan invokeDuration;
+					TimeSpan renderDuration;
+					markup = ProcessRequest(uri, path, out invokeDuration, out renderDuration);
+					_Instance.OnResponse(context, markup, invokeDuration, renderDuration);
 				}
 				response.ContentType = "text/html";
                 var task = context.Response.WriteAsync(markup);
@@ -74,7 +77,7 @@ namespace BeRated.Server
 			}
         }
 
-		private string ProcessRequest(Uri uri, string path)
+		private string ProcessRequest(Uri uri, string path, out TimeSpan invokeDuration, out TimeSpan renderDuration)
 		{
 			string markup;
 			var requestPattern = new Regex(@"^/(?<method>\w+?)(?:\?(?:(?<firstArgument>\w+?)=(?<firstValue>[^?=&]*))(?:&(?<arguments>\w+?)=(?<values>[^?=&]*))*)?$", RegexOptions.ECMAScript);
@@ -102,8 +105,15 @@ namespace BeRated.Server
 				}
 			}
 			Type modelType;
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
 			object model = Invoke(method, arguments, out modelType);
+			stopwatch.Stop();
+			invokeDuration = stopwatch.Elapsed;
+			stopwatch.Start();
 			markup = _Instance.Render(uri.AbsolutePath, modelType, model);
+			stopwatch.Stop();
+			renderDuration = stopwatch.Elapsed;
 			markup = markup.Replace("\r", "");
 			var whitespacePattern = new Regex(@"^\s+|\n{2,}", RegexOptions.ECMAScript | RegexOptions.Multiline);
 			markup = whitespacePattern.Replace(markup, "");

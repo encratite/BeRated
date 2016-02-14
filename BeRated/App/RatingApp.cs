@@ -11,7 +11,7 @@ using Microsoft.Owin;
 
 namespace BeRated.App
 {
-	public class RatingApp : BaseApp, IQueryPerformanceLogger
+	public class RatingApp : BaseApp
     {
         private Configuration _Configuration;
 		private CacheManager _Cache;
@@ -30,7 +30,13 @@ namespace BeRated.App
 			base.Dispose();
 		}
 
-		public override void OnResponse(IOwinContext context, string markup)
+		public override void OnResponse(IOwinContext context, string markup, TimeSpan invokeDuration, TimeSpan renderDuration)
+		{
+			UpdateCache(context, markup);
+			PrintPerformanceMessage(context, invokeDuration, renderDuration);
+		}
+
+		private void UpdateCache(IOwinContext context, string markup)
 		{
 			_WebCache[context.Request.Uri.PathAndQuery] = new CacheEntry(markup);
 			int maximumCacheSize = _Configuration.CacheSize.Value * 1024 * 1024;
@@ -47,21 +53,22 @@ namespace BeRated.App
 			}
 		}
 
-        public void Initialize()
+		private void PrintPerformanceMessage(IOwinContext context, TimeSpan invokeDuration, TimeSpan renderDuration)
+		{
+			string message = string.Format("Processed request {0} (controller: {1} ms; rendering: {2} ms)", context.Request.Uri.PathAndQuery, invokeDuration.TotalMilliseconds, renderDuration.TotalMilliseconds);
+			TimeSpan duration = invokeDuration + renderDuration;
+			if (duration.TotalMilliseconds < 250)
+				Logger.Log(message);
+			else if (duration.TotalMilliseconds < 1000)
+				Logger.Warning(message);
+			else
+				Logger.Error(message);
+		}
+
+		public void Initialize()
         {
             base.Initialize(_Configuration.ViewPath);
 			_Cache.Run();
-        }
-
-        void IQueryPerformanceLogger.OnQueryEnd(string query, TimeSpan timeSpan)
-        {
-            string message = string.Format("Executed query in {0} ms: {1}", timeSpan.TotalMilliseconds, query);
-            if (timeSpan.TotalMilliseconds < 250)
-                Logger.Log(message);
-            else if (timeSpan.TotalMilliseconds < 1000)
-                Logger.Warning(message);
-            else
-                Logger.Error(message);
         }
 
 		#region Controllers
