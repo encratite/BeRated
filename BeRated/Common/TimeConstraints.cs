@@ -28,7 +28,7 @@ namespace BeRated.Common
         public bool Match(DateTime time)
         {
             var dateTimeOffset = new DateTimeOffset(time, DateTimeOffset.Now.Offset);
-            return Match(time);
+            return Match(dateTimeOffset);
         }
 	}
 }
