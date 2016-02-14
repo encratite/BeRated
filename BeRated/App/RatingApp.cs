@@ -64,7 +64,9 @@ namespace BeRated.App
                 Logger.Error(message);
         }
 
-        [Controller]
+		#region Controllers
+
+		[Controller]
         public GeneralStats General()
         {
 			var constraints = GetTimeConstraints();
@@ -96,64 +98,23 @@ namespace BeRated.App
 		[Controller]
 		public TeamMatchupStats Matchup(string team1, string team2)
 		{
-            Func<string, List<PlayerInfo>> readPlayers = (playerIdString) =>
-			{
-				var playerIdParameter = new CommandParameter("player_id_string", playerIdString);
-				/*
-				using (var reader = connection.ReadFunction("get_player_names", playerIdParameter))
-				{
-					return reader.ReadAll<PlayerInfo>();
-				}
-				*/
-				throw new NotImplementedException();
-			};
-			Func<bool, GameOutcomes> readOutcomes = (precise) =>
-			{
-				var teamParameter1 = new CommandParameter("player_id_string1", team1);
-				var teamParameter2 = new CommandParameter("player_id_string2", team2);
-				var preciseParameter = new CommandParameter("precise", precise);
-				/*
-				using (var reader = connection.ReadFunction("get_matchup_stats", teamParameter1, teamParameter2, preciseParameter))
-				{
-					return reader.ReadAll<GameOutcomes>().First();
-				}
-				*/
-				throw new NotImplementedException();
-			};
+			var players1 = GetTeam(team1);
+			var players2 = GetTeam(team2);
 			var matchup = new TeamMatchupStats
 			{
-				Team1 = readPlayers(team1),
-				Team2 = readPlayers(team2),
-				ImpreciseOutcomes = readOutcomes(false),
-				PreciseOutcomes = readOutcomes(true),
+				Team1 = players1,
+				Team2 = players2,
+				ImpreciseOutcomes = GetGameOutcomes(players1, players2, false),
+				PreciseOutcomes = GetGameOutcomes(players1, players2, true),
 			};
 			return matchup;
 		}
 
-		private TimeConstraints GetTimeConstraints()
-		{
-			int? days = GetDays();
-			var timeConstraints = new TimeConstraints(days);
-			return timeConstraints;
-		}
+		#endregion
 
-		private int? GetDays()
-		{
-			int? days = 0;
-			string daysString;
-			if (Context.Current.Cookies.TryGetValue("days", out daysString))
-			{
-				if (daysString != string.Empty)
-					days = int.Parse(daysString);
-				else
-					days = null;
-			}
-			return days;
-		}
+		#region Cache access
 
-        #region Cache access
-
-        private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
+		private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
         {
             var stats = _Cache.Players.Select(player =>
             {
@@ -295,19 +256,64 @@ namespace BeRated.App
 			return items;
 		}
 
+		private List<PlayerInfo> GetTeam(string steamIdString)
+		{
+			var steamIds = steamIdString.Split(',');
+			var players = steamIds.Select(steamId => _Cache.GetPlayer(steamId));
+			var team = players.Select(player => GetPlayerInfo(player)).ToList();
+			return team;
+		}
+
+		private GameOutcomes GetGameOutcomes(List<PlayerInfo> team1, List<PlayerInfo> team2, bool precise)
+		{
+			var outcomes = new GameOutcomes();
+			foreach (var game in _Cache.Games)
+			{
+				bool terrorists =
+					IsSameTeam(team1, game.Terrorists, precise) &&
+					IsSameTeam(team2, game.CounterTerrorists, precise);
+				bool counterTerrorists =
+					IsSameTeam(team1, game.CounterTerrorists, precise) &&
+					IsSameTeam(team2, game.Terrorists, precise);
+				if (!terrorists && !counterTerrorists)
+					continue;
+				if (game.Outcome == GameOutcome.Draw)
+					outcomes.Draws++;
+				else if (
+					game.Outcome == GameOutcome.TerroristsWin && terrorists ||
+					game.Outcome == GameOutcome.CounterTerroristsWin && counterTerrorists
+				)
+					outcomes.Wins++;
+				else
+					outcomes.Losses++;
+
+			}
+			return outcomes;
+		}
+
         #endregion
 
-        private bool IsSameTeam(List<PlayerInfo> team1, List<Player> team2)
+        private bool IsSameTeam(List<PlayerInfo> team1, List<Player> team2, bool precise = true)
         {
-            if (team1.Count != team2.Count)
-                return false;
-            foreach (var player1 in team1)
-            {
-                if (!team2.Any(player2 => player1.SteamId == player2.SteamId))
-                    return false;
-            }
-            return true;
+            var ids1 = GetSteamIds(team1);
+			var ids2 = GetSteamIds(team2);
+			if (precise)
+				return ids1.Equals(ids2);
+			else
+				return ids1.IsSubsetOf(ids2);
         }
+
+		private HashSet<string> GetSteamIds(List<PlayerInfo> team)
+		{
+			var ids = team.Select(info => info.SteamId);
+			return new HashSet<string>(ids);
+		}
+
+		private HashSet<string> GetSteamIds(List<Player> team)
+		{
+			var ids = team.Select(player => player.SteamId);
+			return new HashSet<string>(ids);
+		}
 
         private void AddGameToTeamStats(List<Player> players, bool isTerroristTeam, GameOutcome outcome, List<TeamStats> teams)
         {
@@ -335,5 +341,26 @@ namespace BeRated.App
         {
             return team.Select(player => GetPlayerInfo(player)).ToList();
         }
+
+		private TimeConstraints GetTimeConstraints()
+		{
+			int? days = GetDays();
+			var timeConstraints = new TimeConstraints(days);
+			return timeConstraints;
+		}
+
+		private int? GetDays()
+		{
+			int? days = 0;
+			string daysString;
+			if (Context.Current.Cookies.TryGetValue("days", out daysString))
+			{
+				if (daysString != string.Empty)
+					days = int.Parse(daysString);
+				else
+					days = null;
+			}
+			return days;
+		}
     }
 }
