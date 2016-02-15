@@ -135,12 +135,13 @@
   <ItemGroup>
     <Content Include="Images\Favicon.ico" />
     <Content Include="Images\Logo.png" />
-    <Content Include="Scripts\Cookies.js" />
-    <Content Include="Scripts\Table.js" />
     <Content Include="Stylesheets\General.css" />
     <Content Include="Stylesheets\Layout.css" />
     <Content Include="Stylesheets\Matchup.css" />
     <Content Include="Stylesheets\Player.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="Scripts\Table.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
