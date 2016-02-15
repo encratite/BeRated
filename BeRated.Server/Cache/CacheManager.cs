@@ -30,7 +30,6 @@ namespace BeRated.Cache
 		public Action OnUpdate { get; set; }
 
 		private string _LogPath;
-		private string _ConnectionString;
 		private int _MaxRounds = MaxRoundsDefault;
 
 		private Thread _ReaderThread = null;
@@ -46,10 +45,9 @@ namespace BeRated.Cache
 
         private LogParser _LogParser;
 
-		public CacheManager(string logPath, string connectionString)
+		public CacheManager(string logPath)
 		{
 			_LogPath = logPath;
-			_ConnectionString = connectionString;
             _LogParser = new LogParser(this);
 		}
 

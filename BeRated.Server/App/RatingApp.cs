@@ -20,7 +20,7 @@ namespace BeRated.App
         public RatingApp(Configuration configuration)
         {
             _Configuration = configuration;
-			_Cache = new CacheManager(_Configuration.LogDirectory, _Configuration.ConnectionString);
+			_Cache = new CacheManager(_Configuration.LogDirectory);
 			_Cache.OnUpdate += OnCacheUpdate;
         }
 

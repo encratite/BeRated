@@ -6,8 +6,6 @@ namespace BeRated
     {
         public string ServerUrl { get; set; }
 
-        public string ConnectionString { get; set; }
-
 		public string LogDirectory { get; set; }
 
         public string ViewPath { get; set; }
@@ -19,7 +17,7 @@ namespace BeRated
 
         public void Validate()
 		{
-			if (ServerUrl == null || ConnectionString == null || LogDirectory == null || ViewPath == null || !CacheSize.HasValue || CacheSize.Value <= 0)
+			if (ServerUrl == null || LogDirectory == null || ViewPath == null || !CacheSize.HasValue || CacheSize.Value <= 0)
 				throw new ApplicationException("Invalid configuration.");
 		}
     }

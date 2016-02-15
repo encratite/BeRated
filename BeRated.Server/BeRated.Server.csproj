@@ -121,27 +121,12 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Views\General.cshtml" />
-    <None Include="Views\Layout.cshtml" />
-    <None Include="Views\Matchup.cshtml" />
-    <None Include="Views\Player.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">
       <Project>{9659019c-3181-4c5c-bd0d-0117456328a6}</Project>
       <Name>Ashod</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Images\Favicon.ico" />
-    <Content Include="Images\Logo.png" />
-    <Content Include="Stylesheets\General.css" />
-    <Content Include="Stylesheets\Layout.css" />
-    <Content Include="Stylesheets\Matchup.css" />
-    <Content Include="Stylesheets\Player.css" />
-  </ItemGroup>
-  <ItemGroup>
-    <TypeScriptCompile Include="Scripts\Table.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
