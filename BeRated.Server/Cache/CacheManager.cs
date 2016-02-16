@@ -218,7 +218,7 @@ namespace BeRated.Cache
                 return false;
             int roundsPlayed = round.TerroristScore + round.CounterTerroristScore;
             if (roundsPlayed == 1)
-                _Rounds.Clear();
+                _Rounds = new List<Round>();
             _Rounds.Add(round);
             var winningTeam = _LogParser.GetWinningTeam(round.SfuiNotice);
             foreach (var pair in _PlayerTeams)

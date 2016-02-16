@@ -28,5 +28,10 @@ namespace BeRated.Cache
             Terrorists = new List<Player>();
             CounterTerrorists = new List<Player>();
 		}
-	}
+
+        public override string ToString()
+        {
+            return string.Format("{0} ({1}v{2})", Time.ToString("g"), Terrorists.Count, CounterTerrorists.Count);
+        }
+    }
 }

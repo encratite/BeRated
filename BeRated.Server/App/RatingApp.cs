@@ -154,6 +154,7 @@ namespace BeRated.App
                 constraints.Match(game.Time) &&
                 (game.Terrorists.Contains(player) || game.CounterTerrorists.Contains(player))
             );
+            matchingGames = matchingGames.OrderByDescending(game => game.Time);
             var games = matchingGames.Select(game =>
             {
                 bool isTerrorist = game.Terrorists.Contains(player);
