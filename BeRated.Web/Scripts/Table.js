@@ -73,7 +73,6 @@ var BeRated;
             this.columnIndex = columnIndex;
         };
         Table.prototype.initialize = function () {
-            var _this = this;
             var headers = this.table.querySelectorAll("th");
             for (var i = 0; i < headers.length; i++) {
                 var header = headers[i];
@@ -86,10 +85,9 @@ var BeRated;
                     }
                 }
                 this.columnTypes[i] = columnType;
-                var columnIndex = i;
-                header.onmousedown = function () {
-                    _this.onHeaderClick(columnIndex);
-                };
+                header.onmousedown = function (columnIndex) {
+                    this.onHeaderClick(columnIndex);
+                }.bind(this, i);
             }
         };
         Table.ColumnType = {

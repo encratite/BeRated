@@ -96,10 +96,9 @@
                     }
                 }
                 this.columnTypes[i] = columnType;
-                var columnIndex = i;
-                header.onmousedown = () => {
+                header.onmousedown = function (columnIndex) {
                     this.onHeaderClick(columnIndex);
-                };
+                }.bind(this, i);
             }
         }
     }
