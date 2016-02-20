@@ -1,0 +1,36 @@
+﻿@using BeRated.App
+@using BeRated.Model
+@using System.Collections.Generic
+
+@model List<GeneralPlayerStats>
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = "Overview";
+}
+
+<table id="players" class="sortable numericTable">
+    <tr>
+        <th class="string">Name</th>
+        <th>Kill/death ratio</th>
+        <th>Kills</th>
+        <th>Deaths</th>
+        <th>Games won</th>
+        <th>Games played</th>
+        <th>Rounds won</th>
+        <th>Rounds played</th>
+    </tr>
+    @foreach (var player in Model)
+    {
+        <tr>
+            <td>@Helper.PlayerLink(player.SteamId, player.Name)</td>
+            <td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
+            <td>@player.Kills</td>
+            <td>@player.Deaths</td>
+            <td>@Helper.Percentage(player.GameWinRatio)</td>
+            <td>@player.GamesPlayed</td>
+            <td>@Helper.Percentage(player.RoundWinRatio)</td>
+            <td>@player.RoundsPlayed</td>
+        </tr>
+    }
+</table>

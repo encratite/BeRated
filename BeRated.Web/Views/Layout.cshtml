@@ -7,59 +7,9 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 		@RenderSection("Stylesheets", false)
         <script src="/Scripts/Table.js"></script>
-		<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-		<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 		@RenderSection("Scripts", false)
     </head>
     <body>
-        <div class="firstRow">
-            <div class="container">
-                <div class="left">
-                    <img src="/Images/Logo.png" alt="Logo">
-                    <span class="link developerNetwork">Developer Network</span>
-                </div>
-                <div class="right">
-                    <span class="link textLink" data-days="0">Today</span>
-                    <span class="link textLink" data-days="7">Past 7 days</span>
-                    <span class="link textLink" data-days="30">Past 30 days</span>
-                    <span class="link textLink" data-days="">Show everything</span>
-                    <span class="link"><i class="fa fa-facebook-official"></i></span>
-                    <span class="link"><i class="fa fa-twitter"></i></span>
-                    <span class="link"><i class="fa fa-google-plus"></i></span>
-                </div>
-            </div>
-        </div>
-        <div class="secondRow">
-            <div class="container">
-                <div class="categoryLinks"><span>Technologies <i class="fa fa-angle-down"></i></span><span>Downloads <i class="fa fa-angle-down"></i></span><span>Programs <i class="fa fa-angle-down"></i></span><span>Community <i class="fa fa-angle-down"></i></span><span class="selected">Documentation <i class="fa fa-angle-down"></i></span><span>Samples</span></div>
-                <button class="searchButton">
-                    <span><i class="fa fa-search"></i></span>
-                </button>
-            </div>
-        </div>
-        <div class="container">
-            <div class="libraryLinks"><i class="fa fa-ellipsis-h"></i> <i class="fa fa-angle-right"></i> <span>.NET Framework Class Library</span> <i class="fa fa-angle-right"></i> <span>System.Player</span> <i class="fa fa-caret-down"></i></div>
-            <div class="content">
-                @RenderBody()
-				<div class="clear"></div>
-            </div>
-        </div>
-		<footer>
-			<div class="container">
-				<ul>
-					<li>Learning resources</li>
-					<li><a href="http://csgoskills.com/academy/aiming/">Aiming and movement</a></li>
-					<li><a href="http://csgoskills.com/academy/how-to-train-csgo/">How to practise CS:GO</a></li>
-					<li><a href="https://www.youtube.com/user/downsideCSS/videos">Educational videos</a></li>
-				</ul>
-				<ul>
-					<li>Community</li>
-					<li><a href="https://www.reddit.com/r/GlobalOffensive/">Reddit</a></li>
-					<li><a href="http://blog.counter-strike.net/index.php/category/updates/">Official blog</a></li>
-					<li><a href="http://csgostash.com/">Skin preview</a></li>
-				</ul>
-				<div class="clear"></div>
-			</div>
-		</footer>
+        @RenderBody()
     </body>
 </html>

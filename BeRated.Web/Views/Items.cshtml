@@ -1,0 +1,27 @@
+﻿@using BeRated.App
+@using BeRated.Model
+
+@model PlayerItems
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = string.Format("{0} - Purchases", Model.Name);
+}
+
+<table class="sortable numericTable" id="purchases">
+    <tr>
+        <th class="string">Item</th>
+        <th>Times purchased</th>
+        <th>Purchases per round</th>
+        <th>Kills per purchase</th>
+    </tr>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.Item</td>
+            <td>@item.TimesPurchased</td>
+            <td>@Helper.Round(item.PurchasesPerRound)</td>
+            <td>@Helper.Round(item.KillsPerPurchase)</td>
+        </tr>
+    }
+</table>

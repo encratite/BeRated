@@ -54,33 +54,20 @@ namespace BeRated.App
 		#region Controllers
 
 		[Controller]
-        public GeneralStats General()
+        public List<GeneralPlayerStats> Players()
         {
 			var constraints = GetTimeConstraints();
-			var stats = new GeneralStats
-            {
-                Players = GetGeneralPlayerStats(constraints),
-                Teams = GetTeamStats(constraints),
-            };
-			return stats;
+			var players = GetGeneralPlayerStats(constraints);
+			return players;
 		}
 
-        [Controller]
-        public PlayerStats Player(string id)
+		[Controller]
+        public List<TeamStats> Teams()
         {
-            var player = _Cache.GetPlayer(id);
 			var constraints = GetTimeConstraints();
-            var playerStats = new PlayerStats
-            {
-                SteamId = player.SteamId,
-                Name = player.Name,
-                Games = GetPlayerGames(player, constraints),
-				Encounters = GetPlayerEncounterStats(player, constraints),
-				Weapons = GetPlayerWeaponStats(player, constraints),
-				Purchases = GetPlayerItemStats(player, constraints),
-            };
-            return playerStats;
-        }
+			var teams = GetTeamStats(constraints);
+			return teams;
+		}
 
 		[Controller]
 		public TeamMatchupStats Matchup(string team1, string team2)
@@ -96,6 +83,61 @@ namespace BeRated.App
 			};
 			return matchup;
 		}
+
+		[Controller]
+        public PlayerGames Player(string id)
+        {
+            var player = _Cache.GetPlayer(id);
+            var games = new PlayerGames
+            {
+                SteamId = player.SteamId,
+                Name = player.Name,
+                Games = GetPlayerGames(player),
+            };
+            return games;
+        }
+
+		[Controller]
+        public PlayerEncounters Encounters(string id)
+        {
+            var player = _Cache.GetPlayer(id);
+			var constraints = GetTimeConstraints();
+            var encounters = new PlayerEncounters
+            {
+                SteamId = player.SteamId,
+                Name = player.Name,
+				Encounters = GetPlayerEncounters(player, constraints),
+            };
+            return encounters;
+        }
+
+		[Controller]
+        public PlayerWeapons Weapons(string id)
+        {
+            var player = _Cache.GetPlayer(id);
+			var constraints = GetTimeConstraints();
+            var weapons = new PlayerWeapons
+            {
+                SteamId = player.SteamId,
+                Name = player.Name,
+				Weapons = GetPlayerWeapons(player, constraints),
+            };
+            return weapons;
+        }
+
+		[Controller]
+        public PlayerItems Items(string id)
+        {
+            var player = _Cache.GetPlayer(id);
+			var constraints = GetTimeConstraints();
+            var weapons = new PlayerItems
+            {
+                SteamId = player.SteamId,
+                Name = player.Name,
+				Items = GetPlayerItems(player, constraints),
+            };
+            return weapons;
+        }
 
 		#endregion
 
@@ -148,10 +190,9 @@ namespace BeRated.App
             return teams;
         }
 
-        private List<PlayerGame> GetPlayerGames(Player player, TimeConstraints constraints)
-        {
+        private List<PlayerGame> GetPlayerGames(Player player)
+		{
             var matchingGames = player.Games.Where(game =>
-                constraints.Match(game.Time) &&
                 (game.Terrorists.Contains(player) || game.CounterTerrorists.Contains(player))
             );
             matchingGames = matchingGames.OrderByDescending(game => game.Time);
@@ -185,7 +226,7 @@ namespace BeRated.App
             return games;
         }
 
-		private List<PlayerEncounterStats> GetPlayerEncounterStats(Player player, TimeConstraints constraints)
+		private List<PlayerEncounterStats> GetPlayerEncounters(Player player, TimeConstraints constraints)
 		{
 			var statsDictionary = new InitializerDictionary<string, PlayerEncounterStats>();
 			Func<Player, PlayerEncounterStats> getStats = (Player statsPlayer) =>
@@ -209,7 +250,7 @@ namespace BeRated.App
 			return encounters;
 		}
 
-		private List<PlayerWeaponStats> GetPlayerWeaponStats(Player player, TimeConstraints constraints)
+		private List<PlayerWeaponStats> GetPlayerWeapons(Player player, TimeConstraints constraints)
 		{
 			var statsDictionary = new InitializerDictionary<string, PlayerWeaponStats>();
 			var kills = player.Kills.Where(kill => constraints.Match(kill.Time));
@@ -224,7 +265,7 @@ namespace BeRated.App
 			return weapons;
 		}
 
-		private List<PlayerItemStats> GetPlayerItemStats(Player player, TimeConstraints constraints)
+		private List<PlayerItemStats> GetPlayerItems(Player player, TimeConstraints constraints)
 		{
 			var statsDictionary = new InitializerDictionary<string, PlayerItemStats>();
 			var purchases = player.Purchases.Where(purchase => constraints.Match(purchase.Time));

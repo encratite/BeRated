@@ -16,7 +16,6 @@ namespace BeRated
             Logger.Log("Creating new app domain");
             var setup = new AppDomainSetup();
             setup.ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
-            var current = AppDomain.CurrentDomain;
             var permissionSet = new PermissionSet(PermissionState.Unrestricted);
             Evidence securityInfo = null;
             var domain = AppDomain.CreateDomain("BeRatedDomain", securityInfo, setup, permissionSet);

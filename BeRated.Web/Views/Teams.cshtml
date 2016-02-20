@@ -1,0 +1,32 @@
+﻿@using BeRated.App
+@using BeRated.Model
+@using System.Collections.Generic
+
+@model List<TeamStats>
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = "Teams";
+}
+
+<table id="teams" class="sortable numericTable">
+    <tr>
+        <th class="string">Team</th>
+        <th>Games</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Draws</th>
+        <th>Win ratio</th>
+    </tr>
+    @foreach (var team in Model)
+    {
+        <tr>
+            <td>@Helper.PlayerList(team.Players)</td>
+            <td>@team.Games</td>
+            <td>@team.Wins</td>
+            <td>@team.Losses</td>
+            <td>@team.Draws</td>
+            <td>@Helper.Percentage(team.WinRatio)</td>
+        </tr>
+    }
+</table>

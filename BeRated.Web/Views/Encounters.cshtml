@@ -1,0 +1,29 @@
+﻿@using BeRated.App
+@using BeRated.Model
+
+@model PlayerEncounters
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = string.Format("{0} - Encounters", Model.Name);
+}
+
+<table class="sortable numericTable" id="encounters">
+    <tr>
+        <th class="string">Opponent</th>
+        <th>Encounters</th>
+        <th>Kills</th>
+        <th>Deaths</th>
+        <th>Win ratio</th>
+    </tr>
+    @foreach (var player in Model.Encounters)
+    {
+        <tr>
+            <td>@Helper.PlayerLink(player.OpponentSteamId, player.OpponentName)</td>
+            <td>@player.Encounters</td>
+            <td>@player.Kills</td>
+            <td>@player.Deaths</td>
+            <td>@Helper.Percentage(player.WinRatio)</td>
+        </tr>
+    }
+</table>

@@ -16,6 +16,14 @@ namespace BeRated.App
 				return "-";
 		}
 
+		public static string Round(decimal? number)
+		{
+			if (number.HasValue)
+				return number.Value.ToString("0.00");
+			else
+				return string.Empty;
+		}
+
 		public static RawString PlayerLink(string steamId, string name)
 		{
 			string path = string.Format("/Player?id={0}", steamId);

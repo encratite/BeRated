@@ -1,0 +1,26 @@
+﻿@using BeRated.App
+@using BeRated.Model
+
+@model PlayerWeapons
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = string.Format("{0} - Weapons", Model.Name);
+}
+
+<table class="sortable numericTable" id="weapons">
+    <tr>
+        <th class="string">Weapon</th>
+        <th>Kills</th>
+        <th>Headshots</th>
+        <th>Headshot kill ratio</th>
+    </tr>
+    @foreach (var weapon in Model.Weapons) {
+    <tr>
+        <td>@weapon.Weapon</td>
+        <td>@weapon.Kills</td>
+        <td>@weapon.Headshots</td>
+        <td>@Helper.Percentage(weapon.HeadshotRatio)</td>
+    </tr>
+    }
+</table>
