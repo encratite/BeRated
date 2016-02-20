@@ -187,6 +187,7 @@ namespace BeRated.App
                 AddGameToTeamStats(game.Terrorists, true, game.Outcome, teams);
                 AddGameToTeamStats(game.CounterTerrorists, false, game.Outcome, teams);
             }
+			teams = teams.OrderByDescending(team => team.Games).ToList();
             return teams;
         }
 
@@ -246,7 +247,7 @@ namespace BeRated.App
 				var stats = getStats(death.Killer);
 				stats.Deaths++;
 			}
-			var encounters = statsDictionary.Values.ToList();
+			var encounters = statsDictionary.Values.OrderByDescending(stats => stats.Encounters).ToList();
 			return encounters;
 		}
 
@@ -261,7 +262,7 @@ namespace BeRated.App
 				if (kill.Headshot)
 					stats.Headshots++;
 			}
-			var weapons = statsDictionary.Values.ToList();
+			var weapons = statsDictionary.Values.OrderByDescending(stats => stats.Kills).ToList();
 			return weapons;
 		}
 
@@ -276,7 +277,7 @@ namespace BeRated.App
 				var stats = statsDictionary.Get(purchase.Item, () => new PlayerItemStats(purchase.Item));
 				stats.TimesPurchased++;
 			}
-			var items = statsDictionary.Values.ToList();
+			var items = statsDictionary.Values.OrderByDescending(stats => stats.TimesPurchased).ToList();
 			foreach (var item in items)
 			{
 				item.PurchasesPerRound = Ratio.Get(item.TimesPurchased, rounds);

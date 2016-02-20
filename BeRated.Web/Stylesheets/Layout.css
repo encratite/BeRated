@@ -1,3 +1,38 @@
 * {
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+}
+
+body {
+}
+
+li {
+    list-style-type: none;
+}
+
+th {
+    text-align: left;
+}
+
+th, td {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+a {
+    color: #4d9dff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #bad9ff;
+}
+
+.content {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.numericTable td:nth-child(n + 2) {
+    text-align: right;
 }
