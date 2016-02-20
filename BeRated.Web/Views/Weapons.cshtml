@@ -6,9 +6,10 @@
 @{
     Layout = "/Layout";
     ViewBag.Title = string.Format("{0} - Weapons", Model.Name);
+    ViewBag.SteamId = Model.SteamId;
 }
 
-<table class="sortable numericTable" id="weapons">
+<table class="sortable numericTable">
     <tr>
         <th class="string">Weapon</th>
         <th>Kills</th>

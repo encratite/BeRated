@@ -5,10 +5,11 @@
 
 @{
     Layout = "/Layout";
-    ViewBag.Title = string.Format("{0} - Profile", Model.Name);
+    ViewBag.Title = string.Format("{0} - Games", Model.Name);
+    ViewBag.SteamId = Model.SteamId;
 }
 
-<table id="games">
+<table>
 	<tr>
 		<th>Time</th>
 		<th>Outcome</th>
@@ -21,7 +22,7 @@
 			<td>@game.Time.ToString("g")</td>
 			<td><span class="@game.Outcome">@Helper.Outcome(game.Outcome)</span></td>
 			<td>@game.PlayerScore - @game.EnemyScore</td>
-			<td>@Helper.PlayerList(game.PlayerTeam) vs. @Helper.PlayerList(game.EnemyTeam) <a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)" title="Analyze this matchup"><i class="fa fa-search"></i></a></td>
+			<td>@Helper.PlayerList(game.PlayerTeam) vs. @Helper.PlayerList(game.EnemyTeam) <a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)" title="Analyze this matchup">(analyze)</a></td>
 		</tr>
 	}
 </table>
