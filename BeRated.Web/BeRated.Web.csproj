@@ -27,7 +27,14 @@
   <ItemGroup>
     <Content Include="Images\Favicon.ico" />
     <Content Include="Images\Logo.png" />
-    <Content Include="Stylesheets\Layout.css" />
+    <None Include="compilerconfig.json" />
+    <None Include="compilerconfig.json.defaults">
+      <DependentUpon>compilerconfig.json</DependentUpon>
+    </None>
+    <None Include="Stylesheets\Layout.less" />
+    <Content Include="Stylesheets\Layout.css">
+      <DependentUpon>Layout.less</DependentUpon>
+    </Content>
     <Content Include="Views\Players.cshtml" />
     <Content Include="Views\Layout.cshtml" />
     <Content Include="Views\Matchup.cshtml" />
