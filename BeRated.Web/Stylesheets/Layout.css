@@ -16,15 +16,15 @@ li {
   display: inline;
   list-style-type: none;
 }
-table {
+.grid {
   border: 1px solid #ddd;
   border-radius: 3px;
   border-spacing: 0;
 }
-tr:hover {
+.grid > tbody > tr:hover {
   background-color: #fcfcfc;
 }
-th {
+.grid > tbody > tr > th {
   background-color: #f8f8f8;
   font-weight: bold;
   -moz-background-clip: padding;
@@ -37,12 +37,15 @@ th {
   user-select: none;
   text-align: left;
 }
-th,
-td {
+.grid > tbody > tr > th,
+.grid > tbody > tr > td {
   padding: 0.6em 1em;
 }
-td {
+.grid > tbody > tr > td {
   border-top: 1px solid #ddd;
+}
+.grid td {
+  vertical-align: top;
 }
 .menu {
   background-color: #f8f8f8;
@@ -76,9 +79,15 @@ td {
 .numericTable td:nth-child(n + 2) {
   text-align: right;
 }
-.games td {
-  vertical-align: top;
+.playerList {
+  width: 100%;
 }
-.games li {
+.playerList tr:nth-child(2) td {
+  padding-left: 10em;
+}
+.playerList td {
+  width: 20em;
+}
+.playerList li {
   display: block;
 }

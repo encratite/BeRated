@@ -9,7 +9,7 @@
     ViewBag.SteamId = Model.SteamId;
 }
 
-<table>
+<table class="grid">
 	<tr>
 		<th>Time</th>
 		<th>Outcome</th>
@@ -22,7 +22,16 @@
 			<td>@game.Time.ToString("g")</td>
 			<td><span class="@game.Outcome">@Helper.Outcome(game.Outcome)</span></td>
 			<td>@game.PlayerScore - @game.EnemyScore</td>
-			<td>@Helper.PlayerList(game.PlayerTeam) vs. @Helper.PlayerList(game.EnemyTeam) <a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)" title="Analyze this matchup">(analyze)</a></td>
+            <td>
+                <table class="playerList">
+                    <tr>
+                        <td>@Helper.MultiLinePlayerList(game.PlayerTeam)</td>
+                        <td>@Helper.MultiLinePlayerList(game.EnemyTeam)</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)">Analyze matchup</a></td>
+                    </tr>
+                </table>
 		</tr>
 	}
 </table>
