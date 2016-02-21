@@ -1,6 +1,6 @@
-﻿namespace BeRated.Cache
+﻿namespace BeRated.Common
 {
-    enum GameOutcome
+    public enum GameOutcome
     {
         TerroristsWin,
         CounterTerroristsWin,

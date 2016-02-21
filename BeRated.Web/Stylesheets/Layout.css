@@ -76,3 +76,9 @@ td {
 .numericTable td:nth-child(n + 2) {
   text-align: right;
 }
+.games td {
+  vertical-align: top;
+}
+.games li {
+  display: block;
+}

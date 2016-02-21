@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace BeRated.Common
+namespace BeRated.App
 {
 	class TimeConstraints
 	{
-		public DateTimeOffset? Start { get; set; }
-		public DateTimeOffset? End { get; set; }
+		public DateTimeOffset? Start { get; private set; }
+		public DateTimeOffset? End { get; private set; }
 
 		public TimeConstraints()
 		{

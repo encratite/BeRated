@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using BeRated.Common;
 using BeRated.Model;
 using RazorEngine.Text;
 
@@ -41,6 +43,20 @@ namespace BeRated.App
 			return rawString;
 		}
 
+		public static string Outcome(GameOutcome outcome)
+		{
+			switch (outcome)
+			{
+				case GameOutcome.TerroristsWin:
+					return "Terrorists";
+				case GameOutcome.CounterTerroristsWin:
+					return "Counter-Terrorists";
+				case GameOutcome.Draw:
+					return "Draw";
+			}
+			throw new ApplicationException("Invalid outcome.");
+		}
+
 		public static string Outcome(PlayerGameOutcome outcome)
 		{
 			return outcome.ToString();
@@ -50,6 +66,14 @@ namespace BeRated.App
 		{
 			var idString = team.Select(player => player.SteamId);
 			return string.Join(",", idString);
+		}
+
+		public static RawString MultiLinePlayerList(List<PlayerInfo> team)
+		{
+			var links = team.Select(player => string.Format("<li>{0}</li>", PlayerLink(player.SteamId, player.Name)));
+			string elements = string.Join("\n", links);
+			string output = string.Format("<ul>\n{0}\n</ul>", elements);
+			return new RawString(output);
 		}
 	}
 }

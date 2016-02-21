@@ -7,6 +7,7 @@ using BeRated.Common;
 using BeRated.Model;
 using BeRated.Server;
 using Microsoft.Owin;
+using ModelGame = BeRated.Model.Game;
 
 namespace BeRated.App
 {
@@ -67,6 +68,13 @@ namespace BeRated.App
 			var constraints = GetTimeConstraints();
 			var teams = GetTeamStats(constraints);
 			return teams;
+		}
+
+		[Controller]
+		public List<ModelGame> Games()
+		{
+			var games = GetGames();
+			return games;
 		}
 
 		[Controller]
@@ -390,6 +398,23 @@ namespace BeRated.App
             else
                 team.Losses++;
         }
+
+		private List<ModelGame> GetGames()
+		{
+			var games = _Cache.Games.Select(game =>
+			{
+				return new ModelGame
+				{
+					Time = game.Time,
+					TerroristScore = game.TerroristScore,
+					CounterTerroristScore = game.CounterTerroristScore,
+					Outcome = game.Outcome,
+					Terrorists = GetPlayerInfos(game.Terrorists),
+					CounterTerrorists = GetPlayerInfos(game.CounterTerrorists),
+				};
+			}).OrderByDescending(game => game.Time).ToList();
+			return games;
+		}
 
         private PlayerInfo GetPlayerInfo(Player player)
         {

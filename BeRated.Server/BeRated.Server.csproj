@@ -73,7 +73,7 @@
   <ItemGroup>
     <Compile Include="App\Helper.cs" />
     <Compile Include="Cache\Game.cs" />
-    <Compile Include="Cache\GameOutcome.cs" />
+    <Compile Include="Common\GameOutcome.cs" />
     <Compile Include="Cache\Player.cs" />
     <Compile Include="Cache\Team.cs" />
     <Compile Include="Cache\LogParser.cs" />
@@ -86,6 +86,7 @@
     <Compile Include="Cache\Vector.cs" />
     <Compile Include="Cache\CacheManager.cs" />
     <Compile Include="Common\Ratio.cs" />
+    <Compile Include="Model\Game.cs" />
     <Compile Include="Model\PlayerEncounters.cs" />
     <Compile Include="Model\PlayerGameOutcome.cs" />
     <Compile Include="Model\GameOutcomes.cs" />
@@ -114,7 +115,7 @@
     <Compile Include="Server\TemplateState.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />
     <Compile Include="Server\MiddlewareApp.cs" />
-    <Compile Include="Common\TimeConstraints.cs" />
+    <Compile Include="App\TimeConstraints.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

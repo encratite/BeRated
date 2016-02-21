@@ -1,0 +1,30 @@
+﻿@using BeRated.App
+@using BeRated.Model
+@using System.Collections.Generic
+
+@model List<Game>
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = "Games";
+}
+
+<table class="games">
+    <tr>
+        <th>Time</th>
+        <th>Winner</th>
+        <th>Score</th>
+        <th>Counter-Terrorists</th>
+        <th>Terrorists</th>
+    </tr>
+    @foreach (var game in Model)
+    {
+        <tr>
+            <td>@game.Time.ToString("g")</td>
+            <td><span class="@game.Outcome">@Helper.Outcome(game.Outcome)</span></td>
+            <td>@game.CounterTerroristScore - @game.TerroristScore</td>
+            <td>@Helper.MultiLinePlayerList(game.CounterTerrorists)</td>
+            <td>@Helper.MultiLinePlayerList(game.Terrorists)</td>
+        </tr>
+    }
+</table>
