@@ -9,29 +9,24 @@
     ViewBag.SteamId = Model.SteamId;
 }
 
-<table class="grid">
+<table class="grid playerList">
 	<tr>
 		<th>Time</th>
 		<th>Outcome</th>
 		<th>Score</th>
-		<th>Matchup</th>
+		<th>Team</th>
+        <th>Enemy team</th>
+        <th>Details</th>
 	</tr>
 	@foreach (var game in Model.Games)
 	{
 		<tr>
 			<td>@game.Time.ToString("g")</td>
-			<td><span class="@game.Outcome">@Helper.Outcome(game.Outcome)</span></td>
+			<td><span class="@Helper.LowerCase(game.Outcome.ToString())">@Helper.Outcome(game.Outcome)</span></td>
 			<td>@game.PlayerScore - @game.EnemyScore</td>
-            <td>
-                <table class="playerList">
-                    <tr>
-                        <td>@Helper.MultiLinePlayerList(game.PlayerTeam)</td>
-                        <td>@Helper.MultiLinePlayerList(game.EnemyTeam)</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2"><a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)">Analyze matchup</a></td>
-                    </tr>
-                </table>
+            <td>@Helper.MultiLinePlayerList(game.PlayerTeam)</td>
+            <td>@Helper.MultiLinePlayerList(game.EnemyTeam)</td>
+            <td><a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)">Analyze matchup</a></td>
 		</tr>
 	}
 </table>

@@ -10,6 +10,19 @@ namespace BeRated.App
 {
 	public class Helper
 	{
+		public static string LowerCase(string input)
+		{
+			if (input != null && input.Length >= 1)
+				return input.Substring(0, 1).ToLower() + input.Substring(1);
+			else
+				return input;
+		}
+
+		public static string GetScoreClasses(string baseClass, int score, int otherScore)
+		{
+			return baseClass + (score > otherScore ? " victory" : "");
+		}
+
 		public static string Percentage(decimal? ratio)
 		{
 			if (ratio.HasValue)

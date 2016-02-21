@@ -11,6 +11,10 @@
     padding: 0;
 }
 
+body {
+    margin-bottom: 2em;
+}
+
 a {
     color: @linkColour;
     text-decoration: none;
@@ -30,38 +34,35 @@ li {
     border-radius: 3px;
     border-spacing: 0;
 
-    > tbody {
-        > tr:hover {
-            background-color: #fcfcfc;
-        }
+    tr:hover {
+        background-color: #fcfcfc;
+    }
 
-        > tr > th {
-            background-color: @headerBackgroundColour;
-            font-weight: bold;
-            -moz-background-clip: padding; 
-            -webkit-background-clip: padding-box;
-            background-clip: padding-box;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-            text-align: left;
-        }
+    th {
+        background-color: @headerBackgroundColour;
+        font-weight: bold;
+        -moz-background-clip: padding; 
+        -webkit-background-clip: padding-box;
+        background-clip: padding-box;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        text-align: left;
+    }
 
-        > tr {
-            > th, > td {
-                padding: 0.6em 1em;
-            }
-        }
-
-        > tr > td {
-            border-top: @border;
-        }
+    th, td {
+        padding: 0.6em 1em;
     }
 
     td {
         vertical-align: top;
+        border-top: @border;
+    }
+
+    td:nth-child(1) {
+        white-space: nowrap;
     }
 }
 
@@ -106,17 +107,31 @@ li {
 }
 
 .playerList {
-    width: 100%;
-
-    tr:nth-child(2) td {
-        padding-left: 10em;
-    }
-
-    td {
-        width: 20em;
-    }
-
     li { 
         display: block;
     }
+}
+
+.win {
+    color: #00c325;
+}
+
+.loss {
+    color: #bd0000;
+}
+
+.draw {
+    color: #c7a019;
+}
+
+.counterTerrorists {
+    color: #5783c0;
+}
+
+.terrorists {
+    color: #a68947;
+}
+
+.victory {
+    font-weight: bold;
 }

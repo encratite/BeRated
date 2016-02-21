@@ -5,6 +5,9 @@
   margin: 0;
   padding: 0;
 }
+body {
+  margin-bottom: 2em;
+}
 a {
   color: #4078c0;
   text-decoration: none;
@@ -21,10 +24,10 @@ li {
   border-radius: 3px;
   border-spacing: 0;
 }
-.grid > tbody > tr:hover {
+.grid tr:hover {
   background-color: #fcfcfc;
 }
-.grid > tbody > tr > th {
+.grid th {
   background-color: #f8f8f8;
   font-weight: bold;
   -moz-background-clip: padding;
@@ -37,15 +40,16 @@ li {
   user-select: none;
   text-align: left;
 }
-.grid > tbody > tr > th,
-.grid > tbody > tr > td {
+.grid th,
+.grid td {
   padding: 0.6em 1em;
-}
-.grid > tbody > tr > td {
-  border-top: 1px solid #ddd;
 }
 .grid td {
   vertical-align: top;
+  border-top: 1px solid #ddd;
+}
+.grid td:nth-child(1) {
+  white-space: nowrap;
 }
 .menu {
   background-color: #f8f8f8;
@@ -79,15 +83,24 @@ li {
 .numericTable td:nth-child(n + 2) {
   text-align: right;
 }
-.playerList {
-  width: 100%;
-}
-.playerList tr:nth-child(2) td {
-  padding-left: 10em;
-}
-.playerList td {
-  width: 20em;
-}
 .playerList li {
   display: block;
+}
+.win {
+  color: #00c325;
+}
+.loss {
+  color: #bd0000;
+}
+.draw {
+  color: #c7a019;
+}
+.counterTerrorists {
+  color: #5783c0;
+}
+.terrorists {
+  color: #a68947;
+}
+.victory {
+  font-weight: bold;
 }

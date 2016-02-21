@@ -9,22 +9,22 @@
     ViewBag.Title = "Games";
 }
 
-<table class="grid">
+<table class="grid playerList">
     <tr>
         <th>Time</th>
-        <th>Winner</th>
         <th>Score</th>
         <th>Counter-Terrorists</th>
         <th>Terrorists</th>
+        <th>Details</th>
     </tr>
     @foreach (var game in Model)
     {
         <tr>
             <td>@game.Time.ToString("g")</td>
-            <td><span class="@game.Outcome">@Helper.Outcome(game.Outcome)</span></td>
-            <td>@game.CounterTerroristScore - @game.TerroristScore</td>
+            <td><span class="@Helper.GetScoreClasses("counterTerrorists", game.CounterTerroristScore, game.TerroristScore)">@game.CounterTerroristScore</span> - <span class="@Helper.GetScoreClasses("terrorists", game.TerroristScore, game.CounterTerroristScore)">@game.TerroristScore</span></td>
             <td>@Helper.MultiLinePlayerList(game.CounterTerrorists)</td>
             <td>@Helper.MultiLinePlayerList(game.Terrorists)</td>
+            <td><a href="/Matchup?team1=@Helper.PlayerIds(game.CounterTerrorists)&team2=@Helper.PlayerIds(game.Terrorists)">Analyze matchup</a></td>
         </tr>
     }
 </table>
