@@ -14,11 +14,13 @@
 		@RenderSection("Scripts", false)
     </head>
     <body>
-        <div class="content">
-            <ul class="globalMenu">
+        <div class="menu">
+            <ul>
                 <li><a href="/Players">Players</a></li>
                 <li><a href="/Teams">Teams</a></li>
             </ul>
+        </div>
+        <div class="content">
             @if (ViewBag.SteamId != null)
             {
                 <ul class="playerMenu">
@@ -26,7 +28,8 @@
                     <li>@PlayerLink("Encounters")</li>
                     <li>@PlayerLink("Weapons")</li>
                     <li>@PlayerLink("Items", "Items purchased")</li>
-                </ul>}
+                </ul>
+            }
             @RenderBody()
         </div>
     </body>
