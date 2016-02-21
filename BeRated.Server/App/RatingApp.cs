@@ -174,7 +174,7 @@ namespace BeRated.App
 		            RoundsPlayed = roundsPlayed,
 		            RoundWinRatio = Ratio.Get(roundsWon, roundsPlayed),
                 };
-            }).ToList();
+            }).OrderBy(player => player.Name).ToList();
             return stats;
         }
 

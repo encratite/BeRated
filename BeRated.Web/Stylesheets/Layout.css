@@ -1,6 +1,6 @@
 * {
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 16px;
+	font-family: Arial, sans-serif;
+    font-size: 15px;
 }
 
 body {
@@ -12,16 +12,6 @@ li {
 
 th {
     text-align: left;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-th, td {
-    padding-left: 1em;
-    padding-right: 1em;
 }
 
 a {
@@ -40,4 +30,17 @@ a:hover {
 
 .numericTable td:nth-child(n + 2) {
     text-align: right;
+}
+
+.sortable th {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.sortable th, .sortable td {
+    padding-left: 1em;
+    padding-right: 1em;
 }
