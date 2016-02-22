@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Helper.cs" />
+    <Compile Include="App\TimeConstraintPreset.cs" />
     <Compile Include="Cache\Game.cs" />
     <Compile Include="Common\GameOutcome.cs" />
     <Compile Include="Cache\Player.cs" />

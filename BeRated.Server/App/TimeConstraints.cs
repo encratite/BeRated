@@ -2,7 +2,7 @@
 
 namespace BeRated.App
 {
-	class TimeConstraints
+	public class TimeConstraints
 	{
 		public DateTimeOffset? Start { get; private set; }
 		public DateTimeOffset? End { get; private set; }
@@ -11,15 +11,10 @@ namespace BeRated.App
 		{
 		}
 
-		public TimeConstraints(int? days)
+		public TimeConstraints(DateTimeOffset? start, DateTimeOffset? end = null)
 		{
-            Start = null;
-			if (days != null)
-			{
-				var then = DateTimeOffset.Now.AddDays((double)-days);
-				Start = new DateTimeOffset(then.Year, then.Month, then.Day, 0, 0, 0, then.Offset);
-			}
-            End = null;
+            Start = GetMidnightOffset(start);
+            End = GetMidnightOffset(end);
 		}
 
         public bool Match(DateTimeOffset time)
@@ -33,6 +28,16 @@ namespace BeRated.App
         {
             var dateTimeOffset = new DateTimeOffset(time, DateTimeOffset.Now.Offset);
             return Match(dateTimeOffset);
+        }
+
+        private DateTimeOffset? GetMidnightOffset(DateTimeOffset? maybeOffset)
+        {
+            if (maybeOffset.HasValue)
+            {
+                var offset = maybeOffset.Value;
+                maybeOffset = new DateTimeOffset(offset.Year, offset.Month, offset.Day, 0, 0, 0, offset.Offset);
+            }
+            return maybeOffset;
         }
 	}
 }

@@ -12,7 +12,7 @@ namespace BeRated.App
 	{
 		public static string GetTitle(string description, string name)
 		{
-			return string.Format("{0}: {1}", name, description);
+			return string.Format("{0}/{1}", name, description);
 		}
 
 		public static string LowerCase(string input)
