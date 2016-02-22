@@ -80,6 +80,10 @@ li {
   line-height: 3em;
   color: #000;
 }
+.playerName {
+  font-size: 1.3em;
+  margin-bottom: 1em;
+}
 .playerMenu {
   margin-bottom: 2em;
 }

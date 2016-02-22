@@ -3,7 +3,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>@ViewBag.Title - CS:GO Stats</title>
+        <title>@ViewBag.Title</title>
         <link rel="icon" href="/Images/Favicon.ico">
         <link rel="stylesheet" type="text/css" href="/Stylesheets/Layout.css">
 		@RenderSection("Stylesheets", false)
@@ -21,6 +21,7 @@
         <div class="content">
             @if (ViewBag.SteamId != null)
             {
+                <h1 class="playerName">@ViewBag.Title</h1>
                 <ul class="playerMenu">
                     <li>@PlayerLink("Player", "Games")</li><li>@PlayerLink("Encounters")</li><li>@PlayerLink("Weapons")</li><li>@PlayerLink("Items", "Items purchased")</li>
                 </ul>
