@@ -1,8 +1,13 @@
+@darken: 5%;
+
+@linkColour: darken(#4078c0, @darken);
+@headerBackgroundColour: darken(#f8f8f8, @darken);
+@borderColour: darken(#ddd, @darken);
+
 @contentWidth: 900px;
-@linkColour: #4078c0;
-@headerBackgroundColour: #f8f8f8;
-@border: 1px solid #ddd;
+@border: 1px solid @borderColour;
 @borderRadius: 4px;
+@textMargin: 0.9em;
 
 * {
 	font-family: Helvetica, Arial, sans-serif;
@@ -28,6 +33,12 @@ a {
 li {
     display: inline;
     list-style-type: none;
+}
+
+p {
+    margin-left: @textMargin;
+    margin-right: @textMargin;
+    margin-bottom: 2em;
 }
 
 .grid {
@@ -89,7 +100,7 @@ li {
     }
 
     li:nth-child(1) {
-        padding-left: 1em;
+        padding-left: 1.3em;
     }
 
     a {
@@ -111,7 +122,8 @@ li {
 .title {
     font-size: 1.3em;
     margin-bottom: 1em;
-    margin-left: 0.5em;
+    margin-left: @textMargin;
+    margin-right: @textMargin;
 }
 
 .playerMenu {
@@ -126,7 +138,7 @@ li {
         color: inherit;
         text-decoration: inherit;
         background-image: none;
-        background-color: darken(@headerBackgroundColour, 5%);
+        background-color: darken(@headerBackgroundColour, 6%);
     }
 
     li:first-child a {
