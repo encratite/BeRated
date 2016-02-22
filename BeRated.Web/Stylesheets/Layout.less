@@ -1,7 +1,8 @@
+@contentWidth: 900px;
 @linkColour: #4078c0;
 @headerBackgroundColour: #f8f8f8;
-
 @border: 1px solid #ddd;
+@borderRadius: 4px;
 
 * {
 	font-family: Helvetica, Arial, sans-serif;
@@ -31,7 +32,7 @@ li {
 
 .grid {
     border: @border;
-    border-radius: 3px;
+    border-radius: @borderRadius;
     border-spacing: 0;
 
     tr:hover {
@@ -70,10 +71,10 @@ li {
     background-color: @headerBackgroundColour;
     width: 100%;
     border-bottom: @border;
-    margin-bottom: 3em;
+    margin-bottom: 2em;
 
     ul {
-        width: 1000px;
+        width: @contentWidth;
         margin: 0 auto;
     }
 
@@ -85,11 +86,11 @@ li {
         }
     }
 
-    a {
-        font-weight: bold;
-        line-height: 3em;
-        color: #000;
+    li:nth-child(1) {
+        padding-left: 1em;
+    }
 
+    a {
         &:hover {
             color: @linkColour;
             text-decoration: none;
@@ -97,8 +98,52 @@ li {
     }
 }
 
+.menu, .playerMenu {
+    a {
+        font-weight: bold;
+        line-height: 3em;
+        color: #000;
+    }
+}
+
+.playerMenu {
+    margin-bottom: 2em;
+
+    a {
+        padding: 0.4em 0.8em;
+        background-image: linear-gradient(@headerBackgroundColour, darken(@headerBackgroundColour, 5%));
+    }
+
+    a:hover {
+        color: inherit;
+        text-decoration: inherit;
+        background-image: none;
+        background-color: darken(@headerBackgroundColour, 5%);
+    }
+
+    li:first-child a {
+        border-top: @border;
+        border-bottom: @border;
+        border-left: @border;
+        border-top-left-radius: @borderRadius;
+        border-bottom-left-radius: @borderRadius;
+    }
+
+    li:nth-child(n + 2) a {
+        border-top: @border;
+        border-bottom: @border;
+        border-left: @border;
+    }
+
+    li:last-child a {
+        border-right: @border;
+        border-top-right-radius: @borderRadius;
+        border-bottom-right-radius: @borderRadius;
+    }
+}
+
 .content {
-    width: 1000px;
+    width: @contentWidth;
     margin: 0 auto;
 }
 

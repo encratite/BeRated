@@ -1,7 +1,4 @@
-@helper PlayerLink(string controller, string description = null)
-{
-    <a href="/@controller?id=@ViewBag.SteamId">@(description ?? controller)</a>
-}
+@helper PlayerLink(string controller, string description = null) {<a href="/@controller?id=@ViewBag.SteamId">@(description ?? controller)</a>}
 
 <!doctype html>
 <html>
@@ -25,10 +22,7 @@
             @if (ViewBag.SteamId != null)
             {
                 <ul class="playerMenu">
-                    <li>@PlayerLink("Player", "Games")</li>
-                    <li>@PlayerLink("Encounters")</li>
-                    <li>@PlayerLink("Weapons")</li>
-                    <li>@PlayerLink("Items", "Items purchased")</li>
+                    <li>@PlayerLink("Player", "Games")</li><li>@PlayerLink("Encounters")</li><li>@PlayerLink("Weapons")</li><li>@PlayerLink("Items", "Items purchased")</li>
                 </ul>
             }
             @RenderBody()
