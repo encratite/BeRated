@@ -48,7 +48,7 @@ li {
   vertical-align: top;
   border-top: 1px solid #ddd;
 }
-.grid td:nth-child(1) {
+.dateGrid td:nth-child(1) {
   white-space: nowrap;
 }
 .menu {
