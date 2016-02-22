@@ -19,9 +19,9 @@
             </ul>
         </div>
         <div class="content">
+            <h1 class="title">@ViewBag.Title</h1>
             @if (ViewBag.SteamId != null)
             {
-                <h1 class="playerName">@ViewBag.Title</h1>
                 <ul class="playerMenu">
                     <li>@PlayerLink("Player", "Games")</li><li>@PlayerLink("Encounters")</li><li>@PlayerLink("Weapons")</li><li>@PlayerLink("Items", "Items purchased")</li>
                 </ul>
