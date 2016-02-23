@@ -6,9 +6,11 @@ namespace BeRated.Model
 	{
 		public string Weapon { get; set; }
 		public int Kills { get; set; }
-		public int Headshots { get; set; }
+		public int HeadshotKills { get; set; }
+        public int PenetrationKills { get; set; }
 
-		public decimal HeadshotRatio { get { return Ratio.Get(Headshots, Kills).Value; } }
+		public decimal HeadshotKillRatio { get { return Ratio.Get(HeadshotKills, Kills).Value; } }
+        public decimal PenetrationKillRatio { get { return Ratio.Get(PenetrationKills, Kills).Value; } }
 
 		private PlayerWeaponStats()
 		{
@@ -18,7 +20,8 @@ namespace BeRated.Model
 		{
 			Weapon = weapon;
 			Kills = 0;
-			Headshots = 0;
+			HeadshotKills = 0;
+            PenetrationKills = 0;
 		}
 	}
 }

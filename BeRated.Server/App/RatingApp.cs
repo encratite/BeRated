@@ -289,7 +289,9 @@ namespace BeRated.App
 				var stats = statsDictionary.Get(kill.Weapon, () => new PlayerWeaponStats(kill.Weapon));
 				stats.Kills++;
 				if (kill.Headshot)
-					stats.Headshots++;
+					stats.HeadshotKills++;
+                if (kill.Penetrated)
+                    stats.PenetrationKills++;
 			}
 			var weapons = statsDictionary.Values.OrderByDescending(stats => stats.Kills).ToList();
 			return weapons;

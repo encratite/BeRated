@@ -17,7 +17,7 @@ namespace BeRated.Cache
 
         private static Regex LogFileStartedPattern = new Regex(DatePrefix + "Log file started \\(file \".+?\"\\) \\(game \".+?\"\\) \\(version \"(\\d+)\"\\)");
         private static Regex MatchStartPattern = new Regex(DatePrefix + "World triggered \"Match_Start\" on \"(.+?)\"");
-		private static Regex KillPattern = new Regex(DatePrefix + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed " + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
+		private static Regex KillPattern = new Regex(DatePrefix + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed " + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"(?: \\((.+?)\\))?");
 		private static Regex MaxRoundsPattern = new Regex(DatePrefix + "server_cvar: \"mp_maxrounds\" \"(\\d+)\"");
 		// grep -h -E -o "SFUI_[^""]+" * | sort | uniq
 		private static Regex EndOfRoundPattern = new Regex(DatePrefix + "Team \"(TERRORIST|CT)\" triggered \"(SFUI_Notice_All_Hostages_Rescued|SFUI_Notice_Bomb_Defused|SFUI_Notice_CTs_Win|SFUI_Notice_Hostages_Not_Rescued|SFUI_Notice_Target_Bombed|SFUI_Notice_Target_Saved|SFUI_Notice_Terrorists_Win)\" \\(CT \"(\\d+)\"\\) \\(T \"(\\d+)\"\\)");
@@ -74,7 +74,9 @@ namespace BeRated.Cache
 			int victimY = reader.Int();
 			int victimZ = reader.Int();
 			string weapon = reader.String();
-			bool headshot = reader.String() != "";
+            string flags = reader.String();
+			bool headshot = flags.Contains("headshot");
+            bool penetrated = flags.Contains("penetrated");
 			var output = new Kill
 			{
 				Time = time,
@@ -85,6 +87,7 @@ namespace BeRated.Cache
 				VictimTeam = victimTeam,
 				VictimPosition = new Vector(victimX, victimY, victimZ),
 				Headshot = headshot,
+                Penetrated = penetrated,
 				Weapon = weapon,
 			};
 			return output;

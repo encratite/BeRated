@@ -12,6 +12,7 @@ namespace BeRated.Cache
 		public Team VictimTeam { get; set; }
 		public Vector VictimPosition { get; set; }
 		public bool Headshot { get; set; }
+        public bool Penetrated { get; set; }
 		public string Weapon { get; set; }
 	}
 }

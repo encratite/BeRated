@@ -13,15 +13,19 @@
     <tr>
         <th class="string">Weapon</th>
         <th>Kills</th>
-        <th>Headshots</th>
+        <th>Headshot kills</th>
         <th>Headshot kill ratio</th>
+        <th>Penetration kills</th>
+        <th>Penetration kill ratio</th>
     </tr>
     @foreach (var weapon in Model.Weapons) {
     <tr>
         <td>@weapon.Weapon</td>
         <td>@weapon.Kills</td>
-        <td>@weapon.Headshots</td>
-        <td>@Helper.Percentage(weapon.HeadshotRatio)</td>
+        <td>@weapon.HeadshotKills</td>
+        <td>@Helper.Percentage(weapon.HeadshotKillRatio)</td>
+        <td>@weapon.PenetrationKills</td>
+        <td>@Helper.Percentage(weapon.PenetrationKillRatio)</td>
     </tr>
     }
 </table>
