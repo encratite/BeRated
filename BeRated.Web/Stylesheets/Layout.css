@@ -53,6 +53,9 @@ p {
   vertical-align: top;
   border-top: 1px solid #d0d0d0;
 }
+.sortable th {
+  cursor: pointer;
+}
 .dateGrid td:nth-child(1) {
   white-space: nowrap;
 }

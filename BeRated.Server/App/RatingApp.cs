@@ -300,7 +300,7 @@ namespace BeRated.App
 			var purchases = player.Purchases.Where(purchase => constraints.Match(purchase.Time));
 			int kills = player.Kills.Count(kill => constraints.Match(kill.Time));
 			int rounds = player.Rounds.Count(round => constraints.Match(round.Time));
-			foreach (var purchase in player.Purchases)
+			foreach (var purchase in purchases)
 			{
 				var stats = statsDictionary.Get(purchase.Item, () => new PlayerItemStats(purchase.Item));
 				stats.TimesPurchased++;
