@@ -96,12 +96,36 @@ var BeRated;
         };
         return Table;
     })();
-    document.addEventListener("DOMContentLoaded", function (event) {
+    function initializeSortableTables() {
         var tables = document.querySelectorAll("table.sortable");
         for (var i = 0; i < tables.length; i++) {
             var table = tables[i];
+            var rows = table.querySelectorAll("tr");
             new Table(table);
         }
+    }
+    function adjustEmptyTables() {
+        var tables = document.querySelectorAll("table.grid");
+        for (var i = 0; i < tables.length; i++) {
+            var table = tables[i];
+            var rows = table.querySelectorAll("tr");
+            if (rows.length > 1) {
+                continue;
+            }
+            var body = table.querySelector("tbody");
+            var columns = table.querySelectorAll("th");
+            var row = document.createElement("tr");
+            row.className = "noData";
+            body.appendChild(row);
+            var cell = document.createElement("td");
+            cell.textContent = "No data available";
+            cell.colSpan = columns.length;
+            row.appendChild(cell);
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function (event) {
+        initializeSortableTables();
+        adjustEmptyTables();
     });
 })(BeRated || (BeRated = {}));
 //# sourceMappingURL=Table.js.map
