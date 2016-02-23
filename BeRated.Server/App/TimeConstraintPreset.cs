@@ -21,7 +21,7 @@ namespace BeRated.App
 
         public static IEnumerable<TimeConstraintPreset> Presets = new List<TimeConstraintPreset>
         {
-            new TimeConstraintPreset("all", "Show all", () => new TimeConstraints()),
+            new TimeConstraintPreset("all", "Show all stats", () => new TimeConstraints()),
             new TimeConstraintPreset("today", "Today", () => GetDayPreset()),
             new TimeConstraintPreset("yesterday", "Yesterday", () => GetDayPreset(1)),
             new TimeConstraintPreset("currentWeek", "Current week", () => GetWeekPreset()),
@@ -43,7 +43,7 @@ namespace BeRated.App
             var weekTimeSpan = TimeSpan.FromDays(7 * weeks);
             var start = DateTimeOffset.Now - weekTimeSpan;
             while (start.DayOfWeek != CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek)
-                start.AddDays(-1);
+                start = start.AddDays(-1);
             var end = start + weekTimeSpan;
             var constraints = new TimeConstraints(start, end);
             return constraints;
@@ -52,10 +52,9 @@ namespace BeRated.App
         private static TimeConstraints GetMonthPreset(int months = 0)
         {
             var start = DateTimeOffset.Now;
-            start.AddDays(- start.Day - 1);
-            start.AddMonths(-months);
-            var end = start;
-            end.AddMonths(1);
+            start = start.AddDays(- start.Day + 1);
+            start = start.AddMonths(-months);
+            var end = start.AddMonths(1);
             var constraints = new TimeConstraints(start, end);
             return constraints;
         }

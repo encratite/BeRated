@@ -155,10 +155,16 @@ p {
         border-left: @border;
     }
 
-    li:last-child a {
+    li:nth-last-child(2) a {
         border-right: @border;
         border-top-right-radius: @borderRadius;
         border-bottom-right-radius: @borderRadius;
+    }
+
+    select {
+        margin-left: 2em;
+        height: 2.1em;
+        border-radius: @borderRadius;
     }
 }
 

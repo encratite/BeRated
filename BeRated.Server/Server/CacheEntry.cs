@@ -4,13 +4,13 @@ namespace BeRated.Server
 {
 	class CacheEntry
 	{
-		public DateTime Time { get; private set; }
+		public DateTimeOffset Time { get; private set; }
 
 		public string Markup { get; private set; }
 
 		public CacheEntry(string markup)
 		{
-			Time = DateTime.Now;
+			Time = DateTimeOffset.Now;
 			Markup = markup;
 		}
 	}

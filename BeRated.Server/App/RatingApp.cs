@@ -13,6 +13,8 @@ namespace BeRated.App
 {
 	public class RatingApp : BaseApp
     {
+        private const string TimeConstraintsCookie = "timeConstraints";
+
         private Configuration _Configuration;
 		private CacheManager _Cache;
 
@@ -34,10 +36,26 @@ namespace BeRated.App
 		public override string GetCachedResponse(IOwinContext context)
 		{
 			CacheEntry cacheEntry;
-			if (_WebCache.TryGetValue(context.Request.Uri.PathAndQuery, out cacheEntry))
-				return cacheEntry.Markup;
-			else
-				return null;
+            string key = GetCacheKey(context);
+			if (_WebCache.TryGetValue(key, out cacheEntry))
+            {
+                var cacheTime = cacheEntry.Time;
+                var now = DateTimeOffset.Now;
+                if (
+                    cacheTime.Year == now.Year &&
+                    cacheTime.Month == now.Month &&
+                    cacheTime.Day == now.Day
+                )
+                {
+				    return cacheEntry.Markup;
+                }
+                else
+                {
+                    // The entry is outdated, get rid of it
+                    _WebCache.Remove(key);
+                }
+            }
+			return null;
 		}
 
 		public override void OnResponse(IOwinContext context, string markup, TimeSpan invokeDuration, TimeSpan renderDuration)
@@ -96,11 +114,12 @@ namespace BeRated.App
         public PlayerGames Player(string id)
         {
             var player = _Cache.GetPlayer(id);
+            var constraints = GetTimeConstraints();
             var games = new PlayerGames
             {
                 SteamId = player.SteamId,
                 Name = player.Name,
-                Games = GetPlayerGames(player),
+                Games = GetPlayerGames(player, constraints),
             };
             return games;
         }
@@ -199,9 +218,10 @@ namespace BeRated.App
             return teams;
         }
 
-        private List<PlayerGame> GetPlayerGames(Player player)
+        private List<PlayerGame> GetPlayerGames(Player player, TimeConstraints constraints)
 		{
             var matchingGames = player.Games.Where(game =>
+                constraints.Match(game.Time) &&
                 (game.Terrorists.Contains(player) || game.CounterTerrorists.Contains(player))
             );
             matchingGames = matchingGames.OrderByDescending(game => game.Time);
@@ -333,7 +353,8 @@ namespace BeRated.App
 
 		private void UpdateCache(IOwinContext context, string markup)
 		{
-			_WebCache[context.Request.Uri.PathAndQuery] = new CacheEntry(markup);
+            string key = GetCacheKey(context);
+			_WebCache[key] = new CacheEntry(markup);
 			int maximumCacheSize = _Configuration.CacheSize.Value * 1024 * 1024;
 			int cacheSize = 0;
 			foreach (var pair in _WebCache)
@@ -429,13 +450,33 @@ namespace BeRated.App
 
 		private TimeConstraints GetTimeConstraints()
 		{
-			var timeConstraints = new TimeConstraints();
-			return timeConstraints;
+			var constraints = new TimeConstraints();
+            string internalName = GetTimeConstraintsCookie();
+            if (internalName != null)
+            {
+                var preset = TimeConstraintPreset.Presets.First(p => p.InternalName == internalName);
+                constraints = preset.GetConstraints();
+            }
+            return constraints;
 		}
 
 		private void OnCacheUpdate()
 		{
 			_WebCache.Clear();
 		}
+
+        private string GetCacheKey(IOwinContext context)
+        {
+            string internalName = GetTimeConstraintsCookie();
+            string key = string.Format("{0}&{1}={2}", context.Request.Uri.PathAndQuery, TimeConstraintsCookie, internalName);
+            return key;
+        }
+
+        private string GetTimeConstraintsCookie()
+        {
+            string internalName = null;
+            Context.Current.Cookies.TryGetValue(TimeConstraintsCookie, out internalName);
+            return internalName;
+        }
     }
 }

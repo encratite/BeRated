@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\Table.ts" />
+    <TypeScriptCompile Include="Scripts\TimeConstraints.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\Favicon.ico" />
