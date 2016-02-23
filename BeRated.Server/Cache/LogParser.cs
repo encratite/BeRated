@@ -15,6 +15,8 @@ namespace BeRated.Cache
 		private const string PlayerPattern = "\"(.+?)<\\d+><(.+?)><(.*?)>\"";
 		private const string PlayerWithoutTeamPattern = "\"(.+?)<\\d+><(.+?)>\"";
 
+        private static Regex LogFileStartedPattern = new Regex(DatePrefix + "Log file started \\(file \".+?\"\\) \\(game \".+?\"\\) \\(version \"(\\d+)\"\\)");
+        private static Regex MatchStartPattern = new Regex(DatePrefix + "World triggered \"Match_Start\" on \"(.+?)\"");
 		private static Regex KillPattern = new Regex(DatePrefix + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed " + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"( \\(headshot\\))?");
 		private static Regex MaxRoundsPattern = new Regex(DatePrefix + "server_cvar: \"mp_maxrounds\" \"(\\d+)\"");
 		// grep -h -E -o "SFUI_[^""]+" * | sort | uniq
@@ -29,6 +31,28 @@ namespace BeRated.Cache
 		{
 			_Cache = cache;
 		}
+
+        public int? ReadServerVersion(string line)
+        {
+            var match = LogFileStartedPattern.Match(line);
+            if (!match.Success)
+                return null;
+            var reader = new MatchReader(match);
+			var time = ReadDate(reader);
+            int version = reader.Int();
+            return version;
+        }
+
+        public string ReadMap(string line)
+        {
+            var match = MatchStartPattern.Match(line);
+            if (!match.Success)
+                return null;
+            var reader = new MatchReader(match);
+            var time = ReadDate(reader);
+            string map = reader.String();
+            return map;
+        }
 
 		public Kill ReadPlayerKill(string line)
 		{

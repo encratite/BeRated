@@ -12,6 +12,7 @@
 <table class="grid dateGrid playerList">
     <tr>
         <th>Time</th>
+        <th>Map</th>
         <th>Score</th>
         <th>Counter-Terrorists</th>
         <th>Terrorists</th>
@@ -21,6 +22,7 @@
     {
         <tr>
             <td>@game.Time.ToString("g")</td>
+            <td>@game.Map</td>
             <td><span class="@Helper.GetScoreClasses("counterTerrorists", game.CounterTerroristScore, game.TerroristScore)">@game.CounterTerroristScore</span> - <span class="@Helper.GetScoreClasses("terrorists", game.TerroristScore, game.CounterTerroristScore)">@game.TerroristScore</span></td>
             <td>@Helper.MultiLinePlayerList(game.CounterTerrorists)</td>
             <td>@Helper.MultiLinePlayerList(game.Terrorists)</td>

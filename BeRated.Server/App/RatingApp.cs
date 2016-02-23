@@ -245,6 +245,7 @@ namespace BeRated.App
                 return new PlayerGame
                 {
                     Time = game.Time,
+                    Map = game.Map,
                     PlayerScore = isTerrorist ? terroristScore : counterTerroristScore,
                     EnemyScore = isTerrorist ? counterTerroristScore : terroristScore,
                     Outcome = outcome,
@@ -427,6 +428,7 @@ namespace BeRated.App
 				return new ModelGame
 				{
 					Time = game.Time,
+                    Map = game.Map,
 					TerroristScore = game.TerroristScore,
 					CounterTerroristScore = game.CounterTerroristScore,
 					Outcome = game.Outcome,

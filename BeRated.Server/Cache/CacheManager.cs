@@ -41,6 +41,8 @@ namespace BeRated.Cache
 
         private List<Game> _Games = new List<Game>();
 
+        private int _MatchStartCounter = 0;
+        private string _Map = null;
 		private Dictionary<string, Team> _PlayerTeams = null;
 		private List<Round> _Rounds = new List<Round>();
 
@@ -116,6 +118,8 @@ namespace BeRated.Cache
 			lock (this)
 			{
 				_MaxRounds = MaxRoundsDefault;
+                _MatchStartCounter = 0;
+                _Map = null;
 				_PlayerTeams = new Dictionary<string, Team>();
 				string fileName = Path.GetFileName(path);
 				var fileInfo = new FileInfo(path);
@@ -136,11 +140,17 @@ namespace BeRated.Cache
 				Console.WriteLine("{0} Processing {1}", DateTime.Now, path);
 				var lines = content.Split('\n');
 				int lineCounter = 1;
-				foreach (var line in lines)
-				{
-					ProcessLine(line);
-					lineCounter++;
-				}
+                try
+                {
+				    foreach (var line in lines)
+				    {
+					    ProcessLine(line);
+					    lineCounter++;
+				    }
+                }
+                catch (NotSupportedException)
+                {
+                }
 				_LogStates[fileName] = currentFileSize;
 			}
 		}
@@ -149,6 +159,8 @@ namespace BeRated.Cache
         {
             var readers = new Func<string, bool>[]
             {
+                ReadServerVersion,
+                ReadMap,
                 ReadPlayerKill,
                 ReadMaxRounds,
                 ReadTeamSwitch,
@@ -168,15 +180,44 @@ namespace BeRated.Cache
 
         #region Line processing methods
 
+        private bool ReadServerVersion(string line)
+        {
+            int? version = _LogParser.ReadServerVersion(line);
+            if (version == null)
+                return false;
+            if (version.Value < 5949)
+            {
+                // The format of this log file is too old and too annoying to parse, abort
+                throw new NotSupportedException();
+            }
+            return true;
+        }
+
+        private bool ReadMap(string line)
+        {
+            string map = _LogParser.ReadMap(line);
+            if (map == null)
+                return false;
+            _MatchStartCounter++;
+            _Map = map;
+            return true;
+        }
+
         private bool ReadPlayerKill(string line)
         {
             var kill = _LogParser.ReadPlayerKill(line);
 			if (kill == null)
                 return false;
-			if (kill.Killer.SteamId == LogParser.BotId || kill.Victim.SteamId == LogParser.BotId || kill.Killer == kill.Victim)
-				return true;
-			kill.Killer.Kills.Add(kill);
-			kill.Victim.Deaths.Add(kill);
+			if (
+                !IgnoreStats() &&
+                kill.Killer.SteamId != LogParser.BotId &&
+                kill.Victim.SteamId != LogParser.BotId &&
+                kill.Killer != kill.Victim
+            )
+            {
+			    kill.Killer.Kills.Add(kill);
+			    kill.Victim.Deaths.Add(kill);
+            }
 			return true;
         }
 
@@ -239,7 +280,7 @@ namespace BeRated.Cache
 			if (purchase == null)
                 return false;
 			string steamId = purchase.Player.SteamId;
-			if (steamId != LogParser.BotId)
+			if (!IgnoreStats() && steamId != LogParser.BotId)
 			    purchase.Player.Purchases.Add(purchase);
             return true;
         }
@@ -259,7 +300,7 @@ namespace BeRated.Cache
                 outcome = GameOutcome.TerroristsWin;
             else if (counterTerroristsWinGame)
                 outcome = GameOutcome.CounterTerroristsWin;
-            var game = new Game(_Rounds, outcome);
+            var game = new Game(_Map, _Rounds, outcome);
             _Games.Add(game);
             foreach (var pair in _PlayerTeams)
             {
@@ -278,6 +319,11 @@ namespace BeRated.Cache
                 var players = playerTeam == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
                 players.Add(player);
             }
+        }
+
+        private bool IgnoreStats()
+        {
+            return _MatchStartCounter < 2;
         }
     }
 }

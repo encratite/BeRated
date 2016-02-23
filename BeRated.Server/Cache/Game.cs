@@ -9,6 +9,8 @@ namespace BeRated.Cache
 	{
 		public DateTimeOffset Time { get { return LastRound.Time; } }
 
+        public string Map { get; private set; }
+
 		public List<Round> Rounds { get; private set; }
 
         public int TerroristScore { get { return LastRound.TerroristScore; } }
@@ -21,8 +23,9 @@ namespace BeRated.Cache
 
         private Round LastRound { get { return Rounds.Last(); } }
 
-		public Game(List<Round> rounds, GameOutcome outcome)
+		public Game(string map, List<Round> rounds, GameOutcome outcome)
 		{
+            Map = map;
 			Rounds = rounds;
             Outcome = outcome;
 

@@ -12,6 +12,7 @@
 <table class="grid dateGrid playerList">
 	<tr>
 		<th>Time</th>
+        <th>Map</th>
 		<th>Outcome</th>
 		<th>Score</th>
 		<th>Team</th>
@@ -22,6 +23,7 @@
 	{
 		<tr>
 			<td>@game.Time.ToString("g")</td>
+            <td>@game.Map</td>
 			<td><span class="@Helper.LowerCase(game.Outcome.ToString())">@Helper.Outcome(game.Outcome)</span></td>
 			<td>@game.PlayerScore - @game.EnemyScore</td>
             <td>@Helper.MultiLinePlayerList(game.PlayerTeam)</td>
