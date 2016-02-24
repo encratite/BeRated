@@ -10,11 +10,6 @@ namespace BeRated.App
 {
 	public class Helper
 	{
-		public static string GetTitle(string description, string name)
-		{
-			return string.Format("{0}/{1}", name, description);
-		}
-
 		public static string LowerCase(string input)
 		{
 			if (input != null && input.Length >= 1)
@@ -80,18 +75,28 @@ namespace BeRated.App
 			return outcome.ToString();
 		}
 
-		public static string PlayerIds(List<PlayerInfo> team)
+		public static string PlayerIds(List<PlayerGameInfo> team)
 		{
 			var idString = team.Select(player => player.SteamId);
 			return string.Join(",", idString);
 		}
 
-		public static RawString MultiLinePlayerList(List<PlayerInfo> team)
+		public static List<RawString> GetTeamRows(List<PlayerGameInfo> counterTerrorists, List<PlayerGameInfo> terrorists)
 		{
-			var links = team.Select(player => string.Format("<li>{0}</li>", PlayerLink(player.SteamId, player.Name)));
-			string elements = string.Join("\n", links);
-			string output = string.Format("<ul>\n{0}\n</ul>", elements);
-			return new RawString(output);
+            var counterTerroristRows = counterTerrorists.Select(player => GetPlayerRow(player, false));
+			var terroristRows = terrorists.Select(player => GetPlayerRow(player, true));
+            var rows = counterTerroristRows.Concat(terroristRows).ToList();
+            return rows;
 		}
-	}
+
+        private static RawString GetPlayerRow(PlayerGameInfo player, bool terrorist)
+        {
+            string className = terrorist ? "terroristPlayer" : "counterTerroristPlayer";
+            var link = PlayerLink(player.SteamId, player.Name);
+            string markup = string.Format("<td class=\"{0}\">{1}</td>\n", className, link);
+            markup += string.Format("<td>{0}</td>\n", player.Kills);
+            markup += string.Format("<td>{0}</td>\n", player.Deaths);
+            return new RawString(markup);
+        }
+    }
 }

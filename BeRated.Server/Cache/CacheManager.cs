@@ -45,6 +45,7 @@ namespace BeRated.Cache
         private string _Map = null;
 		private Dictionary<string, Team> _PlayerTeams = null;
 		private List<Round> _Rounds = new List<Round>();
+        private List<Kill> _RoundKills = new List<Kill>();
 
         private LogParser _LogParser;
 
@@ -120,6 +121,7 @@ namespace BeRated.Cache
                 _MatchStartCounter = 0;
                 _Map = null;
 				_PlayerTeams = new Dictionary<string, Team>();
+                _RoundKills = new List<Kill>();
 				string fileName = Path.GetFileName(path);
 				var fileInfo = new FileInfo(path);
 				long currentFileSize = fileInfo.Length;
@@ -217,6 +219,7 @@ namespace BeRated.Cache
                 kill.Weapon = TranslateWeapon(kill.Weapon);
 			    kill.Killer.Kills.Add(kill);
 			    kill.Victim.Deaths.Add(kill);
+                _RoundKills.Add(kill);
             }
 			return true;
         }
@@ -261,6 +264,7 @@ namespace BeRated.Cache
             int roundsPlayed = round.TerroristScore + round.CounterTerroristScore;
             if (roundsPlayed == 1)
                 _Rounds = new List<Round>();
+            round.Kills = _RoundKills;
             _Rounds.Add(round);
             var winningTeam = _LogParser.GetWinningTeam(round.SfuiNotice);
             foreach (var pair in _PlayerTeams)
@@ -271,6 +275,7 @@ namespace BeRated.Cache
                 container.Add(round);
             }
             CheckForEndOfGame(round, roundsPlayed);
+            _RoundKills = new List<Kill>();
             return true;
         }
 
@@ -293,6 +298,8 @@ namespace BeRated.Cache
 
         private void CheckForEndOfGame(Round round, int roundsPlayed)
         {
+            if (_PlayerTeams.Count == 0)
+                return;
             int roundsToWin = _MaxRounds / 2 + 1;
             bool terroristsWinGame = round.TerroristScore >= roundsToWin;
             bool counterTerroristsWinGame = round.CounterTerroristScore >= roundsToWin;

@@ -1,9 +1,13 @@
 @darken: 5%;
 
+// Colours
 @linkColour: darken(#4078c0, @darken);
 @headerBackgroundColour: darken(#f8f8f8, @darken);
 @borderColour: darken(#ddd, @darken);
+@counterTerroristColour: #5783c0;
+@terroristColour: #a68947;
 
+// Dimensions
 @contentWidth: 900px;
 @border: 1px solid @borderColour;
 @borderRadius: 4px;
@@ -181,9 +185,17 @@ p {
     text-align: right;
 }
 
-.playerList {
-    li { 
-        display: block;
+.gameGrid {
+    tr:hover {
+        background-color: transparent;
+    }
+
+    .scoreCell {
+        border-right: @border;
+    }
+
+    .detailsCell {
+        border-left: @border;
     }
 }
 
@@ -199,12 +211,24 @@ p {
     color: #c7a019;
 }
 
-.counterTerrorists {
-    color: #5783c0;
+.counterTerroristScore {
+    color: @counterTerroristColour;
 }
 
-.terrorists {
-    color: #a68947;
+.terroristScore {
+    color: @terroristColour;
+}
+
+.counterTerroristPlayer {
+    a {
+        color: @counterTerroristColour;
+    }
+}
+
+.terroristPlayer {
+    a {
+        color: @terroristColour;
+    }
 }
 
 .victory {

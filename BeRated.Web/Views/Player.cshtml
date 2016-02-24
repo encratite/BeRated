@@ -5,30 +5,38 @@
 
 @{
     Layout = "/Layout";
-    ViewBag.Title = Helper.GetTitle("Games", Model.Name);
+    ViewBag.Title = Model.Name;
     ViewBag.SteamId = Model.SteamId;
 }
 
-<table class="grid dateGrid playerList">
-	<tr>
-		<th>Time</th>
+<table class="grid dateGrid gameGrid">
+    <tr>
+        <th>Time</th>
         <th>Map</th>
-		<th>Outcome</th>
-		<th>Score</th>
-		<th>Team</th>
-        <th>Enemy team</th>
+        <th>Outcome</th>
+        <th>Score</th>
+        <th>Player</th>
+        <th>Kills</th>
+        <th>Deaths</th>
         <th>Details</th>
-	</tr>
-	@foreach (var game in Model.Games)
-	{
-		<tr>
-			<td>@game.Time.ToString("g")</td>
-            <td>@game.Map</td>
-			<td><span class="@Helper.LowerCase(game.Outcome.ToString())">@Helper.Outcome(game.Outcome)</span></td>
-			<td>@game.PlayerScore - @game.EnemyScore</td>
-            <td>@Helper.MultiLinePlayerList(game.PlayerTeam)</td>
-            <td>@Helper.MultiLinePlayerList(game.EnemyTeam)</td>
-            <td><a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)">Analyze matchup</a></td>
-		</tr>
-	}
+    </tr>
+    @foreach (var game in Model.Games)
+    {
+        var rows = Helper.GetTeamRows(game.CounterTerrorists, game.Terrorists);
+        int count = rows.Count;
+        <tr>
+            <td rowspan="@count">@game.Time.ToString("g")</td>
+            <td rowspan="@count">@game.Map</td>
+            <td rowspan="@count"><span class="@Helper.LowerCase(game.Outcome.ToString())">@Helper.Outcome(game.Outcome)</span></td>
+            <td rowspan="@count" class="scoreCell">@game.PlayerScore - @game.EnemyScore</td>
+            @rows.First()
+            <td rowspan="@count" class="detailsCell"><a href="/Matchup?team1=@Helper.PlayerIds(game.PlayerTeam)&team2=@Helper.PlayerIds(game.EnemyTeam)">Analyze matchup</a></td>
+        </tr>
+        foreach (var row in rows.Skip(1))
+        {
+            <tr>
+                @row
+            </tr>
+        }
+    }
 </table>

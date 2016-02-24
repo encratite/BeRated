@@ -2,17 +2,14 @@
 {
 	public class PlayerInfo
 	{
-		public string SteamId { get; set; }
-		public string Name { get; set; }
+		public string Name { get; private set; }
 
-		public PlayerInfo()
-		{
-		}
+		public string SteamId { get; private set; }
 
-		public PlayerInfo(string steamId, string name)
-		{
+		public PlayerInfo(string name, string steamId)
+        {
+            Name = name;
 			SteamId = steamId;
-			Name = name;
 		}
 	}
 }

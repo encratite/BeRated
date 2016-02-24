@@ -8,6 +8,7 @@ using BeRated.Model;
 using BeRated.Server;
 using Microsoft.Owin;
 using ModelGame = BeRated.Model.Game;
+using CacheGame = BeRated.Cache.Game;
 
 namespace BeRated.App
 {
@@ -115,12 +116,7 @@ namespace BeRated.App
         {
             var player = _Cache.GetPlayer(id);
             var constraints = GetTimeConstraints();
-            var games = new PlayerGames
-            {
-                SteamId = player.SteamId,
-                Name = player.Name,
-                Games = GetPlayerGames(player, constraints),
-            };
+            var games = new PlayerGames(player.Name, player.SteamId, GetPlayerGames(player, constraints));
             return games;
         }
 
@@ -129,12 +125,7 @@ namespace BeRated.App
         {
             var player = _Cache.GetPlayer(id);
 			var constraints = GetTimeConstraints();
-            var encounters = new PlayerEncounters
-            {
-                SteamId = player.SteamId,
-                Name = player.Name,
-				Encounters = GetPlayerEncounters(player, constraints),
-            };
+            var encounters = new PlayerEncounters(player.Name, player.SteamId, GetPlayerEncounters(player, constraints));
             return encounters;
         }
 
@@ -143,12 +134,7 @@ namespace BeRated.App
         {
             var player = _Cache.GetPlayer(id);
 			var constraints = GetTimeConstraints();
-            var weapons = new PlayerWeapons
-            {
-                SteamId = player.SteamId,
-                Name = player.Name,
-				Weapons = GetPlayerWeapons(player, constraints),
-            };
+            var weapons = new PlayerWeapons(player.Name, player.SteamId, GetPlayerWeapons(player, constraints));
             return weapons;
         }
 
@@ -157,12 +143,7 @@ namespace BeRated.App
         {
             var player = _Cache.GetPlayer(id);
 			var constraints = GetTimeConstraints();
-            var weapons = new PlayerItems
-            {
-                SteamId = player.SteamId,
-                Name = player.Name,
-				Items = GetPlayerItems(player, constraints),
-            };
+            var weapons = new PlayerItems(player.Name, player.SteamId, GetPlayerItems(player, constraints));
             return weapons;
         }
 
@@ -230,8 +211,8 @@ namespace BeRated.App
                 bool isTerrorist = game.Terrorists.Contains(player);
                 int terroristScore = game.TerroristScore;
                 int counterTerroristScore = game.CounterTerroristScore;
-                var terrorists = GetPlayerInfos(game.Terrorists);
-                var counterTerrorists = GetPlayerInfos(game.CounterTerrorists);
+                var terrorists = GetPlayerInfos(game.Terrorists, game);
+                var counterTerrorists = GetPlayerInfos(game.CounterTerrorists, game);
                 PlayerGameOutcome outcome;
                 if (game.Outcome == GameOutcome.Draw)
                     outcome = PlayerGameOutcome.Draw;
@@ -249,6 +230,8 @@ namespace BeRated.App
                     PlayerScore = isTerrorist ? terroristScore : counterTerroristScore,
                     EnemyScore = isTerrorist ? counterTerroristScore : terroristScore,
                     Outcome = outcome,
+                    Terrorists = terrorists,
+                    CounterTerrorists = counterTerrorists,
                     PlayerTeam = isTerrorist ? terrorists : counterTerrorists,
                     EnemyTeam = isTerrorist ? counterTerrorists : terrorists,
                 };
@@ -434,8 +417,8 @@ namespace BeRated.App
 					TerroristScore = game.TerroristScore,
 					CounterTerroristScore = game.CounterTerroristScore,
 					Outcome = game.Outcome,
-					Terrorists = GetPlayerInfos(game.Terrorists),
-					CounterTerrorists = GetPlayerInfos(game.CounterTerrorists),
+					Terrorists = GetPlayerInfos(game.Terrorists, game),
+					CounterTerrorists = GetPlayerInfos(game.CounterTerrorists, game),
 				};
 			}).OrderByDescending(game => game.Time).ToList();
 			return games;
@@ -443,13 +426,21 @@ namespace BeRated.App
 
         private PlayerInfo GetPlayerInfo(Player player)
         {
-            return new PlayerInfo(player.SteamId, player.Name);
+            return new PlayerInfo(player.Name, player.SteamId);
         }
 
-        private List<PlayerInfo> GetPlayerInfos(List<Player> team)
+        private List<PlayerGameInfo> GetPlayerInfos(List<Player> team, CacheGame game)
         {
-			var players = team.OrderBy(player => player.Name);
-            return players.Select(player => GetPlayerInfo(player)).ToList();
+            var gameKills = game.Rounds.SelectMany(round => round.Kills).ToList();
+			var playerInfos = team.Select(player =>
+            {
+                int kills = gameKills.Count(kill => kill.Killer == player);
+                int deaths = gameKills.Count(kill => kill.Victim == player);
+                var playerInfo = new PlayerGameInfo(player.Name, player.SteamId, kills, deaths);
+                return playerInfo;
+            });
+            playerInfos = playerInfos.OrderByDescending(player => player.Kills);
+            return playerInfos.ToList();
         }
 
 		private TimeConstraints GetTimeConstraints()

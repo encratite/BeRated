@@ -11,7 +11,10 @@ namespace BeRated.Model
 		public int EnemyScore { get; set; }
 		public PlayerGameOutcome Outcome { get; set; }
 
-		public List<PlayerInfo> PlayerTeam { get; set; }
-		public List<PlayerInfo> EnemyTeam { get; set; }
+        public List<PlayerGameInfo> Terrorists { get; set; }
+        public List<PlayerGameInfo> CounterTerrorists { get; set; }
+
+		public List<PlayerGameInfo> PlayerTeam { get; set; }
+		public List<PlayerGameInfo> EnemyTeam { get; set; }
 	}
 }

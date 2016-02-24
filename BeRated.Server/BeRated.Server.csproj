@@ -90,6 +90,7 @@
     <Compile Include="Common\Ratio.cs" />
     <Compile Include="Model\Game.cs" />
     <Compile Include="Model\PlayerEncounters.cs" />
+    <Compile Include="Model\PlayerGameInfo.cs" />
     <Compile Include="Model\PlayerGameOutcome.cs" />
     <Compile Include="Model\GameOutcomes.cs" />
     <Compile Include="Model\PlayerInfo.cs" />

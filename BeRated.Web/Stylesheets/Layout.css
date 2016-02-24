@@ -136,8 +136,14 @@ p {
 .numericTable td:nth-child(n + 2) {
   text-align: right;
 }
-.playerList li {
-  display: block;
+.gameGrid tr:hover {
+  background-color: transparent;
+}
+.gameGrid .scoreCell {
+  border-right: 1px solid #d0d0d0;
+}
+.gameGrid .detailsCell {
+  border-left: 1px solid #d0d0d0;
 }
 .win {
   color: #00c325;
@@ -148,10 +154,16 @@ p {
 .draw {
   color: #c7a019;
 }
-.counterTerrorists {
+.counterTerroristScore {
   color: #5783c0;
 }
-.terrorists {
+.terroristScore {
+  color: #a68947;
+}
+.counterTerroristPlayer a {
+  color: #5783c0;
+}
+.terroristPlayer a {
   color: #a68947;
 }
 .victory {
