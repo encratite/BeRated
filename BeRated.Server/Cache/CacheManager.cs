@@ -77,17 +77,16 @@ namespace BeRated.Cache
             return player;
         }
 
-		public Player GetPlayer(string name, string steamId)
+		public Player GetPlayer(string name, string steamId, DateTime time)
 		{
 			Player player;
 			if (_Players.TryGetValue(steamId, out player))
 			{
-				// Update name, just in case
-				player.Name = name;
+				player.SetName(name, time);
 			}
 			else
 			{
-				player = new Player(name, steamId);
+				player = new Player(name, steamId, time);
 				if (steamId != LogParser.BotId)
 					_Players[steamId] = player;
 			}

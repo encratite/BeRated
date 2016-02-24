@@ -80,10 +80,10 @@ namespace BeRated.Cache
 			var output = new Kill
 			{
 				Time = time,
-				Killer = GetPlayer(killerName, killerSteamId),
+				Killer = GetPlayer(killerName, killerSteamId, time),
 				KillerTeam = killerTeam,
 				KillerPosition = new Vector(killerX, killerY, killerZ),
-				Victim = GetPlayer(victimName, victimSteamId),
+				Victim = GetPlayer(victimName, victimSteamId, time),
 				VictimTeam = victimTeam,
 				VictimPosition = new Vector(victimX, victimY, victimZ),
 				Headshot = headshot,
@@ -140,7 +140,7 @@ namespace BeRated.Cache
 			var output = new TeamSwitch
 			{
 				Time = time,
-				Player = GetPlayer(name, steamId),
+				Player = GetPlayer(name, steamId, time),
 				PreviousTeam = previousTeam,
 				CurrentTeam = currentTeam,
 			};
@@ -161,7 +161,7 @@ namespace BeRated.Cache
 			var output = new Disconnect
 			{
 				Time = time,
-				Player = GetPlayer(name, steamId),
+				Player = GetPlayer(name, steamId, time),
 				Team = team,
 				Reason = reason,
 			};
@@ -182,7 +182,7 @@ namespace BeRated.Cache
 			var output = new Purchase
 			{
 				Time = time,
-				Player = GetPlayer(name, steamId),
+				Player = GetPlayer(name, steamId, time),
 				Team = team,
 				Item = item
 			};
@@ -224,9 +224,9 @@ namespace BeRated.Cache
 			return output;
 		}
 
-		private Player GetPlayer(string name, string steamId)
+		private Player GetPlayer(string name, string steamId, DateTime time)
 		{
-			var player = _Cache.GetPlayer(name, steamId);
+			var player = _Cache.GetPlayer(name, steamId, time);
 			return player;
 		}
     }
