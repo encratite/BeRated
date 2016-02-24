@@ -215,6 +215,7 @@ namespace BeRated.Cache
                 kill.Killer != kill.Victim
             )
             {
+                kill.Weapon = TranslateWeapon(kill.Weapon);
 			    kill.Killer.Kills.Add(kill);
 			    kill.Victim.Deaths.Add(kill);
             }
@@ -281,7 +282,11 @@ namespace BeRated.Cache
                 return false;
 			string steamId = purchase.Player.SteamId;
 			if (!IgnoreStats() && steamId != LogParser.BotId)
+            {
+                var team = _PlayerTeams[steamId];
+                purchase.Item = TranslateItem(purchase.Item, team);
 			    purchase.Player.Purchases.Add(purchase);
+            }
             return true;
         }
 
@@ -324,6 +329,58 @@ namespace BeRated.Cache
         private bool IgnoreStats()
         {
             return _MatchStartCounter < 2;
+        }
+
+        private string TranslateWeapon(string weapon)
+        {
+            var translations = new Dictionary<string, string>
+            {
+                {  "knife_t", "knife" },
+                {  "knife_default_ct", "knife" },
+            };
+            string translation = null;
+            if (translations.TryGetValue(weapon, out translation))
+                return translation;
+            else
+                return weapon;
+        }
+
+        private string TranslateItem(string item, Team team)
+        {
+            var translations = new Dictionary<string, string>
+            {
+                // Kevlar aliases
+                { "vest", "kevlar" },
+                { "vesthelm", "assaultsuit" },
+            };
+            string translation = null;
+            if (translations.TryGetValue(item, out translation))
+                return translation;
+
+            var pairs = new List<ItemPair>
+            {
+                // Pistols
+                new ItemPair("hkp2000", "glock"),
+                new ItemPair("fiveseven", "tec9"),
+                // Shotguns
+                new ItemPair("mag7", "sawedoff"),
+                // SMGs
+                new ItemPair("mp9", "mac10"),
+                // Rifles
+                new ItemPair("famas", "galilar"),
+                new ItemPair("m4a1", "ak47"),
+                new ItemPair("m4a1_silencer", "ak47"),
+                new ItemPair("aug", "sg556"),
+                new ItemPair("scar20", "g3sg1"),
+                // Grenades
+                new ItemPair("incgrenade", "molotov"),
+            };
+            foreach (var pair in pairs)
+            {
+                if (pair.Translate(item, team, ref translation))
+                    return translation;
+            }
+            return item;
         }
     }
 }
