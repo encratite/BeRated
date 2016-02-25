@@ -15,5 +15,7 @@ namespace BeRated.Model
 
 		public List<PlayerGameInfo> Terrorists { get; set; }
 		public List<PlayerGameInfo> CounterTerrorists { get; set; }
+
+        public List<Round> Rounds { get; set; }
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeRated.Common;
+using System;
 using System.Text.RegularExpressions;
 
 namespace BeRated.Cache
@@ -118,7 +119,7 @@ namespace BeRated.Cache
 			var output = new Round
 			{
 				Time = time,
-				TriggeringTeam = triggeringTeam,
+                Winner = GetWinningTeam(sfuiNotice),
 				SfuiNotice = sfuiNotice,
 				TerroristScore = terroristScore,
 				CounterTerroristScore = counterTerroristScore,

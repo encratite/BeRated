@@ -8,7 +8,11 @@ using BeRated.Model;
 using BeRated.Server;
 using Microsoft.Owin;
 using ModelGame = BeRated.Model.Game;
+using ModelRound = BeRated.Model.Round;
+using ModelKill = BeRated.Model.Kill;
 using CacheGame = BeRated.Cache.Game;
+using CacheRound = BeRated.Cache.Round;
+using CacheKill = BeRated.Cache.Kill;
 
 namespace BeRated.App
 {
@@ -433,6 +437,31 @@ namespace BeRated.App
                 Outcome = game.Outcome,
                 Terrorists = GetPlayerInfos(game.Terrorists, game),
                 CounterTerrorists = GetPlayerInfos(game.CounterTerrorists, game),
+                Rounds = game.Rounds.Select(round => GetRound(round)).ToList(),
+            };
+        }
+
+        private ModelRound GetRound(CacheRound round)
+        {
+            return new ModelRound
+            {
+                Time = round.Time,
+                Winner = round.Winner,
+                TerroristScore = round.TerroristScore,
+                CounterTerroristScore = round.CounterTerroristScore,
+                Kills = round.Kills.Select(kill => GetKill(kill)).ToList(),
+            };
+        }
+
+        private ModelKill GetKill(CacheKill kill)
+        {
+            return new ModelKill
+            {
+                Time = kill.Time,
+                Killer = GetPlayerInfo(kill.Killer),
+                Victim = GetPlayerInfo(kill.Victim),
+                KillerTeam = kill.KillerTeam,
+                Weapon = kill.Weapon,
             };
         }
 

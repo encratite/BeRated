@@ -10,23 +10,10 @@ namespace BeRated.App
 {
 	public class Helper
 	{
-		public static string LowerCase(string input)
-		{
-			if (input != null && input.Length >= 1)
-				return input.Substring(0, 1).ToLower() + input.Substring(1);
-			else
-				return input;
-		}
+        private const string CounterTerroristClass = "counterTerrorists";
+        private const string TerroristClass = "terrorists";
 
-        public static RawString GetScore(Game game)
-        {
-            string markup = string.Format("<span class=\"{0}\">{1}</span>", GetScoreClasses("counterTerroristScore", game.CounterTerroristScore, game.TerroristScore), game.CounterTerroristScore);
-            markup += " - ";
-            markup += string.Format("<span class=\"{0}\">{1}</span>", GetScoreClasses("terroristScore", game.TerroristScore, game.CounterTerroristScore), game.TerroristScore);
-            return new RawString(markup);
-        }
-
-		public static string Percentage(decimal? ratio)
+        public static string Percentage(decimal? ratio)
 		{
 			if (ratio.HasValue)
 				return ratio.Value.ToString("P1").Replace(" ", "");
@@ -42,11 +29,44 @@ namespace BeRated.App
 				return string.Empty;
 		}
 
+		public static string LowerCase(string input)
+		{
+			if (input != null && input.Length >= 1)
+				return input.Substring(0, 1).ToLower() + input.Substring(1);
+			else
+				return input;
+		}
+
+        public static RawString GetScore(Game game)
+        {
+            return GetScore(game.CounterTerroristScore, game.TerroristScore);
+        }
+
+        public static RawString GetScore(int counterTerroristScore, int terroristScore)
+        {
+            string markup = string.Format("<span class=\"{0}\">{1}</span>", GetScoreClasses(CounterTerroristClass, counterTerroristScore, terroristScore), counterTerroristScore);
+            markup += " - ";
+            markup += string.Format("<span class=\"{0}\">{1}</span>", GetScoreClasses(TerroristClass, terroristScore, counterTerroristScore), terroristScore);
+            return new RawString(markup);
+        }
+
 		public static RawString PlayerLink(string steamId, string name)
 		{
 			string path = string.Format("/Player?id={0}", steamId);
 			var encodedName = HttpUtility.HtmlEncode(name);
             string markup = string.Format("<a href=\"{0}\">{1}</a>", path, encodedName);
+			var rawString = new RawString(markup);
+            return rawString;
+        }
+
+        public static RawString GetPlayerLink(PlayerInfo player, bool? isTerrorist = null)
+		{
+			string path = string.Format("/Player?id={0}", player.SteamId);
+			var encodedName = HttpUtility.HtmlEncode(player.Name);
+            string className = "neutral";
+            if (isTerrorist.HasValue)
+                className = isTerrorist.Value ? TerroristClass : CounterTerroristClass;
+            string markup = string.Format("<a class=\"{0}\" href=\"{1}\">{2}</a>", className, path, encodedName);
 			var rawString = new RawString(markup);
             return rawString;
         }
@@ -73,6 +93,24 @@ namespace BeRated.App
 			throw new ApplicationException("Invalid outcome.");
 		}
 
+        public static RawString GetTeam(Team team)
+        {
+            string markup;
+            switch (team)
+            {
+                case Common.Team.CounterTerrorist:
+                    markup = string.Format("<span class=\"{0}\">Counter-Terrorists</span>", CounterTerroristClass);
+                    break;
+                case Common.Team.Terrorist:
+                    markup = string.Format("<span class=\"{0}\">Terrorists</span>", TerroristClass);
+                    break;
+                default:
+                    markup = "Unknown";
+                    break;
+            }
+            return new RawString(markup);
+        }
+
 		public static string Outcome(PlayerGameOutcome outcome)
 		{
 			return outcome.ToString();
@@ -88,7 +126,7 @@ namespace BeRated.App
 		{
 			var links = team.OrderBy(player => player.Name).Select(player => string.Format("<li>{0}</li>", PlayerLink(player.SteamId, player.Name)));
 			string elements = string.Join("\n", links);
-            string className = terrorists ? "terrorists" : "counterTerrorists";
+            string className = terrorists ? TerroristClass : CounterTerroristClass;
 			string markup = string.Format("<ul class=\"{0}\">\n{1}\n</ul>", className, elements);
 			return new RawString(markup);
 		}

@@ -77,7 +77,7 @@
     <Compile Include="Cache\ItemPair.cs" />
     <Compile Include="Common\GameOutcome.cs" />
     <Compile Include="Cache\Player.cs" />
-    <Compile Include="Cache\Team.cs" />
+    <Compile Include="Common\Team.cs" />
     <Compile Include="Cache\LogParser.cs" />
     <Compile Include="Cache\Disconnect.cs" />
     <Compile Include="Cache\Round.cs" />
@@ -89,6 +89,7 @@
     <Compile Include="Cache\CacheManager.cs" />
     <Compile Include="Common\Ratio.cs" />
     <Compile Include="Model\Game.cs" />
+    <Compile Include="Model\Kill.cs" />
     <Compile Include="Model\PlayerEncounters.cs" />
     <Compile Include="Model\PlayerGameInfo.cs" />
     <Compile Include="Model\PlayerGameOutcome.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Model\PlayerGames.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Model\PlayerWeapons.cs" />
+    <Compile Include="Model\Round.cs" />
     <Compile Include="Model\TeamMatchupStats.cs" />
     <Compile Include="Model\TeamStats.cs" />
     <Compile Include="Server\BaseApp.cs" />

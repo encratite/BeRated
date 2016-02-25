@@ -1,4 +1,6 @@
-﻿namespace BeRated.Cache
+﻿using BeRated.Common;
+
+namespace BeRated.Cache
 {
     class ItemPair
     {

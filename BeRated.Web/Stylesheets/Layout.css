@@ -25,6 +25,11 @@ p {
   margin-right: 0.9em;
   margin-bottom: 2em;
 }
+h1 {
+  font-size: 1.4em;
+  margin-right: 0.9em;
+  margin-bottom: 0.5em;
+}
 .grid {
   border: 1px solid #d0d0d0;
   border-radius: 4px;
@@ -87,12 +92,6 @@ p {
 .playerMenu a {
   line-height: 3em;
   color: #000;
-}
-.title {
-  font-size: 1.3em;
-  margin-bottom: 1em;
-  margin-left: 0.9em;
-  margin-right: 0.9em;
 }
 .playerMenu {
   margin-bottom: 1em;
@@ -174,14 +173,14 @@ p {
 .draw {
   color: #c7a019;
 }
-.counterTerroristScore {
+.counterTerrorists {
   color: #5783c0;
-}
-.terroristScore {
-  color: #a68947;
 }
 .counterTerrorists a {
   color: #5783c0;
+}
+.terrorists {
+  color: #a68947;
 }
 .terrorists a {
   color: #a68947;
@@ -193,4 +192,8 @@ p {
   font-style: italic;
   text-align: center;
   line-height: 2em;
+}
+.gameKills li {
+  display: block;
+  line-height: 1.6em;
 }

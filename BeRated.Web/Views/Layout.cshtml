@@ -1,6 +1,6 @@
 @using BeRated.App
 
-@helper PlayerLink(string controller, string description = null) {<a href="/@controller?id=@ViewBag.SteamId">@(description ?? controller)</a>}
+@helper GetPlayerLink(string controller, string description = null) {<a href="/@controller?id=@ViewBag.SteamId">@(description ?? controller)</a>}
 
 <!doctype html>
 <html>
@@ -25,11 +25,11 @@
             </ul>
         </div>
         <div class="content">
-            <h1 class="title">@ViewBag.Title</h1>
+            <h1>@ViewBag.Title</h1>
             @if (ViewBag.SteamId != null)
             {
                 <ul class="playerMenu">
-                    <li>@PlayerLink("Player", "Games")</li><li>@PlayerLink("Encounters")</li><li>@PlayerLink("Weapons")</li><li>@PlayerLink("Items", "Items purchased")</li>
+                    <li>@GetPlayerLink("Player", "Games")</li><li>@GetPlayerLink("Encounters")</li><li>@GetPlayerLink("Weapons")</li><li>@GetPlayerLink("Items", "Items purchased")</li>
                     <li>
                         <select>
                             @foreach (var preset in TimeConstraintPreset.Presets)

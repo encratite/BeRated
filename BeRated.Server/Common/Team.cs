@@ -1,6 +1,6 @@
-﻿namespace BeRated.Cache
+﻿namespace BeRated.Common
 {
-	enum Team
+	public enum Team
 	{
 		Unassigned,
 		Terrorist,

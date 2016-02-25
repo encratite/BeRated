@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeRated.Common;
+using System;
 
 namespace BeRated.Cache
 {

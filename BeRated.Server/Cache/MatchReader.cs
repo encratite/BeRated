@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeRated.Common;
+using System;
 using System.Text.RegularExpressions;
 
 namespace BeRated.Cache
@@ -31,13 +32,13 @@ namespace BeRated.Cache
 		{
 			string team = String();
 			if (team == LogParser.UnassignedTeam)
-				return BeRated.Cache.Team.Unassigned;
+				return BeRated.Common.Team.Unassigned;
 			else if (team == LogParser.TerroristTeam)
-				return BeRated.Cache.Team.Terrorist;
+				return BeRated.Common.Team.Terrorist;
 			else if (team == LogParser.CounterTerroristTeam)
-				return BeRated.Cache.Team.CounterTerrorist;
+				return BeRated.Common.Team.CounterTerrorist;
 			else if (team == LogParser.SpectatorTeam)
-				return BeRated.Cache.Team.Spectator;
+				return BeRated.Common.Team.Spectator;
 			else
 				throw new ArgumentException("Invalid team string");
 		}
