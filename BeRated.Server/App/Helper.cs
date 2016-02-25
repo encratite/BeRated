@@ -50,30 +50,27 @@ namespace BeRated.App
             return new RawString(markup);
         }
 
-		public static RawString PlayerLink(string steamId, string name)
-		{
-			string path = string.Format("/Player?id={0}", steamId);
-			var encodedName = HttpUtility.HtmlEncode(name);
-            string markup = string.Format("<a href=\"{0}\">{1}</a>", path, encodedName);
-			var rawString = new RawString(markup);
-            return rawString;
-        }
-
         public static RawString GetPlayerLink(PlayerInfo player, bool? isTerrorist = null)
 		{
 			string path = string.Format("/Player?id={0}", player.SteamId);
 			var encodedName = HttpUtility.HtmlEncode(player.Name);
-            string className = "neutral";
+            string markup;
             if (isTerrorist.HasValue)
-                className = isTerrorist.Value ? TerroristClass : CounterTerroristClass;
-            string markup = string.Format("<a class=\"{0}\" href=\"{1}\">{2}</a>", className, path, encodedName);
+            {
+                string className = isTerrorist.Value ? TerroristClass : CounterTerroristClass;
+                markup = string.Format("<a class=\"{0}\" href=\"{1}\">{2}</a>", className, path, encodedName);
+            }
+            else
+            {
+                markup = string.Format("<a href=\"{0}\">{1}</a>", path, encodedName);
+            }
 			var rawString = new RawString(markup);
             return rawString;
         }
 
 		public static RawString PlayerList(List<PlayerInfo> players)
 		{
-			var links = players.Select(player => PlayerLink(player.SteamId, player.Name).ToString());
+			var links = players.Select(player => GetPlayerLink(player).ToString());
 			string markup = string.Join(", ", links);
 			var rawString = new RawString(markup);
 			return rawString;
@@ -111,12 +108,12 @@ namespace BeRated.App
             return new RawString(markup);
         }
 
-		public static string Outcome(PlayerGameOutcome outcome)
+		public static string GetOutcome(PlayerGameOutcome outcome)
 		{
 			return outcome.ToString();
 		}
 
-		public static string PlayerIds(List<PlayerGameInfo> team)
+		public static string GetPlayerIds(List<PlayerGameInfo> team)
 		{
 			var idString = team.Select(player => player.SteamId);
 			return string.Join(",", idString);
@@ -124,7 +121,7 @@ namespace BeRated.App
 
         public static RawString GetPlayerList(List<PlayerGameInfo> team, bool terrorists)
 		{
-			var links = team.OrderBy(player => player.Name).Select(player => string.Format("<li>{0}</li>", PlayerLink(player.SteamId, player.Name)));
+			var links = team.OrderBy(player => player.Name).Select(player => string.Format("<li>{0}</li>", GetPlayerLink(player)));
 			string elements = string.Join("\n", links);
             string className = terrorists ? TerroristClass : CounterTerroristClass;
 			string markup = string.Format("<ul class=\"{0}\">\n{1}\n</ul>", className, elements);

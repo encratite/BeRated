@@ -23,7 +23,7 @@
         <tr>
             <td>@game.Time.ToString("g")</td>
             <td>@Helper.GetGameLink(game.Id, game.Map)</td>
-            <td><span class="@Helper.LowerCase(game.Outcome.ToString())">@Helper.Outcome(game.Outcome)</span></td>
+            <td><span class="@Helper.LowerCase(game.Outcome.ToString())">@Helper.GetOutcome(game.Outcome)</span></td>
             <td>@game.PlayerScore - @game.EnemyScore</td>
             <td>@Helper.GetPlayerList(game.PlayerTeam, game.IsTerrorist)</td>
             <td>@Helper.GetPlayerList(game.EnemyTeam, !game.IsTerrorist)</td>

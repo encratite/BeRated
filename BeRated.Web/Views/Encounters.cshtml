@@ -20,7 +20,7 @@
     @foreach (var player in Model.Encounters)
     {
         <tr>
-            <td>@Helper.PlayerLink(player.OpponentSteamId, player.OpponentName)</td>
+            <td>@Helper.GetPlayerLink(player)</td>
             <td>@player.Encounters</td>
             <td>@player.Kills</td>
             <td>@player.Deaths</td>

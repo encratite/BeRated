@@ -2,10 +2,8 @@
 
 namespace BeRated.Model
 {
-	public class PlayerEncounterStats
+	public class PlayerEncounterStats : PlayerInfo
 	{
-		public string OpponentName { get; set; }
-		public string OpponentSteamId { get; set; }
 		public int Kills { get; set; }
 		public int Deaths { get; set; }
 
@@ -15,8 +13,8 @@ namespace BeRated.Model
 
 		public PlayerEncounterStats(string name, string steamId)
 		{
-			OpponentSteamId = steamId;
-			OpponentName = name;
+			SteamId = steamId;
+			Name = name;
 			Kills = 0;
 			Deaths = 0;
 		}

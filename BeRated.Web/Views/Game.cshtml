@@ -21,7 +21,7 @@
         @foreach (var player in team)
         {
             <tr>
-                <td>@Helper.PlayerLink(player.SteamId, player.Name)</td>
+                <td>@Helper.GetPlayerLink(player)</td>
                 <td>@player.Kills</td>
                 <td>@player.Deaths</td>
             </tr>
@@ -37,6 +37,9 @@
 
 <h1>Players</h1>
 @TeamTable("Counter-Terrorist", "counterTerrorists", Model.CounterTerrorists)
+<div class="matchup">
+    <a href="/Matchup?team1=@Helper.GetPlayerIds(Model.CounterTerrorists)&team2=@Helper.GetPlayerIds(Model.Terrorists)">Analyze this matchup</a>
+</div>
 @TeamTable("Terrorist", "terrorists", Model.Terrorists)
 
 <h1>Rounds</h1>

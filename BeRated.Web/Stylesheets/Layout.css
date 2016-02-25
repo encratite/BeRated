@@ -24,6 +24,7 @@ p {
   margin-left: 0.9em;
   margin-right: 0.9em;
   margin-bottom: 2em;
+  line-height: 1.4em;
 }
 h1 {
   font-size: 1.4em;
@@ -153,16 +154,23 @@ h1 {
   line-height: 2em;
 }
 .teamPlayers {
-  margin-bottom: 2em;
+  margin-bottom: 1em;
 }
-.teamPlayers td:nth-child(1) {
+.teamPlayers th:nth-child(1) {
   width: 15em;
 }
-.teamPlayers td:nth-child(2) {
+.teamPlayers th:nth-child(2) {
   width: 3em;
 }
-.teamPlayers td:nth-child(3) {
+.teamPlayers th:nth-child(3) {
   width: 3em;
+}
+table.terrorists {
+  margin-bottom: 2em;
+}
+.matchup {
+  margin-bottom: 1em;
+  margin-left: 8em;
 }
 .win {
   color: #00c325;

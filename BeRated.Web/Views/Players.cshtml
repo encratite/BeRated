@@ -23,7 +23,7 @@
     @foreach (var player in Model)
     {
         <tr>
-            <td>@Helper.PlayerLink(player.SteamId, player.Name)</td>
+            <td>@Helper.GetPlayerLink(player)</td>
             <td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
             <td>@player.Kills</td>
             <td>@player.Deaths</td>
