@@ -79,8 +79,9 @@ var BeRated;
                 var columnType = Table.ColumnType.Numeric;
                 for (var key in Table.ColumnType) {
                     var type = Table.ColumnType[key];
-                    if (header.classList.contains(type)) {
-                        columnType = type;
+                    var dataColumnType = header.dataset["columnType"];
+                    if (dataColumnType != undefined) {
+                        columnType = dataColumnType;
                         break;
                     }
                 }

@@ -96,6 +96,14 @@ namespace BeRated.App
 			return games;
 		}
 
+        [Controller]
+        public ModelGame Game(long id)
+        {
+            var game = _Cache.Games.First(g => g.Id == id);
+            var gameModel = GetGame(game);
+            return gameModel;
+        }
+
 		[Controller]
 		public TeamMatchupStats Matchup(string team1, string team2)
 		{
@@ -225,13 +233,13 @@ namespace BeRated.App
                     outcome = PlayerGameOutcome.Loss;
                 return new PlayerGame
                 {
+                    Id = game.Id,
                     Time = game.Time,
                     Map = game.Map,
                     PlayerScore = isTerrorist ? terroristScore : counterTerroristScore,
                     EnemyScore = isTerrorist ? counterTerroristScore : terroristScore,
+                    IsTerrorist = isTerrorist,
                     Outcome = outcome,
-                    Terrorists = terrorists,
-                    CounterTerrorists = counterTerrorists,
                     PlayerTeam = isTerrorist ? terrorists : counterTerrorists,
                     EnemyTeam = isTerrorist ? counterTerrorists : terrorists,
                 };
@@ -408,21 +416,25 @@ namespace BeRated.App
 
 		private List<ModelGame> GetGames()
 		{
-			var games = _Cache.Games.Select(game =>
-			{
-				return new ModelGame
-				{
-					Time = game.Time,
-                    Map = game.Map,
-					TerroristScore = game.TerroristScore,
-					CounterTerroristScore = game.CounterTerroristScore,
-					Outcome = game.Outcome,
-					Terrorists = GetPlayerInfos(game.Terrorists, game),
-					CounterTerrorists = GetPlayerInfos(game.CounterTerrorists, game),
-				};
-			}).OrderByDescending(game => game.Time).ToList();
-			return games;
+			var games = _Cache.Games.Select(game => GetGame(game));
+            games = games.OrderByDescending(game => game.Time);
+			return games.ToList();
 		}
+
+        private ModelGame GetGame(CacheGame game)
+        {
+            return new ModelGame
+            {
+                Id = game.Id,
+                Time = game.Time,
+                Map = game.Map,
+                TerroristScore = game.TerroristScore,
+                CounterTerroristScore = game.CounterTerroristScore,
+                Outcome = game.Outcome,
+                Terrorists = GetPlayerInfos(game.Terrorists, game),
+                CounterTerrorists = GetPlayerInfos(game.CounterTerrorists, game),
+            };
+        }
 
         private PlayerInfo GetPlayerInfo(Player player)
         {

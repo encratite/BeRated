@@ -1,7 +1,6 @@
 ﻿@using BeRated.App
 @using BeRated.Model
 @using System.Collections.Generic
-@using System.Linq
 
 @model List<Game>
 
@@ -10,32 +9,22 @@
     ViewBag.Title = "Games";
 }
 
-<table class="grid dateGrid gameGrid">
+<table class="grid dateGrid playerList">
     <tr>
         <th>Time</th>
         <th>Map</th>
         <th>Score</th>
-        <th>Player</th>
-        <th>Kills</th>
-        <th>Deaths</th>
-        <th>Details</th>
+        <th>Counter-Terrorists</th>
+        <th>Terrorists</th>
     </tr>
     @foreach (var game in Model)
     {
-        var rows = Helper.GetTeamRows(game.CounterTerrorists, game.Terrorists);
-        int count = rows.Count;
         <tr>
-            <td rowspan="@count">@game.Time.ToString("g")</td>
-            <td rowspan="@count">@game.Map</td>
-            <td rowspan="@count" class="scoreCell"><span class="@Helper.GetScoreClasses("counterTerroristScore", game.CounterTerroristScore, game.TerroristScore)">@game.CounterTerroristScore</span> - <span class="@Helper.GetScoreClasses("terroristScore", game.TerroristScore, game.CounterTerroristScore)">@game.TerroristScore</span></td>
-            @rows.First()
-            <td rowspan="@count" class="detailsCell"><a href="/Matchup?team1=@Helper.PlayerIds(game.CounterTerrorists)&team2=@Helper.PlayerIds(game.Terrorists)">Analyze matchup</a></td>
+            <td>@game.Time.ToString("g")</td>
+            <td>@Helper.GetGameLink(game.Id, game.Map)</td>
+            <td>@Helper.GetScore(game)</td>
+            <td>@Helper.GetPlayerList(game.CounterTerrorists, false)</td>
+            <td>@Helper.GetPlayerList(game.Terrorists, true)</td>
         </tr>
-        foreach (var row in rows.Skip(1))
-        {
-            <tr>
-                @row
-            </tr>
-        }
     }
 </table>

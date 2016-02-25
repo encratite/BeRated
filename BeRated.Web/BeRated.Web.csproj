@@ -42,6 +42,7 @@
     <Content Include="Views\Player.cshtml" />
     <Content Include="Views\Items.cshtml" />
     <Content Include="Views\Games.cshtml" />
+    <Content Include="Views\Game.cshtml" />
     <None Include="Views\Weapons.cshtml" />
   </ItemGroup>
   <ItemGroup>

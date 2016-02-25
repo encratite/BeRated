@@ -28,6 +28,7 @@ body {
 a {
     color: @linkColour;
     text-decoration: none;
+    font-weight: bold;
 
     &:hover {
         text-decoration: underline;
@@ -121,7 +122,6 @@ p {
 
 .menu, .playerMenu {
     a {
-        font-weight: bold;
         line-height: 3em;
         color: #000;
     }
@@ -185,17 +185,47 @@ p {
     text-align: right;
 }
 
-.gameGrid {
-    tr:hover {
-        background-color: transparent;
+.playerList {
+    li {
+        display: block;
     }
 
-    .scoreCell {
-        border-right: @border;
+    ul.counterTerrorists {
+        a {
+            color: @counterTerroristColour;
+        }
     }
 
-    .detailsCell {
-        border-left: @border;
+    ul.terrorists {
+        a {
+            color: @terroristColour;
+        }
+    }
+}
+
+.gameDescription {
+    margin-left: @textMargin;
+    margin-bottom: 1em;
+
+    li {
+        display: block;
+        line-height: 2em;
+    }
+}
+
+.teamPlayers {
+    margin-bottom: 2em;
+
+    td:nth-child(1) {
+        width: 15em;
+    }
+
+    td:nth-child(2) {
+        width: 3em;
+    }
+
+    td:nth-child(3) {
+        width: 3em;
     }
 }
 
@@ -219,13 +249,13 @@ p {
     color: @terroristColour;
 }
 
-.counterTerroristPlayer {
+.counterTerrorists {
     a {
         color: @counterTerroristColour;
     }
 }
 
-.terroristPlayer {
+.terrorists {
     a {
         color: @terroristColour;
     }

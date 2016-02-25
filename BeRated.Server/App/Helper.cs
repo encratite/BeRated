@@ -18,10 +18,13 @@ namespace BeRated.App
 				return input;
 		}
 
-		public static string GetScoreClasses(string baseClass, int score, int otherScore)
-		{
-			return baseClass + (score > otherScore ? " victory" : "");
-		}
+        public static RawString GetScore(Game game)
+        {
+            string markup = string.Format("<span class=\"{0}\">{1}</span>", GetScoreClasses("counterTerroristScore", game.CounterTerroristScore, game.TerroristScore), game.CounterTerroristScore);
+            markup += " - ";
+            markup += string.Format("<span class=\"{0}\">{1}</span>", GetScoreClasses("terroristScore", game.TerroristScore, game.CounterTerroristScore), game.TerroristScore);
+            return new RawString(markup);
+        }
 
 		public static string Percentage(decimal? ratio)
 		{
@@ -81,22 +84,24 @@ namespace BeRated.App
 			return string.Join(",", idString);
 		}
 
-		public static List<RawString> GetTeamRows(List<PlayerGameInfo> counterTerrorists, List<PlayerGameInfo> terrorists)
+        public static RawString GetPlayerList(List<PlayerGameInfo> team, bool terrorists)
 		{
-            var counterTerroristRows = counterTerrorists.Select(player => GetPlayerRow(player, false));
-			var terroristRows = terrorists.Select(player => GetPlayerRow(player, true));
-            var rows = counterTerroristRows.Concat(terroristRows).ToList();
-            return rows;
+			var links = team.OrderBy(player => player.Name).Select(player => string.Format("<li>{0}</li>", PlayerLink(player.SteamId, player.Name)));
+			string elements = string.Join("\n", links);
+            string className = terrorists ? "terrorists" : "counterTerrorists";
+			string markup = string.Format("<ul class=\"{0}\">\n{1}\n</ul>", className, elements);
+			return new RawString(markup);
 		}
 
-        private static RawString GetPlayerRow(PlayerGameInfo player, bool terrorist)
+        public static RawString GetGameLink(long id, string map)
         {
-            string className = terrorist ? "terroristPlayer" : "counterTerroristPlayer";
-            var link = PlayerLink(player.SteamId, player.Name);
-            string markup = string.Format("<td class=\"{0}\">{1}</td>\n", className, link);
-            markup += string.Format("<td>{0}</td>\n", player.Kills);
-            markup += string.Format("<td>{0}</td>\n", player.Deaths);
+            string markup = string.Format("<a href=\"/Game?id={0}\">{1}</a>", id, map);
             return new RawString(markup);
         }
+
+        private static string GetScoreClasses(string baseClass, int score, int otherScore)
+		{
+			return baseClass + (score > otherScore ? " victory" : "");
+		}
     }
 }

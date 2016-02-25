@@ -7,7 +7,9 @@ namespace BeRated.Cache
 {
     class Game
 	{
-		public DateTimeOffset Time { get { return LastRound.Time; } }
+        public long Id { get { return Time.Ticks / 10000000; } }
+
+		public DateTime Time { get { return LastRound.Time; } }
 
         public string Map { get; private set; }
 

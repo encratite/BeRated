@@ -1,0 +1,38 @@
+﻿@using BeRated.App
+@using BeRated.Model
+@using System.Collections.Generic
+
+@model Game
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = string.Format("Game {0}", Model.Id);
+}
+
+@helper TeamTable(string playerDescription, string className, List<PlayerGameInfo> team)
+{
+    <table class="sortable grid numericTable teamPlayers @className">
+        <tr>
+            <th data-column-type="string">@playerDescription</th>
+            <th>Kills</th>
+            <th>Deaths</th>
+        </tr>
+        @foreach (var player in team)
+        {
+            <tr>
+                <td>@Helper.PlayerLink(player.SteamId, player.Name)</td>
+                <td>@player.Kills</td>
+                <td>@player.Deaths</td>
+            </tr>
+        }
+    </table>
+}
+
+<ul class="gameDescription">
+    <li><b>Time:</b> @Model.Time</li>
+    <li><b>Map:</b> @Model.Map</li>
+    <li><b>Score:</b> @Helper.GetScore(Model)</li>
+</ul>
+
+@TeamTable("Counter-Terrorist", "counterTerrorists", Model.CounterTerrorists)
+@TeamTable("Terrorist", "terrorists", Model.Terrorists)
