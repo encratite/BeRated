@@ -197,7 +197,7 @@ namespace BeRated.App
 		            RoundWinRatio = Ratio.Get(roundsWon, roundsPlayed),
                 };
 
-				if ((constraints.Start != null || constraints.End != null) && games > 0)
+				if (games > 0)
 				{
 					var firstGame = matchingGames.First();
 					var startRating = firstGame.GetRatedPlayer(player);
@@ -207,11 +207,8 @@ namespace BeRated.App
 					var endRating = lastGame.GetRatedPlayer(player);
 					generalStats.EndKillRating = endRating.PostGameKillRating.ConservativeRating;
 				}
-				else
-				{
+				if (constraints.Start == null && constraints.End == null)
 					generalStats.StartKillRating = null;
-					generalStats.EndKillRating = player.KillRating.ConservativeRating;
-				}
 
 				return generalStats;
             });
