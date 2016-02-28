@@ -153,7 +153,7 @@ namespace BeRated.App
 			if (startRating != null)
 			{
 				double difference = endRating - startRating.Value;
-				if (difference > 0)
+				if (difference >= 0)
 					markup += string.Format(" (<span class=\"positive\">+{0:0.0}</span>)", difference);
 				else
 					markup += string.Format(" (<span class=\"negative\">{0:0.0}</span>)", difference);
