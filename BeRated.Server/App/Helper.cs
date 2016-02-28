@@ -26,7 +26,7 @@ namespace BeRated.App
 			if (number.HasValue)
 				return number.Value.ToString("0.00");
 			else
-				return string.Empty;
+				return "-";
 		}
 
 		public static string LowerCase(string input)

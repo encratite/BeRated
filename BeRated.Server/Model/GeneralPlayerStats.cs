@@ -2,6 +2,7 @@
 {
 	public class GeneralPlayerStats : PlayerInfo
 	{
+		public decimal? KillsPerRound { get; set; }
 		public decimal? KillDeathRatio { get; set; }
 		public int Kills { get; set; }
 		public int Deaths { get; set; }

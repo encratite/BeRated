@@ -12,19 +12,21 @@
 <table class="sortable numericTable grid">
     <tr>
         <th data-column-type="string">Name</th>
+        <th>Kills per round</th>
         <th>Kill/death ratio</th>
         <th>Kills</th>
         <th>Deaths</th>
         <th>Games won</th>
-        <th>Games played</th>
+        <th>Games</th>
         <th>Rounds won</th>
-        <th>Rounds played</th>
+        <th>Rounds</th>
     </tr>
     @foreach (var player in Model)
     {
         <tr>
             <td>@Helper.GetPlayerLink(player)</td>
-            <td>@(player.KillDeathRatio.HasValue ? player.KillDeathRatio.Value.ToString("0.00") : "")</td>
+            <td>@Helper.Round(player.KillsPerRound)</td>
+            <td>@Helper.Round(player.KillDeathRatio)</td>
             <td>@player.Kills</td>
             <td>@player.Deaths</td>
             <td>@Helper.Percentage(player.GameWinRatio)</td>

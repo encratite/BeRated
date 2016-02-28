@@ -187,6 +187,7 @@ namespace BeRated.App
                 {
                     SteamId = player.SteamId,
 		            Name = player.Name,
+					KillsPerRound = Ratio.Get(kills, roundsPlayed),
 		            KillDeathRatio = Ratio.Get(kills, deaths),
 		            Kills = kills,
 		            Deaths = deaths,
