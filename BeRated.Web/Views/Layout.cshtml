@@ -10,10 +10,7 @@
         <link rel="stylesheet" type="text/css" href="/Stylesheets/Layout.css">
 		@RenderSection("Stylesheets", false)
         <script src="/Scripts/Table.js"></script>
-        @if (ViewBag.SteamId != null)
-        {
-            <script src="/Scripts/TimeConstraints.js"></script>
-        }
+        <script src="/Scripts/TimeConstraints.js"></script>
 		@RenderSection("Scripts", false)
     </head>
     <body>
@@ -22,6 +19,14 @@
                 <li><a href="/Players">Players</a></li>
                 <li><a href="/Teams">Teams</a></li>
                 <li><a href="/Games">Games</a></li>
+                <li>
+                    <select>
+                        @foreach (var preset in TimeConstraintPreset.Presets)
+                        {
+                            <option value="@preset.InternalName">@preset.Description</option>
+                        }
+                    </select>
+                </li>
             </ul>
         </div>
         <div class="content">
@@ -30,14 +35,6 @@
             {
                 <ul class="playerMenu">
                     <li>@GetPlayerLink("Player", "Games")</li><li>@GetPlayerLink("Encounters")</li><li>@GetPlayerLink("Weapons")</li><li>@GetPlayerLink("Items", "Items purchased")</li>
-                    <li>
-                        <select>
-                            @foreach (var preset in TimeConstraintPreset.Presets)
-                            {
-                                <option value="@preset.InternalName">@preset.Description</option>
-                            }
-                        </select>
-                    </li>
                 </ul>
             }
             @RenderBody()

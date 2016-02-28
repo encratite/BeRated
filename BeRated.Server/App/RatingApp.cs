@@ -96,7 +96,8 @@ namespace BeRated.App
 		[Controller]
 		public List<ModelGame> Games()
 		{
-			var games = GetGames();
+			var constraints = GetTimeConstraints();
+			var games = GetGames(constraints);
 			return games;
 		}
 
@@ -194,8 +195,10 @@ namespace BeRated.App
 		            RoundsPlayed = roundsPlayed,
 		            RoundWinRatio = Ratio.Get(roundsWon, roundsPlayed),
                 };
-            }).OrderBy(player => player.Name).ToList();
-            return stats;
+            });
+			stats = stats.Where(player => player.Kills + player.Deaths > 0);
+			stats = stats.OrderBy(player => player.Name);
+            return stats.ToList();
         }
 
         private List<TeamStats> GetTeamStats(TimeConstraints constraints)
@@ -418,9 +421,10 @@ namespace BeRated.App
                 team.Losses++;
         }
 
-		private List<ModelGame> GetGames()
+		private List<ModelGame> GetGames(TimeConstraints constraints)
 		{
-			var games = _Cache.Games.Select(game => GetGame(game));
+			var matchingGames = _Cache.Games.Where(game => constraints.Match(game.Time));
+			var games = matchingGames.Select(game => GetGame(game));
             games = games.OrderByDescending(game => game.Time);
 			return games.ToList();
 		}

@@ -100,7 +100,7 @@ namespace BeRated.Cache
             {
                 try
                 {
-                    var files = Directory.GetFiles(_LogPath).ToList();
+                    var files = Directory.GetFiles(_LogPath, "*.log").ToList();
 					files.Sort();
                     foreach (var file in files)
                         ProcessLog(file);

@@ -15,7 +15,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", (event) => {
-        var select = <HTMLSelectElement>document.querySelector(".playerMenu select");
+        var select = <HTMLSelectElement>document.querySelector(".menu select");
         if (select == null) {
             return;
         }

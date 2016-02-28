@@ -14,7 +14,7 @@ var BeRated;
         location.reload();
     }
     document.addEventListener("DOMContentLoaded", function (event) {
-        var select = document.querySelector(".playerMenu select");
+        var select = document.querySelector(".menu select");
         if (select == null) {
             return;
         }
