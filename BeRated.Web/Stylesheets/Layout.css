@@ -170,10 +170,12 @@ table.terrorists {
   margin-bottom: 1em;
   margin-left: 8em;
 }
-.win {
+.win,
+.positive {
   color: #00c325;
 }
-.loss {
+.loss,
+.negative {
   color: #bd0000;
 }
 .draw {

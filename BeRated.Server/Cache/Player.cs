@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Moserware.Skills;
 
 namespace BeRated.Cache
 {
@@ -13,6 +14,8 @@ namespace BeRated.Cache
 		public List<Kill> Kills { get; private set; }
 		public List<Kill> Deaths { get; private set; }
 
+		public Rating KillRating { get; set; }
+
 		public List<Round> RoundsWon { get; private set; }
 		public List<Round> RoundsLost { get; private set; }
 
@@ -24,9 +27,9 @@ namespace BeRated.Cache
             }
         }
 
-		public List<Game> Wins { get; private set; }
-		public List<Game> Losses { get; private set; }
-		public List<Game> Draws { get; private set; }
+		public List<Game> Wins { get; set; }
+		public List<Game> Losses { get; set; }
+		public List<Game> Draws { get; set; }
 
         public IEnumerable<Game> Games
         {
@@ -47,6 +50,8 @@ namespace BeRated.Cache
 
 			Kills = new List<Kill>();
 			Deaths = new List<Kill>();
+
+			KillRating = GameInfo.DefaultGameInfo.DefaultRating;
 
 			RoundsWon = new List<Round>();
 			RoundsLost = new List<Round>();

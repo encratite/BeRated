@@ -183,7 +183,7 @@ namespace BeRated.App
                 int roundsWon = matchingRoundsWon.Count();
                 int roundsPlayed = matchingRounds.Count();
 
-                return new GeneralPlayerStats
+                var generalStats = new GeneralPlayerStats
                 {
                     SteamId = player.SteamId,
 		            Name = player.Name,
@@ -196,6 +196,24 @@ namespace BeRated.App
 		            RoundsPlayed = roundsPlayed,
 		            RoundWinRatio = Ratio.Get(roundsWon, roundsPlayed),
                 };
+
+				if ((constraints.Start != null || constraints.End != null) && games > 0)
+				{
+					var firstGame = matchingGames.First();
+					var startRating = firstGame.GetRatedPlayer(player);
+					generalStats.StartKillRating = startRating.PreGameKillRating.ConservativeRating;
+
+					var lastGame = matchingGames.Last();
+					var endRating = lastGame.GetRatedPlayer(player);
+					generalStats.EndKillRating = endRating.PostGameKillRating.ConservativeRating;
+				}
+				else
+				{
+					generalStats.StartKillRating = null;
+					generalStats.EndKillRating = player.KillRating.ConservativeRating;
+				}
+
+				return generalStats;
             });
 			stats = stats.Where(player => player.Kills + player.Deaths > 0);
 			stats = stats.OrderBy(player => player.Name);
@@ -219,12 +237,12 @@ namespace BeRated.App
 		{
             var matchingGames = player.Games.Where(game =>
                 constraints.Match(game.Time) &&
-                (game.Terrorists.Contains(player) || game.CounterTerrorists.Contains(player))
+                (game.Terrorists.Any(p => p.Player == player) || game.CounterTerrorists.Any(p => p.Player == player))
             );
             matchingGames = matchingGames.OrderByDescending(game => game.Time);
             var games = matchingGames.Select(game =>
             {
-                bool isTerrorist = game.Terrorists.Contains(player);
+                bool isTerrorist = game.Terrorists.Any(p => p.Player == player);
                 int terroristScore = game.TerroristScore;
                 int counterTerroristScore = game.CounterTerroristScore;
                 var terrorists = GetPlayerInfos(game.Terrorists, game);
@@ -383,7 +401,7 @@ namespace BeRated.App
 				Logger.Error(message);
 		}
 
-        private bool IsSameTeam(List<PlayerInfo> team1, List<Player> team2, bool precise = true)
+        private bool IsSameTeam(List<PlayerInfo> team1, List<RatedPlayer> team2, bool precise = true)
         {
             var ids1 = GetSteamIds(team1);
 			var ids2 = GetSteamIds(team2);
@@ -399,20 +417,20 @@ namespace BeRated.App
 			return new HashSet<string>(ids);
 		}
 
-		private HashSet<string> GetSteamIds(List<Player> team)
+		private HashSet<string> GetSteamIds(List<RatedPlayer> team)
 		{
-			var ids = team.Select(player => player.SteamId);
+			var ids = team.Select(player => player.Player.SteamId);
 			return new HashSet<string>(ids);
 		}
 
-        private void AddGameToTeamStats(List<Player> players, bool isTerroristTeam, GameOutcome outcome, List<TeamStats> teams)
+        private void AddGameToTeamStats(List<RatedPlayer> players, bool isTerroristTeam, GameOutcome outcome, List<TeamStats> teams)
         {
 			if (players.Count == 0)
 				return;
             var team = teams.FirstOrDefault(teamStats => IsSameTeam(teamStats.Players, players));
             if (team == null)
             {
-                var playerInfos = players.Select(player => GetPlayerInfo(player));
+                var playerInfos = players.Select(player => GetPlayerInfo(player.Player));
 				playerInfos = playerInfos.OrderBy(player => player.Name);
                 team = new TeamStats(playerInfos.ToList());
                 teams.Add(team);
@@ -481,14 +499,14 @@ namespace BeRated.App
             return new PlayerInfo(player.Name, player.SteamId);
         }
 
-        private List<PlayerGameInfo> GetPlayerInfos(List<Player> team, CacheGame game)
+        private List<PlayerGameInfo> GetPlayerInfos(List<RatedPlayer> team, CacheGame game)
         {
             var gameKills = game.Rounds.SelectMany(round => round.Kills).ToList();
 			var playerInfos = team.Select(player =>
             {
-                int kills = gameKills.Count(kill => kill.Killer == player);
-                int deaths = gameKills.Count(kill => kill.Victim == player);
-                var playerInfo = new PlayerGameInfo(player.Name, player.SteamId, kills, deaths);
+                int kills = gameKills.Count(kill => kill.Killer == player.Player);
+                int deaths = gameKills.Count(kill => kill.Victim == player.Player);
+                var playerInfo = new PlayerGameInfo(player.Player.Name, player.Player.SteamId, kills, deaths);
                 return playerInfo;
             });
             playerInfos = playerInfos.OrderByDescending(player => player.Kills);

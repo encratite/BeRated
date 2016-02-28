@@ -4,6 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using BeRated.Common;
+using Moserware.Skills;
+using Team = BeRated.Common.Team;
+using SkillPlayer = Moserware.Skills.Player;
+using SkillTeam = Moserware.Skills.Team;
 
 namespace BeRated.Cache
 {
@@ -44,6 +48,7 @@ namespace BeRated.Cache
         private int _MatchStartCounter = 0;
         private string _Map = null;
 		private Dictionary<string, Team> _PlayerTeams = null;
+		private Dictionary<string, Rating> _PreGameKillRatings = null;
 		private List<Round> _Rounds = new List<Round>();
         private List<Kill> _RoundKills = new List<Kill>();
 
@@ -121,6 +126,7 @@ namespace BeRated.Cache
                 _MatchStartCounter = 0;
                 _Map = null;
 				_PlayerTeams = new Dictionary<string, Team>();
+				_PreGameKillRatings = new Dictionary<string, Rating>();
                 _RoundKills = new List<Kill>();
 				string fileName = Path.GetFileName(path);
 				var fileInfo = new FileInfo(path);
@@ -215,16 +221,19 @@ namespace BeRated.Cache
                 kill.Victim.SteamId != LogParser.BotId &&
                 kill.Killer != kill.Victim
             )
-            {
-                kill.Weapon = TranslateWeapon(kill.Weapon);
-			    kill.Killer.Kills.Add(kill);
-			    kill.Victim.Deaths.Add(kill);
-                _RoundKills.Add(kill);
-            }
+			{
+				kill.Weapon = TranslateWeapon(kill.Weapon);
+				var killer = kill.Killer;
+				var victim = kill.Victim;
+				killer.Kills.Add(kill);
+				victim.Deaths.Add(kill);
+				_RoundKills.Add(kill);
+				AdjustRatings(killer, victim);
+			}
 			return true;
         }
 
-        private bool ReadMaxRounds(string line)
+		private bool ReadMaxRounds(string line)
         {
             int? maxRounds = _LogParser.ReadMaxRounds(line);
 			if (maxRounds == null)
@@ -240,8 +249,11 @@ namespace BeRated.Cache
                 return false;
 			string steamId = teamSwitch.Player.SteamId;
 			var team = teamSwitch.CurrentTeam;
-			if (steamId != LogParser.BotId)
-			    _PlayerTeams[steamId] = team;
+			if (steamId == LogParser.BotId)
+				return false;
+			_PlayerTeams[steamId] = team;
+			var player = GetPlayer(steamId);
+			_PreGameKillRatings[steamId] = player.KillRating;
             return true;
         }
 
@@ -251,8 +263,10 @@ namespace BeRated.Cache
 			if (disconnect == null)
                 return false;
 			string steamId = disconnect.Player.SteamId;
-			if (steamId != LogParser.BotId)
-				_PlayerTeams.Remove(steamId);
+			if (steamId == LogParser.BotId)
+				return false;
+			_PlayerTeams.Remove(steamId);
+			_PreGameKillRatings.Remove(steamId);
 			return true;
         }
 
@@ -313,6 +327,7 @@ namespace BeRated.Cache
                 outcome = GameOutcome.CounterTerroristsWin;
             var game = new Game(_Map, _Rounds, outcome);
             _Games.Add(game);
+			_Games.Sort((x, y) => x.Time.CompareTo(y.Time));
             foreach (var pair in _PlayerTeams)
             {
                 var player = _Players[pair.Key];
@@ -327,8 +342,11 @@ namespace BeRated.Cache
                 else
                     games = player.Losses;
                 games.Add(game);
+				games.Sort((x, y) => x.Time.CompareTo(y.Time));
                 var players = playerTeam == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
-                players.Add(player);
+				var preGameKillRating = _PreGameKillRatings[player.SteamId];
+				var ratedPlayer = new RatedPlayer(player, preGameKillRating);
+                players.Add(ratedPlayer);
             }
         }
 
@@ -388,5 +406,20 @@ namespace BeRated.Cache
             }
             return item;
         }
+
+		private void AdjustRatings(Player killer, Player victim)
+		{
+			var killerPlayer = new SkillPlayer(killer);
+			var victimPlayer = new SkillPlayer(victim);
+			var killerTeam = new SkillTeam(killerPlayer, killer.KillRating);
+			var victimTeam = new SkillTeam(victimPlayer, victim.KillRating);
+			var teams = Teams.Concat(killerTeam, victimTeam);
+			var newRatings = TrueSkillCalculator.CalculateNewRatings(GameInfo.DefaultGameInfo, teams, 1, 2);
+			foreach (var pair in newRatings)
+			{
+				var player = (Player)pair.Key.Id;
+				player.KillRating = pair.Value;
+			}
+		}
     }
 }

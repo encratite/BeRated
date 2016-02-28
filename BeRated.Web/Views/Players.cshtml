@@ -14,6 +14,7 @@
         <th data-column-type="string">Name</th>
         <th>Kills per round</th>
         <th>Kill/death ratio</th>
+        <th>Kill rating</th>
         <th>Kills</th>
         <th>Deaths</th>
         <th>Games won</th>
@@ -27,6 +28,7 @@
             <td>@Helper.GetPlayerLink(player)</td>
             <td>@Helper.Round(player.KillsPerRound)</td>
             <td>@Helper.Round(player.KillDeathRatio)</td>
+            <td>@Helper.GetRating(player.StartKillRating, player.EndKillRating)</td>
             <td>@player.Kills</td>
             <td>@player.Deaths</td>
             <td>@Helper.Percentage(player.GameWinRatio)</td>

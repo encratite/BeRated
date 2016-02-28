@@ -6,6 +6,8 @@
 @borderColour: darken(#ddd, @darken);
 @counterTerroristColour: #5783c0;
 @terroristColour: #a68947;
+@positiveColour: #00c325;
+@negativeColour: #bd0000;
 
 // Dimensions
 @contentWidth: 900px;
@@ -236,12 +238,12 @@ table.terrorists {
     margin-left: 8em;
 }
 
-.win {
-    color: #00c325;
+.win, .positive {
+    color: @positiveColour;
 }
 
-.loss {
-    color: #bd0000;
+.loss, .negative {
+    color: @negativeColour;
 }
 
 .draw {

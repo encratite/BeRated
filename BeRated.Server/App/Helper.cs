@@ -147,6 +147,20 @@ namespace BeRated.App
             return new RawString(markup);
         }
 
+		public static RawString GetRating(double? startRating, double endRating)
+		{
+			string markup = endRating.ToString("0.0");
+			if (startRating != null)
+			{
+				double difference = endRating - startRating.Value;
+				if (difference > 0)
+					markup += string.Format(" (<span class=\"positive\">+{0:0.0}</span>)", difference);
+				else
+					markup += string.Format(" (<span class=\"negative\">-{0:0.0}</span>)", difference);
+			}
+			return new RawString(markup);
+		}
+
         private static string GetScoreClasses(string baseClass, int score, int otherScore)
 		{
 			return baseClass + (score > otherScore ? " victory" : "");
