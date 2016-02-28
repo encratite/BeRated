@@ -12,23 +12,23 @@
 <table class="sortable numericTable grid">
     <tr>
         <th data-column-type="string">Name</th>
-        <th>Kills per round</th>
-        <th>Kill/death ratio</th>
-        <th>Kill rating</th>
+        <th title="Conservative TrueSkill rating based on kills only">K-Rating</th>
+        <th title="Kills per round">KPR</th>
+        <th title="Kill/death ratio">KDR</th>
         <th>Kills</th>
         <th>Deaths</th>
         <th>Games won</th>
-        <th>Games</th>
+        <th title="Games played">Games</th>
         <th>Rounds won</th>
-        <th>Rounds</th>
+        <th title="Rounds played">Rounds</th>
     </tr>
     @foreach (var player in Model)
     {
         <tr>
             <td>@Helper.GetPlayerLink(player)</td>
+            <td>@Helper.GetRating(player.StartKillRating, player.EndKillRating)</td>
             <td>@Helper.Round(player.KillsPerRound)</td>
             <td>@Helper.Round(player.KillDeathRatio)</td>
-            <td>@Helper.GetRating(player.StartKillRating, player.EndKillRating)</td>
             <td>@player.Kills</td>
             <td>@player.Deaths</td>
             <td>@Helper.Percentage(player.GameWinRatio)</td>

@@ -72,7 +72,7 @@ h1 {
   margin-bottom: 2em;
 }
 .menu ul {
-  width: 900px;
+  width: 950px;
   margin: 0 auto;
 }
 .menu li {
@@ -132,7 +132,7 @@ h1 {
   border-bottom-right-radius: 4px;
 }
 .content {
-  width: 900px;
+  width: 950px;
   margin: 0 auto;
 }
 .numericTable td:nth-child(n + 2) {

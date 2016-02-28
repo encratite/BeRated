@@ -156,7 +156,7 @@ namespace BeRated.App
 				if (difference > 0)
 					markup += string.Format(" (<span class=\"positive\">+{0:0.0}</span>)", difference);
 				else
-					markup += string.Format(" (<span class=\"negative\">-{0:0.0}</span>)", difference);
+					markup += string.Format(" (<span class=\"negative\">{0:0.0}</span>)", difference);
 			}
 			return new RawString(markup);
 		}
