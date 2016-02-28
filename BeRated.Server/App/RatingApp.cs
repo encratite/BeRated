@@ -406,6 +406,8 @@ namespace BeRated.App
 
         private void AddGameToTeamStats(List<Player> players, bool isTerroristTeam, GameOutcome outcome, List<TeamStats> teams)
         {
+			if (players.Count == 0)
+				return;
             var team = teams.FirstOrDefault(teamStats => IsSameTeam(teamStats.Players, players));
             if (team == null)
             {
