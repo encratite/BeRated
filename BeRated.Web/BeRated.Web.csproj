@@ -39,7 +39,7 @@
     <Content Include="Views\Players.cshtml" />
     <Content Include="Views\Layout.cshtml" />
     <Content Include="Views\Matchup.cshtml" />
-    <Content Include="Views\Player.cshtml" />
+    <Content Include="Views\Matches.cshtml" />
     <Content Include="Views\Items.cshtml" />
     <Content Include="Views\Games.cshtml" />
     <Content Include="Views\Game.cshtml" />

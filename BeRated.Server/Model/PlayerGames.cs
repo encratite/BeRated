@@ -2,11 +2,11 @@
 
 namespace BeRated.Model
 {
-	public class PlayerGames : PlayerInfo
+	public class Matches : PlayerInfo
 	{
 		public List<PlayerGame> Games { get; private set; }
 
-        public PlayerGames(string name, string steamId, List<PlayerGame> games)
+        public Matches(string name, string steamId, List<PlayerGame> games)
             : base(name, steamId)
         {
             Games = games;

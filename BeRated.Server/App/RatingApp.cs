@@ -125,11 +125,11 @@ namespace BeRated.App
 		}
 
 		[Controller]
-        public PlayerGames Player(string id)
+        public Matches Matches(string id)
         {
             var player = _Cache.GetPlayer(id);
             var constraints = GetTimeConstraints();
-            var games = new PlayerGames(player.Name, player.SteamId, GetPlayerGames(player, constraints));
+            var games = new Matches(player.Name, player.SteamId, GetPlayerGames(player, constraints));
             return games;
         }
 
