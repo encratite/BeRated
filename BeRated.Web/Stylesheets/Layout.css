@@ -17,7 +17,6 @@ a:hover {
   text-decoration: underline;
 }
 li {
-  display: inline;
   list-style-type: none;
 }
 p {
@@ -77,6 +76,7 @@ h1 {
   margin: 0 auto;
 }
 .menu li {
+  display: inline;
   vertical-align: middle;
 }
 .menu li:nth-child(n + 2) {
@@ -111,6 +111,9 @@ h1 {
   background-image: none;
   background-color: #dcdcdc;
 }
+.playerMenu li {
+  display: inline;
+}
 .playerMenu li:first-child a {
   border-top: 1px solid #d0d0d0;
   border-bottom: 1px solid #d0d0d0;
@@ -135,9 +138,6 @@ h1 {
 .numericTable td:nth-child(n + 2) {
   text-align: right;
 }
-.playerList li {
-  display: block;
-}
 .playerList ul.counterTerrorists a {
   color: #5783c0;
 }
@@ -149,7 +149,6 @@ h1 {
   margin-bottom: 1em;
 }
 .gameDescription li {
-  display: block;
   line-height: 2em;
 }
 .teamPlayers {
@@ -201,6 +200,5 @@ table.terrorists {
   line-height: 2em;
 }
 .gameKills li {
-  display: block;
   line-height: 1.6em;
 }

@@ -119,13 +119,26 @@ namespace BeRated.App
 			return string.Join(",", idString);
 		}
 
-        public static RawString GetPlayerList(List<PlayerGameInfo> team, bool terrorists)
+        public static RawString GetPlayerList(List<PlayerInfo> team, bool? terrorists = null)
 		{
 			var links = team.OrderBy(player => player.Name).Select(player => string.Format("<li>{0}</li>", GetPlayerLink(player)));
 			string elements = string.Join("\n", links);
-            string className = terrorists ? TerroristClass : CounterTerroristClass;
-			string markup = string.Format("<ul class=\"{0}\">\n{1}\n</ul>", className, elements);
+			string markup;
+			if (terrorists.HasValue)
+			{
+				string className = terrorists.Value ? TerroristClass : CounterTerroristClass;
+				markup = string.Format("<ul class=\"{0}\">\n{1}\n</ul>", className, elements);
+			}
+			else
+			{
+				markup = string.Format("<ul>\n{0}\n</ul>", elements);
+			}
 			return new RawString(markup);
+		}
+
+		public static RawString GetPlayerList(List<PlayerGameInfo> team, bool? terrorists = null)
+		{
+			return GetPlayerList(team.OfType<PlayerInfo>().ToList(), terrorists);
 		}
 
         public static RawString GetGameLink(long id, string map)

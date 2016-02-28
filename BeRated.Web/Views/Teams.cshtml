@@ -9,7 +9,7 @@
     ViewBag.Title = "Teams";
 }
 
-<table id="teams" class="sortable numericTable grid">
+<table class="sortable numericTable grid teamTable">
     <tr>
         <th data-column-type="string">Team</th>
         <th>Games</th>
@@ -21,7 +21,7 @@
     @foreach (var team in Model)
     {
         <tr>
-            <td>@Helper.PlayerList(team.Players)</td>
+            <td>@Helper.GetPlayerList(team.Players)</td>
             <td>@team.Games</td>
             <td>@team.Wins</td>
             <td>@team.Losses</td>
