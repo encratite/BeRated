@@ -419,7 +419,10 @@ namespace BeRated.App
             }
             if (outcome == GameOutcome.Draw)
                 team.Draws++;
-            else if (isTerroristTeam && outcome == GameOutcome.TerroristsWin)
+            else if (
+				isTerroristTeam && outcome == GameOutcome.TerroristsWin ||
+				!isTerroristTeam && outcome == GameOutcome.CounterTerroristsWin
+			)
                 team.Wins++;
             else
                 team.Losses++;
