@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Ashod;
 using Microsoft.Owin;
@@ -108,23 +107,7 @@ namespace BeRated.Server
 			Type modelType;
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
-			object model;
-			for (int retryCount = 0; ; retryCount++)
-			{
-				try
-				{
-					model = Invoke(method, arguments, out modelType);
-					break;
-				}
-				catch (Exception exception)
-				{
-					var type = exception.GetType();
-					if (retryCount < 10)
-						Thread.Sleep(TimeSpan.FromSeconds(1));
-					else
-						throw;
-				}
-			}
+			object model = Invoke(method, arguments, out modelType);
 			stopwatch.Stop();
 			invokeDuration = stopwatch.Elapsed;
 			stopwatch.Start();
