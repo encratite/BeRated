@@ -40,11 +40,11 @@ namespace BeRated.App
 
         private static TimeConstraints GetWeekPreset(int weeks = 0)
         {
-            var weekTimeSpan = TimeSpan.FromDays(7);
-            var start = DateTimeOffset.Now - weekTimeSpan;
+			const int daysPerWeek = 7;
+            var start = DateTimeOffset.Now - TimeSpan.FromDays(weeks * daysPerWeek);
             while (start.DayOfWeek != CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek)
                 start = start.AddDays(-1);
-            var end = start + weekTimeSpan;
+            var end = start + TimeSpan.FromDays(daysPerWeek);
             var constraints = new TimeConstraints(start, end);
             return constraints;
         }
