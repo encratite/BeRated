@@ -411,8 +411,9 @@ namespace BeRated.App
             var team = teams.FirstOrDefault(teamStats => IsSameTeam(teamStats.Players, players));
             if (team == null)
             {
-                var playerInfos = players.Select(player => GetPlayerInfo(player)).ToList();
-                team = new TeamStats(playerInfos);
+                var playerInfos = players.Select(player => GetPlayerInfo(player));
+				playerInfos = playerInfos.OrderBy(player => player.Name);
+                team = new TeamStats(playerInfos.ToList());
                 teams.Add(team);
             }
             if (outcome == GameOutcome.Draw)
