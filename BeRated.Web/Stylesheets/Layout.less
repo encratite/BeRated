@@ -130,7 +130,22 @@ h1 {
 
     select {
         height: 1.9em;
+        padding-left: 0.4em;
         border-radius: @borderRadius;
+        -moz-appearance: none;
+    }
+
+    select::-ms-expand {
+        width: 0.9em;
+        border: none;
+        background: #fff;
+        padding-right: 0.5em;
+    }
+
+    @supports (-moz-appearance:meterbar) {
+        select {
+            padding-right: 0.6em;
+        }
     }
 }
 

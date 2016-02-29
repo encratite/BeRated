@@ -75,6 +75,7 @@
     <Compile Include="App\TimeConstraintPreset.cs" />
     <Compile Include="Cache\Game.cs" />
     <Compile Include="Cache\ItemPair.cs" />
+    <Compile Include="Cache\PlayerGameState.cs" />
     <Compile Include="Cache\RatedPlayer.cs" />
     <Compile Include="Common\GameOutcome.cs" />
     <Compile Include="Cache\Player.cs" />

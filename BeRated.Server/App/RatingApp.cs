@@ -201,14 +201,19 @@ namespace BeRated.App
 				{
 					var firstGame = matchingGames.First();
 					var startRating = firstGame.GetRatedPlayer(player);
+                    generalStats.StartMatchRating = startRating.PreGameMatchRating.ConservativeRating;
 					generalStats.StartKillRating = startRating.PreGameKillRating.ConservativeRating;
 
 					var lastGame = matchingGames.Last();
 					var endRating = lastGame.GetRatedPlayer(player);
+                    generalStats.EndMatchRating = endRating.PostGameMatchRating.ConservativeRating;
 					generalStats.EndKillRating = endRating.PostGameKillRating.ConservativeRating;
 				}
 				if (constraints.Start == null && constraints.End == null)
+                {
+                    generalStats.StartMatchRating = null;
 					generalStats.StartKillRating = null;
+                }
 
 				return generalStats;
             });

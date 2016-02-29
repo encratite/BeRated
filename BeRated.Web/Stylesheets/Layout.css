@@ -91,7 +91,20 @@ h1 {
 }
 .menu select {
   height: 1.9em;
+  padding-left: 0.4em;
   border-radius: 4px;
+  -moz-appearance: none;
+}
+.menu select::-ms-expand {
+  width: 0.9em;
+  border: none;
+  background: #fff;
+  padding-right: 0.5em;
+}
+@supports (-moz-appearance:meterbar) {
+  .menu select {
+    padding-right: 0.6em;
+  }
 }
 .menu a,
 .playerMenu a {

@@ -14,6 +14,7 @@ namespace BeRated.Cache
 		public List<Kill> Kills { get; private set; }
 		public List<Kill> Deaths { get; private set; }
 
+        public Rating MatchRating { get; set; }
 		public Rating KillRating { get; set; }
 
 		public List<Round> RoundsWon { get; private set; }
@@ -51,6 +52,7 @@ namespace BeRated.Cache
 			Kills = new List<Kill>();
 			Deaths = new List<Kill>();
 
+            MatchRating = GameInfo.DefaultGameInfo.DefaultRating;
 			KillRating = GameInfo.DefaultGameInfo.DefaultRating;
 
 			RoundsWon = new List<Round>();

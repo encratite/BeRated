@@ -2,6 +2,12 @@
 {
 	public class GeneralPlayerStats : PlayerInfo
 	{
+        public double? StartMatchRating { get; set; }
+		public double EndMatchRating { get; set; }
+
+        public double? StartKillRating { get; set; }
+		public double EndKillRating { get; set; }
+
 		public decimal? KillsPerRound { get; set; }
 		public decimal? KillDeathRatio { get; set; }
 
@@ -13,8 +19,5 @@
 
 		public int RoundsPlayed { get; set; }
 		public decimal? RoundWinRatio { get; set; }
-
-		public double? StartKillRating { get; set; }
-		public double EndKillRating { get; set; }
 	}
 }

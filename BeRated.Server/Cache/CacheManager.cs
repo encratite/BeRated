@@ -47,8 +47,7 @@ namespace BeRated.Cache
 
         private int _MatchStartCounter = 0;
         private string _Map = null;
-		private Dictionary<string, Team> _PlayerTeams = null;
-		private Dictionary<string, Rating> _PreGameKillRatings = null;
+		private Dictionary<string, PlayerGameState> _PlayerStates = new Dictionary<string, PlayerGameState>();
 		private List<Round> _Rounds = new List<Round>();
         private List<Kill> _RoundKills = new List<Kill>();
 
@@ -125,8 +124,7 @@ namespace BeRated.Cache
 				_MaxRounds = MaxRoundsDefault;
                 _MatchStartCounter = 0;
                 _Map = null;
-				_PlayerTeams = new Dictionary<string, Team>();
-				_PreGameKillRatings = new Dictionary<string, Rating>();
+				_PlayerStates = new Dictionary<string, PlayerGameState>();
                 _RoundKills = new List<Kill>();
 				string fileName = Path.GetFileName(path);
 				var fileInfo = new FileInfo(path);
@@ -251,9 +249,15 @@ namespace BeRated.Cache
 			var team = teamSwitch.CurrentTeam;
 			if (steamId == LogParser.BotId)
 				return false;
-			_PlayerTeams[steamId] = team;
-			var player = GetPlayer(steamId);
-			_PreGameKillRatings[steamId] = player.KillRating;
+            var player = GetPlayer(steamId);
+            PlayerGameState state;
+            if (!_PlayerStates.TryGetValue(steamId, out state))
+            {
+                state = new PlayerGameState(player, team);
+                _PlayerStates[steamId] = state;
+            }
+            state.Team = team;
+            state.RoundPlayerLeft = null;
             return true;
         }
 
@@ -264,9 +268,11 @@ namespace BeRated.Cache
                 return false;
 			string steamId = disconnect.Player.SteamId;
 			if (steamId == LogParser.BotId)
-				return false;
-			_PlayerTeams.Remove(steamId);
-			_PreGameKillRatings.Remove(steamId);
+				return true;
+            PlayerGameState state;
+            if (!_PlayerStates.TryGetValue(steamId, out state))
+                return true;
+			state.RoundPlayerLeft = _Rounds.Count;
 			return true;
         }
 
@@ -281,11 +287,12 @@ namespace BeRated.Cache
             round.Kills = _RoundKills;
             _Rounds.Add(round);
             var winningTeam = _LogParser.GetWinningTeam(round.SfuiNotice);
-            foreach (var pair in _PlayerTeams)
+            foreach (var pair in _PlayerStates)
             {
                 var player = _Players[pair.Key];
-                var playerTeam = pair.Value;
-                var container = playerTeam == winningTeam ? player.RoundsWon : player.RoundsLost;
+                var state = pair.Value;
+                var team = state.Team;
+                var container = team == winningTeam ? player.RoundsWon : player.RoundsLost;
                 container.Add(round);
             }
             CheckForEndOfGame(round, roundsPlayed);
@@ -301,7 +308,8 @@ namespace BeRated.Cache
 			string steamId = purchase.Player.SteamId;
 			if (!IgnoreStats() && steamId != LogParser.BotId)
             {
-                var team = _PlayerTeams[steamId];
+                var state = _PlayerStates[steamId];
+                var team = state.Team;
                 purchase.Item = TranslateItem(purchase.Item, team);
 			    purchase.Player.Purchases.Add(purchase);
             }
@@ -312,7 +320,7 @@ namespace BeRated.Cache
 
         private void CheckForEndOfGame(Round round, int roundsPlayed)
         {
-            if (_PlayerTeams.Count == 0)
+            if (_PlayerStates.Count == 0)
                 return;
             int roundsToWin = _MaxRounds / 2 + 1;
             bool terroristsWinGame = round.TerroristScore >= roundsToWin;
@@ -328,24 +336,46 @@ namespace BeRated.Cache
             var game = new Game(_Map, _Rounds, outcome);
             _Games.Add(game);
 			_Games.Sort((x, y) => x.Time.CompareTo(y.Time));
-            foreach (var pair in _PlayerTeams)
+            var counterTerrorists = new SkillTeam();
+            var terrorists = new SkillTeam();
+            int counterTerroristId = 1;
+            int terroristId = 2;
+            var playerStates = _PlayerStates.Where(pair => pair.Value.RoundPlayerLeft == null || _Rounds.Count - pair.Value.RoundPlayerLeft.Value < 2).ToList();
+            foreach (var pair in playerStates)
             {
                 var player = _Players[pair.Key];
-                var playerTeam = pair.Value;
+                var state = pair.Value;
                 List<Game> games;
-                bool terroristWin = terroristsWinGame && playerTeam == Team.Terrorist;
-                bool counterTerroristWin = counterTerroristsWinGame && playerTeam == Team.CounterTerrorist;
                 if (draw)
                     games = player.Draws;
-                else if (terroristWin || counterTerroristWin)
+                else if (
+                    terroristsWinGame && state.Team == Team.Terrorist ||
+                    counterTerroristsWinGame && state.Team == Team.CounterTerrorist
+                )
                     games = player.Wins;
                 else
                     games = player.Losses;
                 games.Add(game);
 				games.Sort((x, y) => x.Time.CompareTo(y.Time));
-                var players = playerTeam == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
-				var preGameKillRating = _PreGameKillRatings[player.SteamId];
-				var ratedPlayer = new RatedPlayer(player, preGameKillRating);
+                var team = state.Team == Team.CounterTerrorist ? counterTerrorists : terrorists;
+                var skillPlayer = new SkillPlayer(player);
+                team.AddPlayer(skillPlayer, player.MatchRating);
+            }
+            var teams = Teams.Concat(counterTerrorists, terrorists);
+            int winnerId = counterTerroristsWinGame ? counterTerroristId : terroristId;
+            int loserId = terroristsWinGame ? counterTerroristId : terroristId;
+            var newRatings = TrueSkillCalculator.CalculateNewRatings(GameInfo.DefaultGameInfo, teams, winnerId, loserId);
+            foreach (var pair in newRatings)
+            {
+                var player = (Player)pair.Key.Id;
+                player.MatchRating = pair.Value;
+            }
+            foreach (var pair in playerStates)
+            {
+                var player = _Players[pair.Key];
+                var state = pair.Value;
+                var players = state.Team == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
+				var ratedPlayer = new RatedPlayer(player, state.PreGameMatchRating, state.PreGameKillRating);
                 players.Add(ratedPlayer);
             }
         }
