@@ -5,6 +5,9 @@
         public double? StartMatchRating { get; set; }
 		public double EndMatchRating { get; set; }
 
+        public double? StartRoundRating { get; set; }
+        public double EndRoundRating { get; set; }
+
         public double? StartKillRating { get; set; }
 		public double EndKillRating { get; set; }
 

@@ -16,6 +16,9 @@ namespace BeRated.Cache
 		private const int MaxRoundsDefault = 30;
         private const int UpdateInterval = 10 * 1000;
 
+        private const int WinnerRank = 1;
+        private const int LoserRank = 2;
+
         public IEnumerable<Player> Players
         {
             get
@@ -287,7 +290,8 @@ namespace BeRated.Cache
             round.Kills = _RoundKills;
             _Rounds.Add(round);
             var winningTeam = _LogParser.GetWinningTeam(round.SfuiNotice);
-            foreach (var pair in _PlayerStates)
+            var playerStates = GetActivePlayerStates();
+            foreach (var pair in playerStates)
             {
                 var player = _Players[pair.Key];
                 var state = pair.Value;
@@ -295,6 +299,9 @@ namespace BeRated.Cache
                 var container = team == winningTeam ? player.RoundsWon : player.RoundsLost;
                 container.Add(round);
             }
+            Action<Player, Rating> setRating = (player, rating) => player.RoundRating = rating;
+            bool counterTerroristsWinGame = winningTeam == Team.CounterTerrorist;
+            AdjustRatings(counterTerroristsWinGame, playerStates, setRating);
             CheckForEndOfGame(round, roundsPlayed);
             _RoundKills = new List<Kill>();
             return true;
@@ -335,12 +342,8 @@ namespace BeRated.Cache
                 outcome = GameOutcome.CounterTerroristsWin;
             var game = new Game(_Map, _Rounds, outcome);
             _Games.Add(game);
-			_Games.Sort((x, y) => x.Time.CompareTo(y.Time));
-            var counterTerrorists = new SkillTeam();
-            var terrorists = new SkillTeam();
-            int counterTerroristId = 1;
-            int terroristId = 2;
-            var playerStates = _PlayerStates.Where(pair => pair.Value.RoundPlayerLeft == null || _Rounds.Count - pair.Value.RoundPlayerLeft.Value < 2).ToList();
+            _Games.Sort((x, y) => x.Time.CompareTo(y.Time));
+            var playerStates = GetActivePlayerStates();
             foreach (var pair in playerStates)
             {
                 var player = _Players[pair.Key];
@@ -356,27 +359,55 @@ namespace BeRated.Cache
                 else
                     games = player.Losses;
                 games.Add(game);
-				games.Sort((x, y) => x.Time.CompareTo(y.Time));
-                var team = state.Team == Team.CounterTerrorist ? counterTerrorists : terrorists;
-                var skillPlayer = new SkillPlayer(player);
-                team.AddPlayer(skillPlayer, player.MatchRating);
+                games.Sort((x, y) => x.Time.CompareTo(y.Time));
             }
-            var teams = Teams.Concat(counterTerrorists, terrorists);
-            int winnerId = counterTerroristsWinGame ? counterTerroristId : terroristId;
-            int loserId = terroristsWinGame ? counterTerroristId : terroristId;
-            var newRatings = TrueSkillCalculator.CalculateNewRatings(GameInfo.DefaultGameInfo, teams, winnerId, loserId);
-            foreach (var pair in newRatings)
+            if (!draw)
             {
-                var player = (Player)pair.Key.Id;
-                player.MatchRating = pair.Value;
+                Action<Player, Rating> setRating = (player, rating) => player.MatchRating = rating;
+                AdjustRatings(counterTerroristsWinGame, playerStates, setRating);
             }
             foreach (var pair in playerStates)
             {
                 var player = _Players[pair.Key];
                 var state = pair.Value;
                 var players = state.Team == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
-				var ratedPlayer = new RatedPlayer(player, state.PreGameMatchRating, state.PreGameKillRating);
+                var ratedPlayer = new RatedPlayer(player, state.PreGameMatchRating, state.PreGameRoundRating, state.PreGameKillRating);
                 players.Add(ratedPlayer);
+            }
+        }
+
+        private void AdjustRatings(bool counterTerroristsWinGame, List<KeyValuePair<string, PlayerGameState>> playerStates, Action<Player, Rating> setRating)
+        {
+            var counterTerrorists = new SkillTeam();
+            var terrorists = new SkillTeam();
+            bool counterTerroristsPlaying = false;
+            bool terroristsPlaying = false;
+            foreach (var pair in playerStates)
+            {
+                var player = _Players[pair.Key];
+                var state = pair.Value;
+                var skillPlayer = new SkillPlayer(player);
+                if (state.Team == Team.CounterTerrorist)
+                {
+                    counterTerrorists.AddPlayer(skillPlayer, player.MatchRating);
+                    counterTerroristsPlaying = true;
+                }
+                else
+                {
+                    terrorists.AddPlayer(skillPlayer, player.MatchRating);
+                    terroristsPlaying = true;
+                }
+            }
+            if (!counterTerroristsPlaying || !terroristsPlaying)
+                return;
+            var teams = Teams.Concat(counterTerrorists, terrorists);
+            int counterTerroristRank = counterTerroristsWinGame ? WinnerRank : LoserRank;
+            int terroristRank = !counterTerroristsWinGame ? WinnerRank : LoserRank;
+            var newRatings = TrueSkillCalculator.CalculateNewRatings(GameInfo.DefaultGameInfo, teams, counterTerroristRank, terroristRank);
+            foreach (var pair in newRatings)
+            {
+                var player = (Player)pair.Key.Id;
+                setRating(player, pair.Value);
             }
         }
 
@@ -451,5 +482,13 @@ namespace BeRated.Cache
 				player.KillRating = pair.Value;
 			}
 		}
+
+        private List<KeyValuePair<string, PlayerGameState>> GetActivePlayerStates()
+        {
+            return _PlayerStates.Where(pair =>
+                pair.Value.RoundPlayerLeft == null ||
+                _Rounds.Count - pair.Value.RoundPlayerLeft.Value < 2
+            ).ToList();
+        }
     }
 }

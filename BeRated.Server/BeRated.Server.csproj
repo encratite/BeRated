@@ -77,6 +77,7 @@
     <Compile Include="Cache\ItemPair.cs" />
     <Compile Include="Cache\PlayerGameState.cs" />
     <Compile Include="Cache\RatedPlayer.cs" />
+    <Compile Include="Cache\RatingPair.cs" />
     <Compile Include="Common\GameOutcome.cs" />
     <Compile Include="Cache\Player.cs" />
     <Compile Include="Common\Team.cs" />

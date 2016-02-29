@@ -201,17 +201,20 @@ namespace BeRated.App
 				{
 					var firstGame = matchingGames.First();
 					var startRating = firstGame.GetRatedPlayer(player);
-                    generalStats.StartMatchRating = startRating.PreGameMatchRating.ConservativeRating;
-					generalStats.StartKillRating = startRating.PreGameKillRating.ConservativeRating;
+                    generalStats.StartMatchRating = startRating.MatchRating.PreGameRating.ConservativeRating;
+                    generalStats.StartRoundRating = startRating.RoundRating.PreGameRating.ConservativeRating;
+					generalStats.StartKillRating = startRating.KillRating.PreGameRating.ConservativeRating;
 
 					var lastGame = matchingGames.Last();
 					var endRating = lastGame.GetRatedPlayer(player);
-                    generalStats.EndMatchRating = endRating.PostGameMatchRating.ConservativeRating;
-					generalStats.EndKillRating = endRating.PostGameKillRating.ConservativeRating;
+                    generalStats.EndMatchRating = endRating.MatchRating.PostGameRating.ConservativeRating;
+                    generalStats.EndRoundRating = endRating.RoundRating.PostGameRating.ConservativeRating;
+					generalStats.EndKillRating = endRating.KillRating.PostGameRating.ConservativeRating;
 				}
 				if (constraints.Start == null && constraints.End == null)
                 {
                     generalStats.StartMatchRating = null;
+                    generalStats.StartRoundRating = null;
 					generalStats.StartKillRating = null;
                 }
 

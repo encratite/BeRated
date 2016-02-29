@@ -7,9 +7,9 @@ namespace BeRated.Cache
     {
         public Team Team { get; set; }
 
-        public Rating PreGameMatchRating { get; set; }
-
-        public Rating PreGameKillRating { get; set; }
+        public Rating PreGameMatchRating { get; private set; }
+        public Rating PreGameRoundRating { get; private set; }
+        public Rating PreGameKillRating { get; private set; }
 
         public int? RoundPlayerLeft { get; set; }
 
@@ -17,6 +17,7 @@ namespace BeRated.Cache
         {
             Team = team;
             PreGameMatchRating = player.MatchRating;
+            PreGameRoundRating = player.RoundRating;
             PreGameKillRating = player.KillRating;
             RoundPlayerLeft = null;
         }
