@@ -226,10 +226,15 @@ namespace BeRated.Cache
 				kill.Weapon = TranslateWeapon(kill.Weapon);
 				var killer = kill.Killer;
 				var victim = kill.Victim;
+				var killerState = GetPlayerState(killer);
+				var victimState = GetPlayerState(victim);
+				if (killerState != null)
+					killerState.Kills++;
+				if (victimState != null)
+					victimState.Deaths++;
 				killer.Kills.Add(kill);
 				victim.Deaths.Add(kill);
 				_RoundKills.Add(kill);
-				AdjustRatings(killer, victim);
 			}
 			return true;
         }
@@ -261,6 +266,8 @@ namespace BeRated.Cache
             }
             state.Team = team;
             state.RoundPlayerLeft = null;
+			state.Kills = 0;
+			state.Deaths = 0;
             return true;
         }
 
@@ -302,6 +309,7 @@ namespace BeRated.Cache
             Action<Player, Rating> setRating = (player, rating) => player.RoundRating = rating;
             bool counterTerroristsWinGame = winningTeam == Team.CounterTerrorist;
             AdjustRatings(counterTerroristsWinGame, playerStates, setRating);
+			AdjustKillRatings(playerStates);
             CheckForEndOfGame(round, roundsPlayed);
             _RoundKills = new List<Kill>();
             return true;
@@ -326,57 +334,67 @@ namespace BeRated.Cache
         #endregion
 
         private void CheckForEndOfGame(Round round, int roundsPlayed)
-        {
-            if (_PlayerStates.Count == 0)
-                return;
-            int roundsToWin = _MaxRounds / 2 + 1;
-            bool terroristsWinGame = round.TerroristScore >= roundsToWin;
-            bool counterTerroristsWinGame = round.CounterTerroristScore >= roundsToWin;
-            bool draw = roundsPlayed >= _MaxRounds;
-            if (!(terroristsWinGame || counterTerroristsWinGame || draw))
-                return;
-            var outcome = GameOutcome.Draw;
-            if (terroristsWinGame)
-                outcome = GameOutcome.TerroristsWin;
-            else if (counterTerroristsWinGame)
-                outcome = GameOutcome.CounterTerroristsWin;
-            var game = new Game(_Map, _Rounds, outcome);
-            _Games.Add(game);
-            _Games.Sort((x, y) => x.Time.CompareTo(y.Time));
-            var playerStates = GetActivePlayerStates();
-            foreach (var pair in playerStates)
-            {
-                var player = _Players[pair.Key];
-                var state = pair.Value;
-                List<Game> games;
-                if (draw)
-                    games = player.Draws;
-                else if (
-                    terroristsWinGame && state.Team == Team.Terrorist ||
-                    counterTerroristsWinGame && state.Team == Team.CounterTerrorist
-                )
-                    games = player.Wins;
-                else
-                    games = player.Losses;
-                games.Add(game);
-                games.Sort((x, y) => x.Time.CompareTo(y.Time));
-            }
-            if (!draw)
-            {
-                Action<Player, Rating> setRating = (player, rating) => player.MatchRating = rating;
-                AdjustRatings(counterTerroristsWinGame, playerStates, setRating);
-            }
-            foreach (var pair in playerStates)
-            {
-                var player = _Players[pair.Key];
-                var state = pair.Value;
-                var players = state.Team == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
-                var ratedPlayer = new RatedPlayer(player, state.PreGameMatchRating, state.PreGameRoundRating, state.PreGameKillRating);
-                players.Add(ratedPlayer);
-            }
-        }
+		{
+			if (_PlayerStates.Count == 0)
+				return;
+			int roundsToWin = _MaxRounds / 2 + 1;
+			bool terroristsWinGame = round.TerroristScore >= roundsToWin;
+			bool counterTerroristsWinGame = round.CounterTerroristScore >= roundsToWin;
+			bool draw = roundsPlayed >= _MaxRounds;
+			if (!(terroristsWinGame || counterTerroristsWinGame || draw))
+				return;
+			var outcome = GameOutcome.Draw;
+			if (terroristsWinGame)
+				outcome = GameOutcome.TerroristsWin;
+			else if (counterTerroristsWinGame)
+				outcome = GameOutcome.CounterTerroristsWin;
+			var game = new Game(_Map, _Rounds, outcome);
+			_Games.Add(game);
+			_Games.Sort((x, y) => x.Time.CompareTo(y.Time));
+			var playerStates = GetActivePlayerStates();
+			AddGame(terroristsWinGame, counterTerroristsWinGame, draw, game, playerStates);
+			if (!draw)
+			{
+				Action<Player, Rating> setRating = (player, rating) => player.MatchRating = rating;
+				AdjustRatings(counterTerroristsWinGame, playerStates, setRating);
+			}
+			AddPlayersToGame(game, playerStates);
+		}
 
-        private void AdjustRatings(bool counterTerroristsWinGame, List<KeyValuePair<string, PlayerGameState>> playerStates, Action<Player, Rating> setRating)
+		private void AddGame(bool terroristsWinGame, bool counterTerroristsWinGame, bool draw, Game game, List<KeyValuePair<string, PlayerGameState>> playerStates)
+		{
+			foreach (var pair in playerStates)
+			{
+				var player = _Players[pair.Key];
+				var state = pair.Value;
+				List<Game> games;
+				if (draw)
+					games = player.Draws;
+				else if (
+					terroristsWinGame && state.Team == Team.Terrorist ||
+					counterTerroristsWinGame && state.Team == Team.CounterTerrorist
+				)
+					games = player.Wins;
+				else
+					games = player.Losses;
+				games.Add(game);
+				games.Sort((x, y) => x.Time.CompareTo(y.Time));
+			}
+		}
+
+		private void AddPlayersToGame(Game game, List<KeyValuePair<string, PlayerGameState>> playerStates)
+		{
+			foreach (var pair in playerStates)
+			{
+				var player = _Players[pair.Key];
+				var state = pair.Value;
+				var players = state.Team == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
+				var ratedPlayer = new RatedPlayer(player, state.PreGameMatchRating, state.PreGameRoundRating, state.PreGameKillRating);
+				players.Add(ratedPlayer);
+			}
+		}
+
+		private void AdjustRatings(bool counterTerroristsWinGame, List<KeyValuePair<string, PlayerGameState>> playerStates, Action<Player, Rating> setRating)
         {
             var counterTerrorists = new SkillTeam();
             var terrorists = new SkillTeam();
@@ -410,6 +428,33 @@ namespace BeRated.Cache
                 setRating(player, pair.Value);
             }
         }
+
+		private void AdjustKillRatings(List<KeyValuePair<string, PlayerGameState>> playerStates)
+		{
+			if (playerStates.Count < 2)
+				return;
+			const int limit = 10000;
+			var sortedPlayerStates = playerStates.OrderByDescending(pair => pair.Value.Kills + Math.Min(pair.Value.Deaths, limit - 1) / (double)limit);
+			var skillTeams = playerStates.Select(pair =>
+			{
+				var player = _Players[pair.Key];
+				var skillPlayer = new SkillPlayer(pair);
+				var rating = pair.Value.PreGameKillRating;
+				var team = new SkillTeam(skillPlayer, rating);
+				return team;
+			});
+			var teams = Teams.Concat(skillTeams.ToArray());
+			var ranks = new List<int>();
+			for (int i = 1; i <= playerStates.Count; i++)
+				ranks.Add(i);
+			var newRatings = TrueSkillCalculator.CalculateNewRatings(GameInfo.DefaultGameInfo, teams, ranks.ToArray());
+			foreach (var pair in newRatings)
+            {
+                var statePair = (KeyValuePair<string, PlayerGameState>)pair.Key.Id;
+				var player = _Players[statePair.Key];
+                player.KillRating = pair.Value;
+            }
+		}
 
         private bool IgnoreStats()
         {
@@ -468,21 +513,6 @@ namespace BeRated.Cache
             return item;
         }
 
-		private void AdjustRatings(Player killer, Player victim)
-		{
-			var killerPlayer = new SkillPlayer(killer);
-			var victimPlayer = new SkillPlayer(victim);
-			var killerTeam = new SkillTeam(killerPlayer, killer.KillRating);
-			var victimTeam = new SkillTeam(victimPlayer, victim.KillRating);
-			var teams = Teams.Concat(killerTeam, victimTeam);
-			var newRatings = TrueSkillCalculator.CalculateNewRatings(GameInfo.DefaultGameInfo, teams, 1, 2);
-			foreach (var pair in newRatings)
-			{
-				var player = (Player)pair.Key.Id;
-				player.KillRating = pair.Value;
-			}
-		}
-
         private List<KeyValuePair<string, PlayerGameState>> GetActivePlayerStates()
         {
             return _PlayerStates.Where(pair =>
@@ -490,5 +520,12 @@ namespace BeRated.Cache
                 _Rounds.Count - pair.Value.RoundPlayerLeft.Value < 2
             ).ToList();
         }
+
+		private PlayerGameState GetPlayerState(Player player)
+		{
+			PlayerGameState state = null;
+			_PlayerStates.TryGetValue(player.SteamId, out state);
+			return state;
+		}
     }
 }
