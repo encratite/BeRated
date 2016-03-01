@@ -152,14 +152,25 @@ namespace BeRated.App
 			string markup = endRating.ToString("0.0");
 			if (startRating != null)
 			{
+                markup += " (";
 				double difference = endRating - startRating.Value;
-				if (difference >= 0)
-					markup += string.Format(" (<span class=\"positive\">+{0:0.0}</span>)", difference);
-				else
-					markup += string.Format(" (<span class=\"negative\">{0:0.0}</span>)", difference);
+                string differenceString = difference.ToString("+0.00;-0.00;0");
+                char firstCharacter = differenceString[0];
+				if (firstCharacter == '+')
+					markup += string.Format("<span class=\"positive\">{0}</span>", differenceString);
+				else if (firstCharacter == '-')
+					markup += string.Format("<span class=\"negative\">{0}</span>", differenceString);
+                else
+                    markup += string.Format("&plusmn;{0}", differenceString);
+                markup += ")";
 			}
 			return new RawString(markup);
 		}
+
+        public static RawString GetRating(GameRating rating)
+        {
+            return GetRating(rating.PreGameRating, rating.PostGameRating);
+        }
 
         private static string GetScoreClasses(string baseClass, int score, int otherScore)
 		{

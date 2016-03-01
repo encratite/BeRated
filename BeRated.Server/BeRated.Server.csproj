@@ -92,6 +92,7 @@
     <Compile Include="Cache\CacheManager.cs" />
     <Compile Include="Common\Ratio.cs" />
     <Compile Include="Model\Game.cs" />
+    <Compile Include="Model\GameRating.cs" />
     <Compile Include="Model\Kill.cs" />
     <Compile Include="Model\PlayerEncounters.cs" />
     <Compile Include="Model\PlayerGameInfo.cs" />
@@ -101,7 +102,7 @@
     <Compile Include="Model\GeneralPlayerStats.cs" />
     <Compile Include="Model\PlayerGame.cs" />
     <Compile Include="Model\PlayerItems.cs" />
-    <Compile Include="Model\PlayerGames.cs" />
+    <Compile Include="Model\Matches.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Model\PlayerWeapons.cs" />
     <Compile Include="Model\Round.cs" />

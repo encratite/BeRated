@@ -247,6 +247,7 @@ namespace BeRated.App
             matchingGames = matchingGames.OrderByDescending(game => game.Time);
             var games = matchingGames.Select(game =>
             {
+                var ratedPlayer = game.GetRatedPlayer(player);
                 bool isTerrorist = game.Terrorists.Any(p => p.Player == player);
                 int terroristScore = game.TerroristScore;
                 int counterTerroristScore = game.CounterTerroristScore;
@@ -271,6 +272,8 @@ namespace BeRated.App
                     EnemyScore = isTerrorist ? counterTerroristScore : terroristScore,
                     IsTerrorist = isTerrorist,
                     Outcome = outcome,
+                    MatchRating = GetGameRating(ratedPlayer.MatchRating),
+                    KillRating = GetGameRating(ratedPlayer.KillRating),
                     PlayerTeam = isTerrorist ? terrorists : counterTerrorists,
                     EnemyTeam = isTerrorist ? counterTerrorists : terrorists,
                 };
@@ -507,11 +510,17 @@ namespace BeRated.App
         private List<PlayerGameInfo> GetPlayerInfos(List<RatedPlayer> team, CacheGame game)
         {
             var gameKills = game.Rounds.SelectMany(round => round.Kills).ToList();
-			var playerInfos = team.Select(player =>
+            var playerInfos = team.Select(player =>
             {
-                int kills = gameKills.Count(kill => kill.Killer == player.Player);
-                int deaths = gameKills.Count(kill => kill.Victim == player.Player);
-                var playerInfo = new PlayerGameInfo(player.Player.Name, player.Player.SteamId, kills, deaths);
+                var playerInfo = new PlayerGameInfo
+                {
+                    Name = player.Player.Name,
+                    SteamId = player.Player.SteamId,
+                    Kills = gameKills.Count(kill => kill.Killer == player.Player),
+                    Deaths = gameKills.Count(kill => kill.Victim == player.Player),
+                    MatchRating = GetGameRating(player.MatchRating),
+                    KillRating = GetGameRating(player.KillRating),
+                };
                 return playerInfo;
             });
             playerInfos = playerInfos.OrderByDescending(player => player.Kills);
@@ -547,6 +556,11 @@ namespace BeRated.App
             string internalName = null;
             Context.Current.Cookies.TryGetValue(TimeConstraintsCookie, out internalName);
             return internalName;
+        }
+
+        private GameRating GetGameRating(RatingPair pair)
+        {
+            return new GameRating(pair.PreGameRating.ConservativeRating, pair.PostGameRating.ConservativeRating);
         }
     }
 }
