@@ -56,8 +56,7 @@
                 yAxis: {
                     title: {
                         text: "Rating"
-                    },
-                    min: 0
+                    }
                 },
                 tooltip: {
                     headerFormat: "<b>{series.name}</b><br>",
