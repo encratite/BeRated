@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Ashod;
 using Microsoft.Owin;
+using Newtonsoft.Json;
 
 namespace BeRated.Server
 {
@@ -41,16 +42,15 @@ namespace BeRated.Server
                     response.StatusCode = 404;
                     return response.WriteAsync("Not found.");
                 }
-				string markup = _Instance.GetCachedResponse(context);
-				if (markup == null)
+				string output = _Instance.GetCachedResponse(context);
+				if (output == null)
 				{
 					TimeSpan invokeDuration;
 					TimeSpan renderDuration;
-					markup = ProcessRequest(uri, path, out invokeDuration, out renderDuration);
-					_Instance.OnResponse(context, markup, invokeDuration, renderDuration);
+					output = ProcessRequest(context, out invokeDuration, out renderDuration);
+					_Instance.OnResponse(context, output, invokeDuration, renderDuration);
 				}
-				response.ContentType = "text/html";
-                var task = context.Response.WriteAsync(markup);
+                var task = context.Response.WriteAsync(output);
                 return task;
             }
             catch (Exception exception)
@@ -77,11 +77,11 @@ namespace BeRated.Server
 			}
         }
 
-		private string ProcessRequest(Uri uri, string path, out TimeSpan invokeDuration, out TimeSpan renderDuration)
-		{
-			string markup;
+		private string ProcessRequest(IOwinContext context, out TimeSpan invokeDuration, out TimeSpan renderDuration)
+        {
+            var uri = context.Request.Uri;
 			var requestPattern = new Regex(@"^/(?<method>\w+?)(?:\?(?:(?<firstArgument>\w+?)=(?<firstValue>[^?=&]*))(?:&(?<arguments>\w+?)=(?<values>[^?=&]*))*)?$", RegexOptions.ECMAScript);
-			var match = requestPattern.Match(path);
+			var match = requestPattern.Match(uri.PathAndQuery);
 			if (!match.Success)
 				throw new MiddlewareException("Malformed request.");
 			var groups = match.Groups;
@@ -104,31 +104,56 @@ namespace BeRated.Server
 					valueEnumerator.MoveNext();
 				}
 			}
+            // Invoke
 			Type modelType;
+            RenderMethod renderMethod;
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
-			object model = Invoke(method, arguments, out modelType);
+			object model = Invoke(method, arguments, out modelType, out renderMethod);
 			stopwatch.Stop();
 			invokeDuration = stopwatch.Elapsed;
 			stopwatch.Start();
-			markup = _Instance.Render(uri.AbsolutePath, modelType, model);
-			stopwatch.Stop();
-			renderDuration = stopwatch.Elapsed;
-			markup = markup.Replace("\r", "");
-			var whitespacePattern = new Regex(@"^\s+|\n{2,}", RegexOptions.ECMAScript | RegexOptions.Multiline);
-			markup = whitespacePattern.Replace(markup, "");
-			return markup;
+            // Render
+            string output;
+            if (renderMethod == RenderMethod.RazorTemplate)
+                output = RenderRazorTemplate(context, modelType,  model);
+            else if (renderMethod == RenderMethod.JsonSerialization)
+                output = RenderJsonSerialization(context, modelType,  model);
+            else
+                throw new ApplicationException("Unknown render method.");
+            stopwatch.Stop();
+            renderDuration = stopwatch.Elapsed;
+            return output;
 		}
 
-		private object Invoke(string method, Dictionary<string, string> arguments, out Type modelType)
+        private string RenderRazorTemplate(IOwinContext context, Type modelType, object model)
+        {
+            var uri = context.Request.Uri;
+            string markup = _Instance.Render(uri.AbsolutePath, modelType, model);
+            markup = markup.Replace("\r", "");
+            var whitespacePattern = new Regex(@"^\s+|\n{2,}", RegexOptions.ECMAScript | RegexOptions.Multiline);
+            markup = whitespacePattern.Replace(markup, "");
+            context.Response.ContentType = "text/html";
+            return markup;
+        }
+
+        private string RenderJsonSerialization(IOwinContext context, Type modelType, object model)
+        {
+            string json = JsonConvert.SerializeObject(model);
+            context.Response.ContentType = "application/json";
+            return json;
+        }
+
+        private object Invoke(string method, Dictionary<string, string> arguments, out Type modelType, out RenderMethod renderMethod)
         {
             var notFoundException = new MiddlewareException("No such method.");
             var methodInfo = _Instance.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.Public);
             if (methodInfo == null)
                 throw notFoundException;
-            var attribute = methodInfo.GetCustomAttribute(typeof(ControllerAttribute));
+            var attribute = methodInfo.GetCustomAttribute<ControllerAttribute>();
             if (attribute == null)
                 throw notFoundException;
+            renderMethod = attribute.RenderMethod;
             var parameters = methodInfo.GetParameters();
             var invokeParameters = new List<object>();
             foreach (var parameter in parameters)

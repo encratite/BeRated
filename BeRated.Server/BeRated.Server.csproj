@@ -48,6 +48,10 @@
       <HintPath>..\packages\Microsoft.Owin.Hosting.3.0.1\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
@@ -111,6 +115,7 @@
     <Compile Include="Server\BaseApp.cs" />
     <Compile Include="Server\CacheEntry.cs" />
     <Compile Include="Server\Context.cs" />
+    <Compile Include="Server\JsonControllerAttribute.cs" />
     <Compile Include="Server\Middleware.cs" />
     <Compile Include="Server\MiddlewareException.cs" />
     <Compile Include="Model\PlayerEncounterStats.cs" />
@@ -120,6 +125,7 @@
     <Compile Include="App\RatingApp.cs" />
     <Compile Include="Server\ControllerAttribute.cs" />
     <Compile Include="Server\PerformanceWatch.cs" />
+    <Compile Include="Server\RenderMethod.cs" />
     <Compile Include="Server\TemplateManager.cs" />
     <Compile Include="Server\TemplateState.cs" />
     <Compile Include="Server\WebAppLauncher.cs" />

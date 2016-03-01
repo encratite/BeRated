@@ -160,6 +160,12 @@ namespace BeRated.App
             return weapons;
         }
 
+        [JsonController]
+        public string Test(int integer)
+        {
+            return (integer * integer).ToString();
+        }
+
 		#endregion
 
 		#region Cache access
