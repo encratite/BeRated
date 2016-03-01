@@ -12,7 +12,13 @@
     }
 
     class RatingChart {
+        ratingChartId = "ratingChart";
+
         loadChartData() {
+            var chartElement = document.getElementById(this.ratingChartId);
+            if (chartElement == null) {
+                return;
+            }
             var request = new XMLHttpRequest();
             request.onreadystatechange = (event) => {
                 if (request.readyState === XMLHttpRequest.DONE) {
@@ -28,7 +34,7 @@
         createChart(playerRatings: PlayerRatings) {
             var chart = new Highcharts.Chart({
                 chart: {
-                    renderTo: "ratingChart",
+                    renderTo: this.ratingChartId,
                     zoomType: "x"
                 },
                 credits: {

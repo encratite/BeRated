@@ -2,9 +2,14 @@ var BeRated;
 (function (BeRated) {
     var RatingChart = (function () {
         function RatingChart() {
+            this.ratingChartId = "ratingChart";
         }
         RatingChart.prototype.loadChartData = function () {
             var _this = this;
+            var chartElement = document.getElementById(this.ratingChartId);
+            if (chartElement == null) {
+                return;
+            }
             var request = new XMLHttpRequest();
             request.onreadystatechange = function (event) {
                 if (request.readyState === XMLHttpRequest.DONE) {
@@ -19,7 +24,7 @@ var BeRated;
         RatingChart.prototype.createChart = function (playerRatings) {
             var chart = new Highcharts.Chart({
                 chart: {
-                    renderTo: "ratingChart",
+                    renderTo: this.ratingChartId,
                     zoomType: "x"
                 },
                 credits: {

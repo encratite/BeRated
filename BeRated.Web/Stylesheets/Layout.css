@@ -65,11 +65,19 @@ h1 {
 .dateGrid td:nth-child(1) {
   white-space: nowrap;
 }
+.menuLink a {
+  line-height: 3em;
+  color: #000;
+}
 .menu {
   background-color: #ebebeb;
   width: 100%;
   border-bottom: 1px solid #d0d0d0;
   margin-bottom: 2em;
+}
+.menu a {
+  line-height: 3em;
+  color: #000;
 }
 .menu ul {
   width: 950px;
@@ -105,44 +113,6 @@ h1 {
   .menu select {
     padding-right: 0.6em;
   }
-}
-.menu a,
-.playerMenu a {
-  line-height: 3em;
-  color: #000;
-}
-.playerMenu {
-  margin-bottom: 1em;
-}
-.playerMenu a {
-  padding: 0.4em 0.8em;
-  background-image: linear-gradient(#ebebeb, #dedede);
-}
-.playerMenu a:hover {
-  color: inherit;
-  text-decoration: inherit;
-  background-image: none;
-  background-color: #dcdcdc;
-}
-.playerMenu li {
-  display: inline;
-}
-.playerMenu li:first-child a {
-  border-top: 1px solid #d0d0d0;
-  border-bottom: 1px solid #d0d0d0;
-  border-left: 1px solid #d0d0d0;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-.playerMenu li:nth-child(n + 2) a {
-  border-top: 1px solid #d0d0d0;
-  border-bottom: 1px solid #d0d0d0;
-  border-left: 1px solid #d0d0d0;
-}
-.playerMenu li:last-child a {
-  border-right: 1px solid #d0d0d0;
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
 }
 .content {
   width: 950px;

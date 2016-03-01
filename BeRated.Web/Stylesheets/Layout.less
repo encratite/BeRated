@@ -98,11 +98,20 @@ h1 {
     }
 }
 
+.menuLink {
+    a {
+        line-height: 3em;
+        color: #000;
+    }
+}
+
 .menu {
     background-color: @headerBackgroundColour;
     width: 100%;
     border-bottom: @border;
     margin-bottom: 2em;
+
+    .menuLink();
 
     ul {
         width: @contentWidth;
@@ -147,53 +156,6 @@ h1 {
         select {
             padding-right: 0.6em;
         }
-    }
-}
-
-.menu, .playerMenu {
-    a {
-        line-height: 3em;
-        color: #000;
-    }
-}
-
-.playerMenu {
-    margin-bottom: 1em;
-
-    a {
-        padding: 0.4em 0.8em;
-        background-image: linear-gradient(@headerBackgroundColour, darken(@headerBackgroundColour, 5%));
-    }
-
-    a:hover {
-        color: inherit;
-        text-decoration: inherit;
-        background-image: none;
-        background-color: darken(@headerBackgroundColour, 6%);
-    }
-
-    li {
-        display: inline;
-    }
-
-    li:first-child a {
-        border-top: @border;
-        border-bottom: @border;
-        border-left: @border;
-        border-top-left-radius: @borderRadius;
-        border-bottom-left-radius: @borderRadius;
-    }
-
-    li:nth-child(n + 2) a {
-        border-top: @border;
-        border-bottom: @border;
-        border-left: @border;
-    }
-
-    li:last-child a {
-        border-right: @border;
-        border-top-right-radius: @borderRadius;
-        border-bottom-right-radius: @borderRadius;
     }
 }
 
