@@ -108,6 +108,8 @@
     <Compile Include="Model\PlayerItems.cs" />
     <Compile Include="Model\Matches.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Model\PlayerRatings.cs" />
+    <Compile Include="Model\PlayerRatingSample.cs" />
     <Compile Include="Model\PlayerWeapons.cs" />
     <Compile Include="Model\Round.cs" />
     <Compile Include="Model\TeamMatchupStats.cs" />

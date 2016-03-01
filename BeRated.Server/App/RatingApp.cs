@@ -161,9 +161,15 @@ namespace BeRated.App
         }
 
         [JsonController]
-        public string Test(int integer)
+        public PlayerRatings Ratings(string id)
         {
-            return (integer * integer).ToString();
+			var player = _Cache.GetPlayer(id);
+			var ratings = new PlayerRatings
+			{
+				MatchRating = GetRatingSamples(player, (ratedPlayer) => ratedPlayer.MatchRating),
+				KillRating = GetRatingSamples(player, (ratedPlayer) => ratedPlayer.KillRating),
+			};
+			return ratings;
         }
 
 		#endregion
@@ -381,6 +387,20 @@ namespace BeRated.App
 
 			}
 			return outcomes;
+		}
+
+		private List<PlayerRatingSample> GetRatingSamples(Player player, Func<RatedPlayer, RatingPair> getRating)
+		{
+			return player.Games.Select(game =>
+			{
+				var ratedPlayer = game.GetRatedPlayer(player);
+				var ratingPair = getRating(ratedPlayer);
+				return new PlayerRatingSample
+				{
+					Time = game.Time,
+					Value = ratingPair.PostGameRating.ConservativeRating,
+				};
+			}).ToList();
 		}
 
         #endregion
