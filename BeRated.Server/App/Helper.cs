@@ -154,14 +154,13 @@ namespace BeRated.App
 			{
                 markup += " (";
 				double difference = endRating - startRating.Value;
-                string differenceString = difference.ToString("+0.00;-0.00;0");
-                char firstCharacter = differenceString[0];
-				if (firstCharacter == '+')
-					markup += string.Format("<span class=\"positive\">{0}</span>", differenceString);
-				else if (firstCharacter == '-')
+                string differenceString = difference.ToString("0.00");
+				if (differenceString == "0.00")
+                    markup += "&plusmn;0";
+                else if (differenceString[0] == '-')
 					markup += string.Format("<span class=\"negative\">{0}</span>", differenceString);
                 else
-                    markup += string.Format("&plusmn;{0}", differenceString);
+                    markup += string.Format("<span class=\"positive\">+{0}</span>", differenceString);
                 markup += ")";
 			}
 			return new RawString(markup);

@@ -8,6 +8,7 @@ using Moserware.Skills;
 using Team = BeRated.Common.Team;
 using SkillPlayer = Moserware.Skills.Player;
 using SkillTeam = Moserware.Skills.Team;
+using Ashod;
 
 namespace BeRated.Cache
 {
@@ -42,7 +43,7 @@ namespace BeRated.Cache
 
 		private Thread _ReaderThread = null;
 
-		private Dictionary<string, long> _LogStates = new Dictionary<string, long>();
+        private HashSet<string> _LogsProcessed = new HashSet<string>();
 
 		private Dictionary<string, Player> _Players = new Dictionary<string, Player>();
 
@@ -114,7 +115,7 @@ namespace BeRated.Cache
                 }
                 catch(Exception exception)
                 {
-                    Console.WriteLine("Failed to update database: {0} ({1})", exception.Message, exception.GetType());
+                    Logger.Exception("Failed to process log files", exception);
                 }
                 Thread.Sleep(UpdateInterval);
             }
@@ -122,45 +123,46 @@ namespace BeRated.Cache
 
 		private void ProcessLog(string path)
 		{
-			lock (this)
+			_MaxRounds = MaxRoundsDefault;
+            _MatchStartCounter = 0;
+            _Map = null;
+			_PlayerStates = new Dictionary<string, PlayerGameState>();
+            _RoundKills = new List<Kill>();
+			string fileName = Path.GetFileName(path);
+			if (_LogsProcessed.Contains(fileName))
 			{
-				_MaxRounds = MaxRoundsDefault;
-                _MatchStartCounter = 0;
-                _Map = null;
-				_PlayerStates = new Dictionary<string, PlayerGameState>();
-                _RoundKills = new List<Kill>();
-				string fileName = Path.GetFileName(path);
-				var fileInfo = new FileInfo(path);
-				long currentFileSize = fileInfo.Length;
-				long bytesProcessed;
-				if (_LogStates.TryGetValue(fileName, out bytesProcessed) && bytesProcessed >= currentFileSize)
-				{
-					// This file has already been processed
-					return;
-				}
-				var content = File.ReadAllText(path);
-				content = content.Replace("\r", "");
-				if (content.Length == 0 || content.Last() != '\n')
-				{
-					// The log file is currently being written to or has been abandoned, skip it
-					return;
-				}
-				Console.WriteLine("{0} Processing {1}", DateTime.Now, path);
-				var lines = content.Split('\n');
-				int lineCounter = 1;
-                try
-                {
-				    foreach (var line in lines)
-				    {
-					    ProcessLine(line);
-					    lineCounter++;
-				    }
-                }
-                catch (NotSupportedException)
-                {
-                }
-				_LogStates[fileName] = currentFileSize;
+				// This file has already been processed
+				return;
 			}
+            var fileInfo = new FileInfo(path);
+            var lastWriteTimeSpan = DateTime.Now -  fileInfo.LastWriteTime;
+			var content = File.ReadAllText(path);
+			if (
+                lastWriteTimeSpan < TimeSpan.FromHours(1) &&
+                !content.Contains("Log file closed\n") &&
+                !content.Contains("disconnected (reason \"Punting bot, server is hibernating\")\n")
+            )
+			{
+				// The log file has not been completed yet
+                Logger.Warning("Unable to process incomplete file {0}", path);
+				return;
+			}
+			var lines = content.Split('\n');
+			int lineCounter = 1;
+            try
+            {
+				foreach (var line in lines)
+				{
+					ProcessLine(line);
+					lineCounter++;
+				}
+                Logger.Log("Processed {0}", path);
+            }
+            catch (NotSupportedException)
+            {
+                Logger.Warning("Unable to process outdated format in {0}", path);
+            }
+            _LogsProcessed.Add(fileName);
 		}
 
 		private void ProcessLine(string line)
@@ -340,7 +342,7 @@ namespace BeRated.Cache
 			int roundsToWin = _MaxRounds / 2 + 1;
 			bool terroristsWinGame = round.TerroristScore >= roundsToWin;
 			bool counterTerroristsWinGame = round.CounterTerroristScore >= roundsToWin;
-			bool draw = roundsPlayed >= _MaxRounds;
+			bool draw = !terroristsWinGame && !counterTerroristsWinGame && roundsPlayed >= _MaxRounds;
 			if (!(terroristsWinGame || counterTerroristsWinGame || draw))
 				return;
 			var outcome = GameOutcome.Draw;
