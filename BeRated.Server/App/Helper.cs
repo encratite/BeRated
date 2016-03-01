@@ -52,7 +52,7 @@ namespace BeRated.App
 
         public static RawString GetPlayerLink(PlayerInfo player, bool? isTerrorist = null)
 		{
-			string path = string.Format("/Matches?id={0}", player.SteamId);
+			string path = string.Format("/Player?id={0}", player.SteamId);
 			var encodedName = HttpUtility.HtmlEncode(player.Name);
             string markup;
             if (isTerrorist.HasValue)

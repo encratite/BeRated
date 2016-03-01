@@ -22,6 +22,7 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\RatingChart.ts" />
     <TypeScriptCompile Include="Scripts\Table.ts" />
     <TypeScriptCompile Include="Scripts\TimeConstraints.ts" />
   </ItemGroup>
@@ -36,6 +37,9 @@
     <Content Include="Stylesheets\Layout.css">
       <DependentUpon>Layout.less</DependentUpon>
     </Content>
+    <Content Include="Stylesheets\Player.css">
+      <DependentUpon>Player.less</DependentUpon>
+    </Content>
     <Content Include="Views\Players.cshtml" />
     <Content Include="Views\Layout.cshtml" />
     <Content Include="Views\Matchup.cshtml" />
@@ -43,6 +47,8 @@
     <Content Include="Views\Items.cshtml" />
     <Content Include="Views\Games.cshtml" />
     <Content Include="Views\Game.cshtml" />
+    <Content Include="Views\Player.cshtml" />
+    <Content Include="Stylesheets\Player.less" />
     <None Include="Views\Weapons.cshtml" />
   </ItemGroup>
   <ItemGroup>

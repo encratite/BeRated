@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Ashod;
 using Microsoft.Owin;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace BeRated.Server
 {
@@ -139,7 +140,11 @@ namespace BeRated.Server
 
         private string RenderJsonSerialization(IOwinContext context, Type modelType, object model)
         {
-            string json = JsonConvert.SerializeObject(model);
+			var settings = new JsonSerializerSettings 
+			{ 
+				ContractResolver = new CamelCasePropertyNamesContractResolver() 
+			};
+            string json = JsonConvert.SerializeObject(model, settings);
             context.Response.ContentType = "application/json";
             return json;
         }

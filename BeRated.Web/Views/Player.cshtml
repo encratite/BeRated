@@ -1,0 +1,22 @@
+﻿@using BeRated.App
+@using BeRated.Model
+
+@model GeneralPlayerStats
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = Model.Name;
+    ViewBag.SteamId = Model.SteamId;
+}
+
+@section Stylesheets {
+    <link rel="stylesheet" type="text/css" href="/Stylesheets/Player.css">
+}
+
+@section Scripts {
+    <script src="http://code.highcharts.com/adapters/standalone-framework.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="/Scripts/RatingChart.js"></script>
+}
+
+<div id="ratingChart"></div>

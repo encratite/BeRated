@@ -3,7 +3,14 @@
     "outputFile": "Stylesheets/Layout.css",
     "inputFile": "Stylesheets/Layout.less",
     "minify": {
-        "enabled": false
+      "enabled": false
+    }
+  },
+  {
+    "outputFile": "Stylesheets/Player.css",
+    "inputFile": "Stylesheets/Player.less",
+    "minify": {
+      "enabled": false
     }
   }
 ]

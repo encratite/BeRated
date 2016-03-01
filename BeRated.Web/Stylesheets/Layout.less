@@ -1,6 +1,7 @@
 @darken: 5%;
 
 // Colours
+@textColour: #333;
 @linkColour: darken(#4078c0, @darken);
 @headerBackgroundColour: darken(#f8f8f8, @darken);
 @borderColour: darken(#ddd, @darken);
@@ -17,13 +18,13 @@
 
 * {
 	font-family: Helvetica, Arial, sans-serif;
-    font-size: 13px;
-    color: #333;
     margin: 0;
     padding: 0;
 }
 
 body {
+    font-size: 13px;
+    color: @textColour;
     margin-bottom: 2em;
 }
 
@@ -268,6 +269,10 @@ table.terrorists {
 .counterTerrorists {
     color: @counterTerroristColour;
 
+    th, td {
+        color: @textColour;
+    }
+
     a {
         color: @counterTerroristColour;
     }
@@ -275,6 +280,10 @@ table.terrorists {
 
 .terrorists {
     color: @terroristColour;
+
+    th, td {
+        color: @textColour;
+    }
 
     a {
         color: @terroristColour;

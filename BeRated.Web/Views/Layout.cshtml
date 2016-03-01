@@ -34,7 +34,7 @@
             @if (ViewBag.SteamId != null)
             {
                 <ul class="playerMenu">
-                    <li>@GetPlayerLink("Matches")</li><li>@GetPlayerLink("Encounters")</li><li>@GetPlayerLink("Weapons")</li><li>@GetPlayerLink("Items", "Items purchased")</li>
+                    <li>@GetPlayerLink("Player", "Overview")</li><li>@GetPlayerLink("Matches")</li><li>@GetPlayerLink("Encounters")</li><li>@GetPlayerLink("Weapons")</li><li>@GetPlayerLink("Items", "Items purchased")</li>
                 </ul>
             }
             @RenderBody()

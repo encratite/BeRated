@@ -1,11 +1,11 @@
 ﻿* {
   font-family: Helvetica, Arial, sans-serif;
-  font-size: 13px;
-  color: #333;
   margin: 0;
   padding: 0;
 }
 body {
+  font-size: 13px;
+  color: #333;
   margin-bottom: 2em;
 }
 a {
@@ -197,11 +197,19 @@ table.terrorists {
 .counterTerrorists {
   color: #5783c0;
 }
+.counterTerrorists th,
+.counterTerrorists td {
+  color: #333;
+}
 .counterTerrorists a {
   color: #5783c0;
 }
 .terrorists {
   color: #a68947;
+}
+.terrorists th,
+.terrorists td {
+  color: #333;
 }
 .terrorists a {
   color: #a68947;
