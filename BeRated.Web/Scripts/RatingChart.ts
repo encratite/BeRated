@@ -7,41 +7,74 @@
     }
 
     interface PlayerRatings {
+        name: string;
+        steamId: string;
         matchRating: PlayerRatingSample[];
         killRating: PlayerRatingSample[];
     }
 
+    interface RatingChartSeries {
+        name: string;
+        property: string;
+    }
+
+    interface RatingChartConfiguration {
+        title: string;
+        controller: string;
+        enableLegend: boolean;
+        series: RatingChartSeries[];
+    }
+
     class RatingChart {
-        ratingChartId = "ratingChart";
+        private container: HTMLDivElement;
+        private configuration: RatingChartConfiguration;
+
+        constructor(container: HTMLDivElement) {
+            this.container = container;
+            this.configuration = <RatingChartConfiguration>JSON.parse(container.textContent);
+            container.removeChild(container.firstChild);
+        }
 
         loadChartData() {
-            var chartElement = document.getElementById(this.ratingChartId);
-            if (chartElement == null) {
-                return;
-            }
             var request = new XMLHttpRequest();
             request.onreadystatechange = (event) => {
                 if (request.readyState === XMLHttpRequest.DONE) {
-                    var playerRatings = <PlayerRatings>JSON.parse(request.response);
-                    this.createChart(playerRatings);
+                    var ratings = <PlayerRatings[]>JSON.parse(request.response);
+                    this.createChart(ratings);
                 }
             };
-            var path = "/Ratings" + window.location.search;
-            request.open("GET", path);
+            var requestPath = this.configuration.controller + window.location.search;
+            request.open("GET", requestPath);
             request.send();
         }
 
-        createChart(playerRatings: PlayerRatings) {
+        createChart(ratings: PlayerRatings[]) {
+            var series = [];
+            this.configuration.series.forEach((seriesConfiguration) => {
+                ratings.forEach((playerRatings) => {
+                    var seriesName = seriesConfiguration.name != null ? seriesConfiguration.name : playerRatings.name;
+                    var serverData = playerRatings[seriesConfiguration.property];
+                    var seriesData = this.getSeriesData(serverData);
+                    var seriesObject = {
+                        name: seriesName,
+                        data: seriesData
+                    };
+                    series.push(seriesObject);
+                });
+            });
             var chart = new Highcharts.Chart({
                 chart: {
-                    renderTo: this.ratingChartId,
+                    renderTo: this.container,
                     zoomType: "x"
                 },
                 credits: {
                     enabled: false
                 },
                 title: {
-                    text: "<b>Rating chart</b>"
+                    text: "<b>" + this.configuration.title + "</b>"
+                },
+                legend: {
+                    enabled: this.configuration.enableLegend || false
                 },
                 xAxis: {
                     type: "datetime",
@@ -62,29 +95,24 @@
                     headerFormat: "<b>{series.name}</b><br>",
                     pointFormat: "{point.x:%Y-%m-%d %H:%M:%S}: {point.y:,.1f}"
                 },
-                series: [
-                    {
-                        name: "Match rating",
-                        data: this.getSeriesData(playerRatings.matchRating)
-                    },
-                    {
-                        name: "Kill rating",
-                        data: this.getSeriesData(playerRatings.killRating)
-                    }
-                ]
+                series: series
             });
         }
 
         getSeriesData(samples: PlayerRatingSample[]) {
             return samples.map((sample) => [
-                    Date.parse(sample.time),
-                    sample.value
+                Date.parse(sample.time),
+                sample.value
             ]);
         }
     }
 
     document.addEventListener("DOMContentLoaded", (event) => {
-        var chart = new RatingChart();
-        chart.loadChartData();
+        var containers = <NodeListOf<HTMLDivElement>>document.querySelectorAll("div.ratingChart");
+        for (var i = 0; i < containers.length; i++) {
+            var container = containers[i];
+            var chart = new RatingChart(container);
+            chart.loadChartData();
+        }
     });
 }

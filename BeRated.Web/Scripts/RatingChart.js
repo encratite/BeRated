@@ -1,37 +1,52 @@
 var BeRated;
 (function (BeRated) {
     var RatingChart = (function () {
-        function RatingChart() {
-            this.ratingChartId = "ratingChart";
+        function RatingChart(container) {
+            this.container = container;
+            this.configuration = JSON.parse(container.textContent);
+            container.removeChild(container.firstChild);
         }
         RatingChart.prototype.loadChartData = function () {
             var _this = this;
-            var chartElement = document.getElementById(this.ratingChartId);
-            if (chartElement == null) {
-                return;
-            }
             var request = new XMLHttpRequest();
             request.onreadystatechange = function (event) {
                 if (request.readyState === XMLHttpRequest.DONE) {
-                    var playerRatings = JSON.parse(request.response);
-                    _this.createChart(playerRatings);
+                    var ratings = JSON.parse(request.response);
+                    _this.createChart(ratings);
                 }
             };
-            var path = "/Ratings" + window.location.search;
-            request.open("GET", path);
+            var requestPath = this.configuration.controller + window.location.search;
+            request.open("GET", requestPath);
             request.send();
         };
-        RatingChart.prototype.createChart = function (playerRatings) {
+        RatingChart.prototype.createChart = function (ratings) {
+            var _this = this;
+            var series = [];
+            this.configuration.series.forEach(function (seriesConfiguration) {
+                ratings.forEach(function (playerRatings) {
+                    var seriesName = seriesConfiguration.name != null ? seriesConfiguration.name : playerRatings.name;
+                    var serverData = playerRatings[seriesConfiguration.property];
+                    var seriesData = _this.getSeriesData(serverData);
+                    var seriesObject = {
+                        name: seriesName,
+                        data: seriesData
+                    };
+                    series.push(seriesObject);
+                });
+            });
             var chart = new Highcharts.Chart({
                 chart: {
-                    renderTo: this.ratingChartId,
+                    renderTo: this.container,
                     zoomType: "x"
                 },
                 credits: {
                     enabled: false
                 },
                 title: {
-                    text: "<b>Rating chart</b>"
+                    text: "<b>" + this.configuration.title + "</b>"
+                },
+                legend: {
+                    enabled: this.configuration.enableLegend || false
                 },
                 xAxis: {
                     type: "datetime",
@@ -52,16 +67,7 @@ var BeRated;
                     headerFormat: "<b>{series.name}</b><br>",
                     pointFormat: "{point.x:%Y-%m-%d %H:%M:%S}: {point.y:,.1f}"
                 },
-                series: [
-                    {
-                        name: "Match rating",
-                        data: this.getSeriesData(playerRatings.matchRating)
-                    },
-                    {
-                        name: "Kill rating",
-                        data: this.getSeriesData(playerRatings.killRating)
-                    }
-                ]
+                series: series
             });
         };
         RatingChart.prototype.getSeriesData = function (samples) {
@@ -73,8 +79,12 @@ var BeRated;
         return RatingChart;
     })();
     document.addEventListener("DOMContentLoaded", function (event) {
-        var chart = new RatingChart();
-        chart.loadChartData();
+        var containers = document.querySelectorAll("div.ratingChart");
+        for (var i = 0; i < containers.length; i++) {
+            var container = containers[i];
+            var chart = new RatingChart(container);
+            chart.loadChartData();
+        }
     });
 })(BeRated || (BeRated = {}));
 //# sourceMappingURL=RatingChart.js.map

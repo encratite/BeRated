@@ -59,4 +59,20 @@
     }
 </table>
 
-<div id="ratingChart"></div>
+<div class="ratingChart">
+    {
+        "title": "Rating chart",
+        "controller": "/GetPlayerRatings",
+        "enableLegend": true,
+        "series": [
+            {
+                "name": "Match rating",
+                "property": "matchRating"
+            },
+            {
+                "name": "Kill rating",
+                "property": "killRating"
+            }
+        ]
+    }
+</div>

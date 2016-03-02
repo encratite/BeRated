@@ -77,7 +77,7 @@ namespace BeRated.Server
 					throw new ApplicationException(message);
                 }
             }
-            string markup = _Engine.Run(key, model.GetType(), model);
+            string markup = _Engine.Run(key, modelType, model);
             return markup;
         }
 

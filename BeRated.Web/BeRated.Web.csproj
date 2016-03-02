@@ -50,6 +50,7 @@
     <Content Include="Views\Player.cshtml" />
     <Content Include="Stylesheets\Player.less" />
     <Content Include="Stylesheets\Common.less" />
+    <Content Include="Views\Ratings.cshtml" />
     <None Include="Views\Weapons.cshtml" />
   </ItemGroup>
   <ItemGroup>

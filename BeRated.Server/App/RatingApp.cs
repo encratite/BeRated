@@ -102,6 +102,12 @@ namespace BeRated.App
 		}
 
         [Controller]
+        public object Ratings()
+        {
+            return null;
+        }
+
+        [Controller]
         public ModelGame Game(long id)
         {
             var game = _Cache.Games.First(g => g.Id == id);
@@ -169,23 +175,28 @@ namespace BeRated.App
             return weapons;
         }
 
+        #endregion
+
+        #region JSON controllers
+
         [JsonController]
-        public PlayerRatings Ratings(string id)
+        public List<PlayerRatings> GetPlayerRatings(string id)
         {
-			var player = _Cache.GetPlayer(id);
-			var ratings = new PlayerRatings
-			{
-				MatchRating = GetRatingSamples(player, (ratedPlayer) => ratedPlayer.MatchRating),
-				KillRating = GetRatingSamples(player, (ratedPlayer) => ratedPlayer.KillRating),
-			};
-			return ratings;
+            var player = _Cache.GetPlayer(id);
+            var ratings = new List<PlayerRatings> {  GetPlayerRatings(player) };
+            return ratings;
         }
 
-		#endregion
+        [JsonController]
+        public List<PlayerRatings> GetAllRatings()
+        {
+            var ratings = _Cache.Players.Select(player => GetPlayerRatings(player)).ToList();
+            return ratings;
+        }
 
-		#region Cache access
+        #endregion
 
-		private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
+        private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
         {
             var stats = _Cache.Players.Select(player => GetGeneralPlayerStats(player, constraints));
 			stats = stats.Where(player => player.Kills + player.Deaths > 0);
@@ -417,7 +428,16 @@ namespace BeRated.App
 			}).OrderBy(sample => sample.Time).ToList();
 		}
 
-        #endregion
+        private PlayerRatings GetPlayerRatings(Player player)
+        {
+            return new PlayerRatings
+            {
+                Name = player.Name,
+                SteamId = player.SteamId,
+                MatchRating = GetRatingSamples(player, (ratedPlayer) => ratedPlayer.MatchRating),
+                KillRating = GetRatingSamples(player, (ratedPlayer) => ratedPlayer.KillRating),
+            };
+        }
 
 		private void UpdateCache(IOwinContext context, string markup)
 		{

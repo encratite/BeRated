@@ -1,0 +1,30 @@
+﻿@using BeRated.App
+@using BeRated.Model
+@using System.Collections.Generic
+
+@model object
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = "Rating charts";
+}
+
+<div class="ratingChart">
+    {
+        "title": "Match ratings",
+        "controller": "/GetAllRatings",
+        "series": [
+            { "property": "matchRating" }
+        ]
+    }
+</div>
+
+<div class="ratingChart">
+    {
+        "title": "Kill ratings",
+        "controller": "/GetAllRatings",
+        "series": [
+            { "property": "killRating" }
+        ]
+    }
+</div>
