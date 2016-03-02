@@ -658,11 +658,11 @@ namespace BeRated.App
             if (players.Count < 3)
                 throw new ArgumentException("Not enough players.");
             var results = new List<MatchmakingResult>();
-            EvaluateMatchmakingPermutations(new List<Player>(), new List<Player>(), players, results);
-            return results.OrderByDescending(result => result.Quality).Take(5).ToList();
+            EvaluateMatchmakingPermutations(new List<Player>(), new List<Player>(), players, results, true);
+            return results.OrderByDescending(result => result.Quality).Take(100).ToList();
         }
 
-        private void EvaluateMatchmakingPermutations(IEnumerable<Player> team1, IEnumerable<Player> team2, IEnumerable<Player> remainingPlayers, List<MatchmakingResult> results)
+        private void EvaluateMatchmakingPermutations(IEnumerable<Player> team1, IEnumerable<Player> team2, IEnumerable<Player> remainingPlayers, List<MatchmakingResult> results, bool firstRun = false)
         {
             var player = remainingPlayers.FirstOrDefault();
             if (player != null)
@@ -670,7 +670,8 @@ namespace BeRated.App
                 remainingPlayers = remainingPlayers.Skip(1);
                 var playerArray = new [] { player };
                 EvaluateMatchmakingPermutations(team1.Concat(playerArray), team2, remainingPlayers, results);
-                EvaluateMatchmakingPermutations(team1, team2.Concat(playerArray), remainingPlayers, results);
+				if (!firstRun)
+					EvaluateMatchmakingPermutations(team1, team2.Concat(playerArray), remainingPlayers, results);
             }
             else
             {
