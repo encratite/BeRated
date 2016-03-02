@@ -17,6 +17,7 @@
         <script src="/Scripts/Table.js"></script>
         <script src="/Scripts/TimeConstraints.js"></script>
         <script src="/Scripts/RatingChart.js"></script>
+        <script src="/Scripts/Matchmaker.js"></script>
     </head>
     <body>
         <div class="menu">
@@ -25,6 +26,7 @@
                 <li><a href="/Teams">Teams</a></li>
                 <li><a href="/Games">Games</a></li>
                 <li><a href="/Ratings">Rating charts</a></li>
+                <li><a href="/Matchmaker">Matchmaker</a></li>
                 <li>
                     <select>
                         @foreach (var preset in TimeConstraintPreset.Presets)
@@ -40,7 +42,7 @@
             @if (ViewBag.SteamId != null)
             {
                 <ul class="playerMenu">
-                    <li>@GetPlayerLink("Player", "Overview")</li><li>@GetPlayerLink("Matches")</li><li>@GetPlayerLink("Encounters")</li><li>@GetPlayerLink("Weapons")</li><li>@GetPlayerLink("Items", "Items purchased")</li>
+                    <li>@GetPlayerLink("Player", "Overview")</li><li>@GetPlayerLink("Matches")</li><li>@GetPlayerLink("Encounters")</li><li>@GetPlayerLink("Weapons")</li><li>@GetPlayerLink("Items", "Items purchased")</li>><li>@GetPlayerLink("Items", "Items purchased")</li>
                 </ul>
             }
             @RenderBody()

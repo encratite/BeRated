@@ -1,0 +1,26 @@
+﻿@using BeRated.App
+@using BeRated.Model
+@using System.Collections.Generic
+
+@model List<PlayerInfo>
+
+@{
+    Layout = "/Layout";
+    ViewBag.Title = "Matchmaker";
+}
+
+<div class="matchmaker">
+    <table class="grid">
+        <tr>
+            <th></th>
+            <th>Player</th>
+        </tr>
+        @foreach (var player in Model)
+        {
+            <tr>
+                <td><input type="checkbox" name="player" value="@player.SteamId" /></td>
+                <td>@Helper.GetPlayerLink(player)</td>
+            </tr>}
+    </table>
+    <input type="button" id="evaluateButton" value="Evaluate selection" />
+</div>

@@ -206,3 +206,15 @@ table.terrorists {
   width: 100%;
   height: 400px;
 }
+.matchmaker {
+  width: 20em;
+  text-align: right;
+}
+.matchmaker table {
+  width: 100%;
+  margin-bottom: 1em;
+  text-align: left;
+}
+.matchmaker input[type="button"] {
+  padding: 0.2em 0.5em;
+}

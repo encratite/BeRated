@@ -7,16 +7,16 @@ using BeRated.Common;
 using BeRated.Model;
 using BeRated.Server;
 using Microsoft.Owin;
-using ModelGame = BeRated.Model.Game;
-using ModelRound = BeRated.Model.Round;
-using ModelKill = BeRated.Model.Kill;
 using CacheGame = BeRated.Cache.Game;
-using CacheRound = BeRated.Cache.Round;
 using CacheKill = BeRated.Cache.Kill;
+using CacheRound = BeRated.Cache.Round;
+using GameInfo = Moserware.Skills.GameInfo;
+using ModelGame = BeRated.Model.Game;
+using ModelKill = BeRated.Model.Kill;
+using ModelRound = BeRated.Model.Round;
 using SkillPlayer = Moserware.Skills.Player;
 using SkillTeam = Moserware.Skills.Team;
 using SkillTeams = Moserware.Skills.Teams;
-using GameInfo = Moserware.Skills.GameInfo;
 using TrueSkillCalculator = Moserware.Skills.TrueSkillCalculator;
 
 namespace BeRated.App
@@ -113,9 +113,9 @@ namespace BeRated.App
         }
 
         [Controller]
-        public List<GeneralPlayerStats> Matchmaker()
+        public List<PlayerInfo> Matchmaker()
         {
-            throw new NotImplementedException();
+            return GetPlayerInfos(_Cache.Players);
         }
 
         [Controller]
@@ -594,7 +594,7 @@ namespace BeRated.App
 
         private List<PlayerInfo> GetPlayerInfos(IEnumerable<Player> players)
         {
-            return players.Select(player => GetPlayerInfo(player)).ToList();
+            return players.Select(player => GetPlayerInfo(player)).OrderBy(player => player.Name).ToList();
         }
 
         private List<PlayerGameInfo> GetPlayerInfos(List<RatedPlayer> team, CacheGame game)
@@ -658,8 +658,8 @@ namespace BeRated.App
             if (players.Count < 3)
                 throw new ArgumentException("Not enough players.");
             var results = new List<MatchmakingResult>();
-            EvaluateMatchmakingPermutations(new List<Player>(), new List<Player>(), _Cache.Players, results);
-            return results.OrderByDescending(result => result.Quality).Take(3).ToList();
+            EvaluateMatchmakingPermutations(new List<Player>(), new List<Player>(), players, results);
+            return results.OrderByDescending(result => result.Quality).Take(5).ToList();
         }
 
         private void EvaluateMatchmakingPermutations(IEnumerable<Player> team1, IEnumerable<Player> team2, IEnumerable<Player> remainingPlayers, List<MatchmakingResult> results)

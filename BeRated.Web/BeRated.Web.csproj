@@ -22,6 +22,7 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\Matchmaker.ts" />
     <TypeScriptCompile Include="Scripts\RatingChart.ts" />
     <TypeScriptCompile Include="Scripts\Table.ts" />
     <TypeScriptCompile Include="Scripts\TimeConstraints.ts" />
@@ -51,6 +52,8 @@
     <Content Include="Stylesheets\Player.less" />
     <Content Include="Stylesheets\Common.less" />
     <Content Include="Views\Ratings.cshtml" />
+    <Content Include="Views\Matchmaker.cshtml" />
+    <Content Include="Views\Matchmaking.cshtml" />
     <None Include="Views\Weapons.cshtml" />
   </ItemGroup>
   <ItemGroup>
