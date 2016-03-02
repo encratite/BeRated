@@ -210,10 +210,13 @@ namespace BeRated.App
 			int roundsWon = matchingRoundsWon.Count();
 			int roundsPlayed = matchingRounds.Count();
 
+			var firstRound = player.Rounds.FirstOrDefault();
+
 			var generalStats = new GeneralPlayerStats
 			{
 				SteamId = player.SteamId,
 				Name = player.Name,
+				FirstRoundTime = firstRound != null ? firstRound.Time : (DateTime?)null,
 				KillsPerRound = Ratio.Get(kills, roundsPlayed),
 				KillDeathRatio = Ratio.Get(kills, deaths),
 				Kills = kills,

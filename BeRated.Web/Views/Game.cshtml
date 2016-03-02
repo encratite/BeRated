@@ -17,8 +17,8 @@
             <th data-column-type="string">@playerDescription</th>
             <th>Kills</th>
             <th>Deaths</th>
-            <th>M-Rating</th>
-            <th>K-Rating</th>
+            <th>Match rating</th>
+            <th>Kill rating</th>
         </tr>
         @foreach (var player in team)
         {
@@ -33,7 +33,7 @@
     </table>
 }
 
-<ul class="gameDescription">
+<ul class="description">
     <li><b>Time:</b> @Model.Time</li>
     <li><b>Map:</b> @Model.Map</li>
     <li><b>Score:</b> @Helper.GetScore(Model)</li>

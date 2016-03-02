@@ -49,6 +49,7 @@
     <Content Include="Views\Game.cshtml" />
     <Content Include="Views\Player.cshtml" />
     <Content Include="Stylesheets\Player.less" />
+    <Content Include="Stylesheets\Common.less" />
     <None Include="Views\Weapons.cshtml" />
   </ItemGroup>
   <ItemGroup>

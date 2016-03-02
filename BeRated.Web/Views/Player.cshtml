@@ -9,4 +9,21 @@
     ViewBag.SteamId = Model.SteamId;
 }
 
+<ul class="description">
+    <li><b>Match rating:</b> @Helper.GetRating(Model.StartMatchRating, Model.EndMatchRating)</li>
+    <li><b>Kill rating:</b> @Helper.GetRating(Model.StartKillRating, Model.EndKillRating)</li>
+    <li><b>Kills per round:</b> @Helper.Round(Model.KillsPerRound)</li>
+    <li><b>Kill/death ratio:</b> @Helper.Round(Model.KillDeathRatio)</li>
+    <li><b>Kills:</b> @Model.Kills</li>
+    <li><b>Deaths:</b> @Model.Deaths</li>
+    <li><b>Games won:</b> @Helper.Percentage(Model.GameWinRatio)</li>
+    <li><b>Games played:</b> @Model.GamesPlayed</li>
+    <li><b>Rounds won:</b> @Helper.Percentage(Model.RoundWinRatio)</li>
+    <li><b>Rounds played:</b> @Model.RoundsPlayed</li>
+    @if (Model.FirstRoundTime != null)
+    {
+        <li><b>Playing since:</b> @Model.FirstRoundTime</li>
+    }
+</ul>
+
 <div id="ratingChart"></div>

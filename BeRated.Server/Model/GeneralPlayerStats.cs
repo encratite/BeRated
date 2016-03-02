@@ -1,7 +1,11 @@
-﻿namespace BeRated.Model
+﻿using System;
+
+namespace BeRated.Model
 {
 	public class GeneralPlayerStats : PlayerInfo
 	{
+		public DateTime? FirstRoundTime { get; set; }
+
         public double? StartMatchRating { get; set; }
 		public double EndMatchRating { get; set; }
 

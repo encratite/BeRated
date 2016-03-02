@@ -54,11 +54,11 @@ var BeRated;
                 },
                 series: [
                     {
-                        name: "M-Rating",
+                        name: "Match rating",
                         data: this.getSeriesData(playerRatings.matchRating)
                     },
                     {
-                        name: "K-Rating",
+                        name: "Kill rating",
                         data: this.getSeriesData(playerRatings.killRating)
                     }
                 ]
