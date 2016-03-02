@@ -131,8 +131,15 @@ h1 {
   margin-left: 0.9em;
   margin-bottom: 1em;
 }
-.description li {
+.description td {
   line-height: 1.8em;
+}
+.description td:first-child {
+  font-weight: bold;
+  padding-right: 2em;
+}
+.description td:first-child:after {
+  content: ":";
 }
 .teamPlayers {
   margin-bottom: 1em;

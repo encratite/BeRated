@@ -33,11 +33,20 @@
     </table>
 }
 
-<ul class="description">
-    <li><b>Time:</b> @Model.Time</li>
-    <li><b>Map:</b> @Model.Map</li>
-    <li><b>Score:</b> @Helper.GetScore(Model)</li>
-</ul>
+<table class="description">
+    <tr>
+        <td>Time</td>
+        <td>@Model.Time</td>
+    </tr>
+    <tr>
+        <td>Map</td>
+        <td>@Model.Map</td>
+    </tr>
+    <tr>
+        <td>Score</td>
+        <td>@Helper.GetScore(Model)</td>
+    </tr>
+</table>
 
 <h1>Players</h1>
 @TeamTable("Counter-Terrorist", "counterTerrorists", Model.CounterTerrorists)

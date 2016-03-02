@@ -163,8 +163,17 @@ h1 {
     margin-left: @textMargin;
     margin-bottom: 1em;
 
-    li {
+    td {
         line-height: 1.8em;
+    }
+
+    td:first-child {
+        font-weight: bold;
+        padding-right: 2em;
+
+        &:after {
+            content: ":";
+        }
     }
 }
 

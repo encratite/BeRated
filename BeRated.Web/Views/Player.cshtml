@@ -9,21 +9,54 @@
     ViewBag.SteamId = Model.SteamId;
 }
 
-<ul class="description">
-    <li><b>Match rating:</b> @Helper.GetRating(Model.StartMatchRating, Model.EndMatchRating)</li>
-    <li><b>Kill rating:</b> @Helper.GetRating(Model.StartKillRating, Model.EndKillRating)</li>
-    <li><b>Kills per round:</b> @Helper.Round(Model.KillsPerRound)</li>
-    <li><b>Kill/death ratio:</b> @Helper.Round(Model.KillDeathRatio)</li>
-    <li><b>Kills:</b> @Model.Kills</li>
-    <li><b>Deaths:</b> @Model.Deaths</li>
-    <li><b>Games won:</b> @Helper.Percentage(Model.GameWinRatio)</li>
-    <li><b>Games played:</b> @Model.GamesPlayed</li>
-    <li><b>Rounds won:</b> @Helper.Percentage(Model.RoundWinRatio)</li>
-    <li><b>Rounds played:</b> @Model.RoundsPlayed</li>
+<table class="description">
+    <tr>
+        <td>Match rating</td>
+        <td>@Helper.GetRating(Model.StartMatchRating, Model.EndMatchRating)</td>
+    </tr>
+    <tr>
+        <td>Kill rating</td>
+        <td>@Helper.GetRating(Model.StartKillRating, Model.EndKillRating)</td>
+    </tr>
+    <tr>
+        <td>Kills per round</td>
+        <td>@Helper.Round(Model.KillsPerRound)</td>
+    </tr>
+    <tr>
+        <td>Kill/death ratio</td>
+        <td>@Helper.Round(Model.KillDeathRatio)</td>
+    </tr>
+    <tr>
+        <td>Kills</td>
+        <td>@Model.Kills</td>
+    </tr>
+    <tr>
+        <td>Deaths</td>
+        <td>@Model.Deaths</td>
+    </tr>
+    <tr>
+        <td>Games won</td>
+        <td>@Helper.Percentage(Model.GameWinRatio)</td>
+    </tr>
+    <tr>
+        <td>Games played</td>
+        <td>@Model.GamesPlayed</td>
+    </tr>
+    <tr>
+        <td>Rounds won</td>
+        <td>@Helper.Percentage(Model.RoundWinRatio)</td>
+    </tr>
+    <tr>
+        <td>Rounds played</td>
+        <td>@Model.RoundsPlayed</td>
+    </tr>
     @if (Model.FirstRoundTime != null)
     {
-        <li><b>Playing since:</b> @Model.FirstRoundTime</li>
+        <tr>
+            <td>Playing since</td>
+            <td>@Model.FirstRoundTime</td>
+        </tr>
     }
-</ul>
+</table>
 
 <div id="ratingChart"></div>
