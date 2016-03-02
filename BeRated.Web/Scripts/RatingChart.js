@@ -31,7 +31,7 @@ var BeRated;
                     enabled: false
                 },
                 title: {
-                    text: "<b>TrueSkill rating chart</b>"
+                    text: "<b>Rating chart</b>"
                 },
                 xAxis: {
                     type: "datetime",
