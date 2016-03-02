@@ -13,6 +13,11 @@ using ModelKill = BeRated.Model.Kill;
 using CacheGame = BeRated.Cache.Game;
 using CacheRound = BeRated.Cache.Round;
 using CacheKill = BeRated.Cache.Kill;
+using SkillPlayer = Moserware.Skills.Player;
+using SkillTeam = Moserware.Skills.Team;
+using SkillTeams = Moserware.Skills.Teams;
+using GameInfo = Moserware.Skills.GameInfo;
+using TrueSkillCalculator = Moserware.Skills.TrueSkillCalculator;
 
 namespace BeRated.App
 {
@@ -105,6 +110,20 @@ namespace BeRated.App
         public object Ratings()
         {
             return null;
+        }
+
+        [Controller]
+        public List<GeneralPlayerStats> Matchmaker()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Controller]
+        public List<MatchmakingResult> Matchmaking(string ids)
+        {
+            var players = GetPlayersFromSteamIds(ids);
+            var results = GetMatchmakingResults(players);
+            return results;
         }
 
         [Controller]
@@ -379,15 +398,21 @@ namespace BeRated.App
 			return items;
 		}
 
-		private List<PlayerInfo> GetTeam(string steamIdString)
-		{
-			var steamIds = steamIdString.Split(',');
-			var players = steamIds.Select(steamId => _Cache.GetPlayer(steamId));
-			var team = players.Select(player => GetPlayerInfo(player)).ToList();
-			return team;
-		}
+		private List<PlayerInfo> GetTeam(string steamIds)
+        {
+            var players = GetPlayersFromSteamIds(steamIds);
+            var team = players.Select(player => GetPlayerInfo(player)).ToList();
+            return team;
+        }
 
-		private GameOutcomes GetGameOutcomes(List<PlayerInfo> team1, List<PlayerInfo> team2, bool precise)
+        private List<Player> GetPlayersFromSteamIds(string steamIds)
+        {
+            var tokens = steamIds.Split(',');
+            var players = tokens.Select(steamId => _Cache.GetPlayer(steamId)).ToList();
+            return players;
+        }
+
+        private GameOutcomes GetGameOutcomes(List<PlayerInfo> team1, List<PlayerInfo> team2, bool precise)
 		{
 			var outcomes = new GameOutcomes();
 			foreach (var game in _Cache.Games)
@@ -567,6 +592,11 @@ namespace BeRated.App
             return new PlayerInfo(player.Name, player.SteamId);
         }
 
+        private List<PlayerInfo> GetPlayerInfos(IEnumerable<Player> players)
+        {
+            return players.Select(player => GetPlayerInfo(player)).ToList();
+        }
+
         private List<PlayerGameInfo> GetPlayerInfos(List<RatedPlayer> team, CacheGame game)
         {
             var gameKills = game.Rounds.SelectMany(round => round.Kills).ToList();
@@ -621,6 +651,54 @@ namespace BeRated.App
         private GameRating GetGameRating(RatingPair pair)
         {
             return new GameRating(pair.PreGameRating.ConservativeRating, pair.PostGameRating.ConservativeRating);
+        }
+
+        private List<MatchmakingResult> GetMatchmakingResults(List<Player> players)
+        {
+            if (players.Count < 3)
+                throw new ArgumentException("Not enough players.");
+            var results = new List<MatchmakingResult>();
+            EvaluateMatchmakingPermutations(new List<Player>(), new List<Player>(), _Cache.Players, results);
+            return results.OrderByDescending(result => result.Quality).Take(3).ToList();
+        }
+
+        private void EvaluateMatchmakingPermutations(IEnumerable<Player> team1, IEnumerable<Player> team2, IEnumerable<Player> remainingPlayers, List<MatchmakingResult> results)
+        {
+            var player = remainingPlayers.FirstOrDefault();
+            if (player != null)
+            {
+                remainingPlayers = remainingPlayers.Skip(1);
+                var playerArray = new [] { player };
+                EvaluateMatchmakingPermutations(team1.Concat(playerArray), team2, remainingPlayers, results);
+                EvaluateMatchmakingPermutations(team1, team2.Concat(playerArray), remainingPlayers, results);
+            }
+            else
+            {
+                if (Math.Abs(team1.Count() - team2.Count()) > 1)
+                    return;
+                var skillTeam1 = GetSkillTeam(team1);
+                var skillTeam2 = GetSkillTeam(team2);
+                var teams = SkillTeams.Concat(skillTeam1, skillTeam2);
+                double quality = TrueSkillCalculator.CalculateMatchQuality(GameInfo.DefaultGameInfo, teams);
+                var result = new MatchmakingResult
+                {
+                    Quality = quality,
+                    Team1 = GetPlayerInfos(team1),
+                    Team2 = GetPlayerInfos(team2),
+                };
+                results.Add(result);
+            }
+        }
+
+        private SkillTeam GetSkillTeam(IEnumerable<Player> players)
+        {
+            var team = new SkillTeam();
+            foreach (var player in players)
+            {
+                var skillPlayer = new SkillPlayer(player);
+                team.AddPlayer(skillPlayer, player.MatchRating);
+            }
+            return team;
         }
     }
 }
