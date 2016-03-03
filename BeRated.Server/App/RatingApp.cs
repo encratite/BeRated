@@ -119,10 +119,10 @@ namespace BeRated.App
         }
 
         [Controller]
-        public List<MatchmakingResult> Matchmaking(string ids)
+        public List<MatchmakingResult> Matchmaking(string ids, bool swap)
         {
             var players = GetPlayersFromSteamIds(ids);
-            var results = GetMatchmakingResults(players);
+            var results = GetMatchmakingResults(players, swap);
             return results;
         }
 
@@ -653,16 +653,25 @@ namespace BeRated.App
             return new GameRating(pair.PreGameRating.ConservativeRating, pair.PostGameRating.ConservativeRating);
         }
 
-        private List<MatchmakingResult> GetMatchmakingResults(List<Player> players)
+        private List<MatchmakingResult> GetMatchmakingResults(List<Player> players, bool swapTeams)
         {
             if (players.Count < 3)
                 throw new ArgumentException("Not enough players.");
             var results = new List<MatchmakingResult>();
-            EvaluateMatchmakingPermutations(new List<Player>(), new List<Player>(), players, results, true);
+            var team1 = new List<Player> { players.First() };
+            var team2 = new List<Player>();
+            if (swapTeams)
+            {
+                var temporaryTeam = team1;
+                team1 = team2;
+                team2 = temporaryTeam;
+            }
+            var remainingPlayers = players.Skip(1);
+            EvaluateMatchmakingPermutations(team1, team2, remainingPlayers, results);
             return results.OrderByDescending(result => result.Quality).Take(100).ToList();
         }
 
-        private void EvaluateMatchmakingPermutations(IEnumerable<Player> team1, IEnumerable<Player> team2, IEnumerable<Player> remainingPlayers, List<MatchmakingResult> results, bool firstRun = false)
+        private void EvaluateMatchmakingPermutations(IEnumerable<Player> team1, IEnumerable<Player> team2, IEnumerable<Player> remainingPlayers, List<MatchmakingResult> results)
         {
             var player = remainingPlayers.FirstOrDefault();
             if (player != null)
@@ -670,8 +679,7 @@ namespace BeRated.App
                 remainingPlayers = remainingPlayers.Skip(1);
                 var playerArray = new [] { player };
                 EvaluateMatchmakingPermutations(team1.Concat(playerArray), team2, remainingPlayers, results);
-				if (!firstRun)
-					EvaluateMatchmakingPermutations(team1, team2.Concat(playerArray), remainingPlayers, results);
+				EvaluateMatchmakingPermutations(team1, team2.Concat(playerArray), remainingPlayers, results);
             }
             else
             {

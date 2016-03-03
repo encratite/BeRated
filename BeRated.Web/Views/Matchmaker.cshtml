@@ -9,6 +9,14 @@
     ViewBag.Title = "Matchmaker";
 }
 
+<p>
+    Select the players you would like to perform matchmaking for and click on the <i>"Evaluate selection"</i> button.
+    The server will then evaluate all possible permutations to determine pairs of teams that are approximately evenly matched, based on their TrueSkill match ratings.
+    Kill ratings are not taken into account.
+    The <i>matchmaking quality</i> thus obtained corresponds to the predicted probability of a draw (100% is best, 0% is worst).
+    Set the <i>"Swap teams"</i> flag to determine the way players are assigned to the Counter-Terrorist team and the Terrorist team.
+</p>
+
 <div class="matchmaker">
     <table class="grid">
         <tr>
@@ -20,7 +28,14 @@
             <tr>
                 <td><input type="checkbox" name="player" value="@player.SteamId" /></td>
                 <td>@Helper.GetPlayerLink(player)</td>
-            </tr>}
+            </tr>
+        }
     </table>
-    <input type="button" id="evaluateButton" value="Evaluate selection" />
+    <div>
+        <input type="checkbox" id="swapTeams" />
+        <label for="swapTeams">Swap teams</label>
+    </div>
+    <div>
+        <input type="button" id="evaluateButton" value="Evaluate selection" />
+    </div>
 </div>

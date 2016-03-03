@@ -260,16 +260,39 @@ table.terrorists {
 }
 
 .matchmaker {
-    width: 20em;
-    text-align: right;
+    width: 25em;
+
+    * {
+        vertical-align: middle;
+    }
 
     table {
         width: 100%;
         margin-bottom: 1em;
         text-align: left;
+
+        td:first-child {
+            text-align: right;
+        }
     }
 
-    input[type = "button"] {
-        padding: 0.2em 0.5em;
+    > div:nth-child(2) {
+        margin-bottom: 1em;
+
+        input {
+            margin-left: 2.8em;
+        }
+
+        label {
+            margin-left: 1.6em;
+        }
+    }
+
+    > div:nth-child(3) {
+        text-align: right;
+
+        input {
+            padding: 0.2em 0.5em;
+        }
     }
 }
