@@ -29,6 +29,11 @@ namespace BeRated.App
 				return "-";
 		}
 
+        public static string Round(double? number)
+		{
+			return Round((decimal?)number);
+		}
+
 		public static string LowerCase(string input)
 		{
 			if (input != null && input.Length >= 1)

@@ -66,6 +66,10 @@ h1 {
 .sortable th {
   cursor: pointer;
 }
+.sortable th:nth-child(n + 2),
+.sortable td:nth-child(n + 2) {
+  text-align: right;
+}
 .dateGrid td:nth-child(1) {
   white-space: nowrap;
 }
@@ -117,9 +121,6 @@ h1 {
 .content {
   width: 950px;
   margin: 0 auto;
-}
-.numericTable td:nth-child(n + 2) {
-  text-align: right;
 }
 .playerList ul.counterTerrorists a {
   color: #5783c0;
@@ -207,7 +208,7 @@ table.terrorists {
   height: 400px;
 }
 .matchmaker {
-  width: 25em;
+  width: 50em;
 }
 .matchmaker * {
   vertical-align: middle;
@@ -217,17 +218,21 @@ table.terrorists {
   margin-bottom: 1em;
   text-align: left;
 }
-.matchmaker table td:first-child {
-  text-align: right;
+.matchmaker table th:nth-child(4),
+.matchmaker table td:nth-child(4) {
+  text-align: left;
+}
+.matchmaker table input {
+  margin-right: 1em;
 }
 .matchmaker > div:nth-child(2) {
   margin-bottom: 1em;
 }
 .matchmaker > div:nth-child(2) input {
-  margin-left: 2.8em;
+  margin-left: 1.05em;
 }
 .matchmaker > div:nth-child(2) label {
-  margin-left: 1.6em;
+  margin-left: 1.1em;
 }
 .matchmaker > div:nth-child(3) {
   text-align: right;

@@ -113,9 +113,10 @@ namespace BeRated.App
         }
 
         [Controller]
-        public List<PlayerInfo> Matchmaker()
+        public List<MatchmakingPlayer> Matchmaker()
         {
-            return GetPlayerInfos(_Cache.Players);
+            var players = _Cache.Players.Select(player => GetMatchmakingPlayer(player));
+            return players.OrderBy(player => player.Name).ToList();
         }
 
         [Controller]
@@ -224,64 +225,66 @@ namespace BeRated.App
         }
 
 		private GeneralPlayerStats GetGeneralPlayerStats(Player player, TimeConstraints constraints)
-		{
-			var matchingKills = player.Kills.Where(kill => constraints.Match(kill.Time));
-			var matchingDeaths = player.Deaths.Where(death => constraints.Match(death.Time));
-			int kills = matchingKills.Count();
-			int deaths = matchingDeaths.Count();
+        {
+            var matchingKills = player.Kills.Where(kill => constraints.Match(kill.Time));
+            var matchingDeaths = player.Deaths.Where(death => constraints.Match(death.Time));
+            int kills = matchingKills.Count();
+            int deaths = matchingDeaths.Count();
 
-			var matchingWins = player.Wins.Where(game => constraints.Match(game.Time));
-			var matchingGames = player.Games.Where(game => constraints.Match(game.Time));
-			int wins = matchingWins.Count();
-			int games = matchingGames.Count();
+            var matchingWins = player.Wins.Where(game => constraints.Match(game.Time));
+            var matchingGames = player.Games.Where(game => constraints.Match(game.Time));
+            int wins = matchingWins.Count();
+            int games = matchingGames.Count();
 
-			var matchingRounds = player.Rounds.Where(round => constraints.Match(round.Time));
-			var matchingRoundsWon = player.RoundsWon.Where(round => constraints.Match(round.Time));
-			int roundsWon = matchingRoundsWon.Count();
-			int roundsPlayed = matchingRounds.Count();
+            var matchingRounds = player.Rounds.Where(round => constraints.Match(round.Time));
+            var matchingRoundsWon = player.RoundsWon.Where(round => constraints.Match(round.Time));
+            int roundsWon = matchingRoundsWon.Count();
+            int roundsPlayed = matchingRounds.Count();
 
-			var firstRound = player.Rounds.FirstOrDefault();
+            var firstRound = player.Rounds.FirstOrDefault();
+            var lastRound = player.Rounds.LastOrDefault();
 
-			var generalStats = new GeneralPlayerStats
-			{
-				SteamId = player.SteamId,
-				Name = player.Name,
-				FirstRoundTime = firstRound != null ? firstRound.Time : (DateTime?)null,
-				KillsPerRound = Ratio.Get(kills, roundsPlayed),
-				KillDeathRatio = Ratio.Get(kills, deaths),
-				Kills = kills,
-				Deaths = deaths,
-				GamesPlayed = games,
-				GameWinRatio = Ratio.Get(wins, games),
-				RoundsPlayed = roundsPlayed,
-				RoundWinRatio = Ratio.Get(roundsWon, roundsPlayed),
-			};
+            var generalStats = new GeneralPlayerStats
+            {
+                SteamId = player.SteamId,
+                Name = player.Name,
+                FirstRoundTime = GetRoundTime(firstRound),
+                LastRoundTime = GetRoundTime(lastRound),
+                KillsPerRound = Ratio.Get(kills, roundsPlayed),
+                KillDeathRatio = Ratio.Get(kills, deaths),
+                Kills = kills,
+                Deaths = deaths,
+                GamesPlayed = games,
+                GameWinRatio = Ratio.Get(wins, games),
+                RoundsPlayed = roundsPlayed,
+                RoundWinRatio = Ratio.Get(roundsWon, roundsPlayed),
+            };
 
-			if (games > 0)
-			{
-				var firstGame = matchingGames.First();
-				var startRating = firstGame.GetRatedPlayer(player);
-				generalStats.StartMatchRating = startRating.MatchRating.PreGameRating.ConservativeRating;
-				generalStats.StartRoundRating = startRating.RoundRating.PreGameRating.ConservativeRating;
-				generalStats.StartKillRating = startRating.KillRating.PreGameRating.ConservativeRating;
+            if (games > 0)
+            {
+                var firstGame = matchingGames.First();
+                var startRating = firstGame.GetRatedPlayer(player);
+                generalStats.StartMatchRating = startRating.MatchRating.PreGameRating.ConservativeRating;
+                generalStats.StartRoundRating = startRating.RoundRating.PreGameRating.ConservativeRating;
+                generalStats.StartKillRating = startRating.KillRating.PreGameRating.ConservativeRating;
 
-				var lastGame = matchingGames.Last();
-				var endRating = lastGame.GetRatedPlayer(player);
-				generalStats.EndMatchRating = endRating.MatchRating.PostGameRating.ConservativeRating;
-				generalStats.EndRoundRating = endRating.RoundRating.PostGameRating.ConservativeRating;
-				generalStats.EndKillRating = endRating.KillRating.PostGameRating.ConservativeRating;
-			}
-			if (constraints.Start == null && constraints.End == null)
-			{
-				generalStats.StartMatchRating = null;
-				generalStats.StartRoundRating = null;
-				generalStats.StartKillRating = null;
-			}
+                var lastGame = matchingGames.Last();
+                var endRating = lastGame.GetRatedPlayer(player);
+                generalStats.EndMatchRating = endRating.MatchRating.PostGameRating.ConservativeRating;
+                generalStats.EndRoundRating = endRating.RoundRating.PostGameRating.ConservativeRating;
+                generalStats.EndKillRating = endRating.KillRating.PostGameRating.ConservativeRating;
+            }
+            if (constraints.Start == null && constraints.End == null)
+            {
+                generalStats.StartMatchRating = null;
+                generalStats.StartRoundRating = null;
+                generalStats.StartKillRating = null;
+            }
 
-			return generalStats;
-		}
+            return generalStats;
+        }
 
-		private List<TeamStats> GetTeamStats(TimeConstraints constraints)
+        private List<TeamStats> GetTeamStats(TimeConstraints constraints)
         {
             var teams = new List<TeamStats>();
             var games = _Cache.Games.Where(game => constraints.Match(game.Time));
@@ -708,6 +711,24 @@ namespace BeRated.App
                 team.AddPlayer(skillPlayer, player.MatchRating);
             }
             return team;
+        }
+
+        private MatchmakingPlayer GetMatchmakingPlayer(Player player)
+        {
+            var lastRound = player.Rounds.LastOrDefault();
+            return new MatchmakingPlayer
+            {
+                Name = player.Name,
+                SteamId = player.SteamId,
+                MatchRating = player.MatchRating.ConservativeRating,
+                Games = player.Games.Count(),
+                LastRound = GetRoundTime(lastRound),
+            };
+        }
+
+        private DateTime? GetRoundTime(CacheRound round)
+        {
+            return round != null ? round.Time : (DateTime?)null;
         }
     }
 }

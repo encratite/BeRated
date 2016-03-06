@@ -39,6 +39,9 @@ var BeRated;
                 if (columnType === Table.ColumnType.Numeric) {
                     value = parseFloat(value);
                 }
+                else if (columnType === Table.ColumnType.Date) {
+                    value = -Date.parse(value);
+                }
                 return value;
             };
             rows.sort(function (row1, row2) {
@@ -92,6 +95,7 @@ var BeRated;
             }
         };
         Table.ColumnType = {
+            Date: "date",
             Numeric: "numeric",
             String: "string"
         };

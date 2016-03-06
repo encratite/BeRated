@@ -98,6 +98,7 @@
     <Compile Include="Model\Game.cs" />
     <Compile Include="Model\GameRating.cs" />
     <Compile Include="Model\Kill.cs" />
+    <Compile Include="Model\MatchmakingPlayer.cs" />
     <Compile Include="Model\MatchmakingResult.cs" />
     <Compile Include="Model\PlayerEncounters.cs" />
     <Compile Include="Model\PlayerGameInfo.cs" />

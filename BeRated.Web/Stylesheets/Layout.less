@@ -72,8 +72,14 @@ h1 {
     }
 }
 
-.sortable th {
-    cursor: pointer;
+.sortable {
+    th {
+        cursor: pointer;
+    }
+
+    th:nth-child(n + 2), td:nth-child(n + 2) {
+        text-align: right;
+    }
 }
 
 .dateGrid {
@@ -139,10 +145,6 @@ h1 {
 .content {
     width: @contentWidth;
     margin: 0 auto;
-}
-
-.numericTable td:nth-child(n + 2) {
-    text-align: right;
 }
 
 .playerList {
@@ -260,7 +262,7 @@ table.terrorists {
 }
 
 .matchmaker {
-    width: 25em;
+    width: 50em;
 
     * {
         vertical-align: middle;
@@ -271,8 +273,12 @@ table.terrorists {
         margin-bottom: 1em;
         text-align: left;
 
-        td:first-child {
-            text-align: right;
+        th:nth-child(4), td:nth-child(4) {
+            text-align: left;
+        }
+
+        input {
+            margin-right: 1em;
         }
     }
 
@@ -280,11 +286,11 @@ table.terrorists {
         margin-bottom: 1em;
 
         input {
-            margin-left: 2.8em;
+            margin-left: 1.05em;
         }
 
         label {
-            margin-left: 1.6em;
+            margin-left: 1.1em;
         }
     }
 

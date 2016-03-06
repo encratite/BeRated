@@ -25,7 +25,7 @@ namespace BeRated.Cache
         {
             get
             {
-                return RoundsWon.Concat(RoundsLost);
+                return RoundsWon.Concat(RoundsLost).OrderBy(round => round.Time);
             }
         }
 
@@ -37,7 +37,7 @@ namespace BeRated.Cache
         {
             get
             {
-                return Wins.Concat(Losses).Concat(Draws);
+                return Wins.Concat(Losses).Concat(Draws).OrderBy(game => game.Time);
             }
         }
 

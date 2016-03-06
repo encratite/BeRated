@@ -2,7 +2,7 @@
 @using BeRated.Model
 @using System.Collections.Generic
 
-@model List<PlayerInfo>
+@model List<MatchmakingPlayer>
 
 @{
     Layout = "/Layout";
@@ -18,16 +18,20 @@
 </p>
 
 <div class="matchmaker">
-    <table class="grid">
+    <table class="sortable grid">
         <tr>
-            <th></th>
-            <th>Player</th>
+            <th data-column-type="string">Player</th>
+            <th>Match rating</th>
+            <th>Games played</th>
+            <th data-column-type="date">Last played</th>
         </tr>
         @foreach (var player in Model)
         {
             <tr>
-                <td><input type="checkbox" name="player" value="@player.SteamId" /></td>
-                <td>@Helper.GetPlayerLink(player)</td>
+                <td><input type="checkbox" name="player" value="@player.SteamId" /> @Helper.GetPlayerLink(player)</td>
+                <td>@Helper.Round(player.MatchRating)</td>
+                <td>@player.Games</td>
+                <td>@player.LastRound</td>
             </tr>
         }
     </table>

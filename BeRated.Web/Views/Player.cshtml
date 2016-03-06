@@ -57,6 +57,13 @@
             <td>@Model.FirstRoundTime</td>
         </tr>
     }
+    @if (Model.LastRoundTime != null)
+    {
+        <tr>
+            <td>Last played</td>
+            <td>@Model.LastRoundTime</td>
+        </tr>
+    }
 </table>
 
 <div class="ratingChart">

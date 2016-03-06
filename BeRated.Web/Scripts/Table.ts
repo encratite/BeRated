@@ -1,6 +1,7 @@
 ﻿module BeRated {
     class Table {
         private static ColumnType = {
+            Date: "date",
             Numeric: "numeric",
             String: "string"
         };
@@ -48,6 +49,9 @@
                 var value = cell.textContent;
                 if (columnType === Table.ColumnType.Numeric) {
                     value = parseFloat(value);
+                }
+                else if (columnType === Table.ColumnType.Date) {
+                    value = - Date.parse(value);
                 }
                 return value;
             };
