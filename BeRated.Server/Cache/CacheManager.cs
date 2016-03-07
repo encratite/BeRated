@@ -222,7 +222,8 @@ namespace BeRated.Cache
                 !IgnoreStats() &&
                 kill.Killer.SteamId != LogParser.BotId &&
                 kill.Victim.SteamId != LogParser.BotId &&
-                kill.Killer != kill.Victim
+                kill.Killer != kill.Victim &&
+                kill.KillerTeam != kill.VictimTeam
             )
 			{
 				kill.Weapon = TranslateWeapon(kill.Weapon);
