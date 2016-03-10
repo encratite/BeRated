@@ -225,6 +225,7 @@ namespace BeRated.App
             var bestResult = results.First();
             var teams = new MatchmakingTeams
             {
+                Quality = bestResult.Quality,
                 CounterTerrorists = GetSteamIdList(bestResult.Team1),
                 Terrorists = GetSteamIdList(bestResult.Team1),
             };

@@ -16,7 +16,7 @@ var BeRated;
         var millisecondsPerDay = 24 * 60 * 60 * 1000;
         var timestamp = now.getTime() + days * millisecondsPerDay;
         var expirationDate = new Date(timestamp);
-        document.cookie = name + "=" + value + "; expires=" + expirationDate.getUTCDate() + "; path=/";
+        document.cookie = name + "=" + value + "; expires=" + expirationDate.toUTCString() + "; path=/";
     }
     BeRated.setCookie = setCookie;
 })(BeRated || (BeRated = {}));
