@@ -30,6 +30,8 @@ namespace BeRated.App
 
 		private Dictionary<string, CacheEntry> _WebCache = new Dictionary<string, CacheEntry>();
 
+        private Random _Random = new Random();
+
         public RatingApp(Configuration configuration)
         {
             _Configuration = configuration;
@@ -212,6 +214,21 @@ namespace BeRated.App
         {
             var ratings = _Cache.Players.Select(player => GetPlayerRatings(player)).ToList();
             return ratings;
+        }
+
+        [JsonController]
+        public MatchmakingTeams GetMatchmakingTeams(string ids)
+        {
+            var players = GetPlayersFromSteamIds(ids);
+            bool swap = _Random.Next(0, 1) == 1;
+            var results = GetMatchmakingResults(players, swap);
+            var bestResult = results.First();
+            var teams = new MatchmakingTeams
+            {
+                CounterTerrorists = GetSteamIdList(bestResult.Team1),
+                Terrorists = GetSteamIdList(bestResult.Team1),
+            };
+            return teams;
         }
 
         #endregion
@@ -729,6 +746,11 @@ namespace BeRated.App
         private DateTime? GetRoundTime(CacheRound round)
         {
             return round != null ? round.Time : (DateTime?)null;
+        }
+
+        private List<string> GetSteamIdList(List<PlayerInfo> players)
+        {
+            return players.Select(player => player.SteamId).ToList();
         }
     }
 }
