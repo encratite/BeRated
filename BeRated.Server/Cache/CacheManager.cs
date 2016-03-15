@@ -1,18 +1,19 @@
-﻿using System;
+﻿using Ashod;
+using BeRated.Common;
+using Moserware.Skills;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using BeRated.Common;
-using Moserware.Skills;
-using Team = BeRated.Common.Team;
 using SkillPlayer = Moserware.Skills.Player;
 using SkillTeam = Moserware.Skills.Team;
-using Ashod;
+using Team = BeRated.Common.Team;
 
 namespace BeRated.Cache
 {
-	class CacheManager : IDisposable
+    class CacheManager : IDisposable
 	{
 		private const int MaxRoundsDefault = 30;
         private const int UpdateInterval = 10 * 1000;
@@ -210,6 +211,8 @@ namespace BeRated.Cache
                 return false;
             _MatchStartCounter++;
             _Map = map;
+            _Rounds = new List<Round>();
+            _RoundKills = new List<Kill>();
             return true;
         }
 
@@ -362,6 +365,7 @@ namespace BeRated.Cache
 			}
             AdjustKillRatings(playerStates);
 			AddPlayersToGame(game, playerStates);
+            RemoveUnreferencedObjects();
 		}
 
 		private void AddGame(bool terroristsWinGame, bool counterTerroristsWinGame, bool draw, Game game, List<KeyValuePair<string, PlayerGameState>> playerStates)
@@ -544,5 +548,27 @@ namespace BeRated.Cache
 			_PlayerStates.TryGetValue(player.SteamId, out state);
 			return state;
 		}
+
+        private void RemoveUnreferencedObjects()
+        {
+            var referencedKills = new HashSet<Kill>();
+            var referencedRounds = new HashSet<Round>();
+            foreach (var game in _Games)
+            {
+                foreach (var round in game.Rounds)
+                {
+                    foreach (var kill in round.Kills)
+                        referencedKills.Add(kill);
+                    referencedRounds.Add(round);
+                }
+            }
+            foreach (var player in _Players.Values)
+            {
+                player.Kills = player.Kills.Where(kill => referencedKills.Contains(kill)).ToList();
+                player.Deaths = player.Deaths.Where(death => referencedKills.Contains(death)).ToList();
+                player.RoundsWon = player.RoundsWon.Where(round => referencedRounds.Contains(round)).ToList();
+                player.RoundsLost = player.RoundsLost.Where(round => referencedRounds.Contains(round)).ToList();
+            }
+        }
     }
 }

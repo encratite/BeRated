@@ -11,15 +11,15 @@ namespace BeRated.Cache
 
 		public string SteamId { get; private set; }
 
-		public List<Kill> Kills { get; private set; }
-		public List<Kill> Deaths { get; private set; }
+		public List<Kill> Kills { get; set; }
+		public List<Kill> Deaths { get; set; }
 
         public Rating MatchRating { get; set; }
         public Rating RoundRating { get; set; }
 		public Rating KillRating { get; set; }
 
-		public List<Round> RoundsWon { get; private set; }
-		public List<Round> RoundsLost { get; private set; }
+		public List<Round> RoundsWon { get; set; }
+		public List<Round> RoundsLost { get; set; }
 
         public IEnumerable<Round> Rounds
         {
