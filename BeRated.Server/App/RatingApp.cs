@@ -403,7 +403,7 @@ namespace BeRated.App
 		{
 			var statsDictionary = new InitializerDictionary<string, PlayerItemStats>();
 			var purchases = player.Purchases.Where(purchase => constraints.Match(purchase.Time));
-			int kills = player.Kills.Count(kill => constraints.Match(kill.Time));
+			var kills = player.Kills.Where(kill => constraints.Match(kill.Time)).ToList();
 			int rounds = player.Rounds.Count(round => constraints.Match(round.Time));
 			foreach (var purchase in purchases)
 			{
@@ -413,8 +413,9 @@ namespace BeRated.App
 			var items = statsDictionary.Values.OrderByDescending(stats => stats.TimesPurchased).ToList();
 			foreach (var item in items)
 			{
-				item.PurchasesPerRound = Ratio.Get(item.TimesPurchased, rounds);
-				item.KillsPerPurchase = Ratio.Get(item.TimesPurchased, kills);
+                int itemKills = kills.Count(kill => kill.Weapon == item.Item);
+				item.PurchasesPerRound = Ratio.Get(item.TimesPurchased, rounds, true);
+				item.KillsPerPurchase = Ratio.Get(itemKills, item.TimesPurchased, true);
 			}
 			return items;
 		}
