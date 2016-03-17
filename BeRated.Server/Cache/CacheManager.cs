@@ -3,7 +3,6 @@ using BeRated.Common;
 using Moserware.Skills;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -44,7 +43,7 @@ namespace BeRated.Cache
 
 		private Thread _ReaderThread = null;
 
-        private HashSet<string> _LogsProcessed = new HashSet<string>();
+        private Dictionary<string, DateTime> _LogStates = new Dictionary<string, DateTime>();
 
 		private Dictionary<string, Player> _Players = new Dictionary<string, Player>();
 
@@ -130,25 +129,22 @@ namespace BeRated.Cache
 			_PlayerStates = new Dictionary<string, PlayerGameState>();
             _RoundKills = new List<Kill>();
 			string fileName = Path.GetFileName(path);
-			if (_LogsProcessed.Contains(fileName))
-			{
-				// This file has already been processed
-				return;
-			}
+            DateTime lastWriteTime;
+            bool hasLastWriteTime = _LogStates.TryGetValue(fileName, out lastWriteTime);
             var fileInfo = new FileInfo(path);
-            var lastWriteTimeSpan = DateTime.Now -  fileInfo.LastWriteTime;
+            if (hasLastWriteTime && fileInfo.LastWriteTime == lastWriteTime)
+                return;
 			var content = File.ReadAllText(path);
 			if (
-                lastWriteTimeSpan < TimeSpan.FromHours(1) &&
                 !content.Contains("Log file closed\n") &&
                 !content.Contains("disconnected (reason \"Punting bot, server is hibernating\")\n")
             )
-			{
-				// The log file has not been completed yet
+            {
+                // The log file has not been completed yet
                 Logger.Warning("Unable to process incomplete file {0}", path);
-				return;
-			}
-			var lines = content.Split('\n');
+                return;
+            }
+            var lines = content.Split('\n');
 			int lineCounter = 1;
             try
             {
@@ -163,10 +159,10 @@ namespace BeRated.Cache
             {
                 Logger.Warning("Unable to process outdated format in {0}", path);
             }
-            _LogsProcessed.Add(fileName);
+            _LogStates[fileName] = fileInfo.LastWriteTime;
 		}
 
-		private void ProcessLine(string line)
+        private void ProcessLine(string line)
         {
             var readers = new Func<string, bool>[]
             {
