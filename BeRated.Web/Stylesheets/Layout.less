@@ -40,35 +40,66 @@ h1 {
 }
 
 .grid {
-    border: @border;
-    border-radius: @borderRadius;
+    @cellPadding: 0.6em 1em;
     border-spacing: 0;
 
-    tr:hover {
-        background-color: #fcfcfc;
+    tr {
+        &:nth-child(n + 1):hover {
+            background-color: #fcfcfc;
+        }
+
+        &:last-child {
+            td {
+                border-bottom: @border;
+            }
+
+            td:first-child {
+                border-left: @border;
+                border-bottom-left-radius: @borderRadius;
+            }
+
+            td:last-child {
+                border-right: @border;
+                border-bottom-right-radius: @borderRadius;
+            }
+        }
     }
 
     th {
         background-color: @headerBackgroundColour;
+        border-top: @border;
         font-weight: bold;
-        -moz-background-clip: padding; 
-        -webkit-background-clip: padding-box;
-        background-clip: padding-box;
         -moz-user-select: none;
         -ms-user-select: none;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
         user-select: none;
         text-align: left;
-    }
+        padding: @cellPadding;
 
-    th, td {
-        padding: 0.6em 1em;
+        &:first-child {
+            border-left: @border;
+            border-top-left-radius: @borderRadius;
+        }
+
+        &:last-child {
+            border-right: @border;
+            border-top-right-radius: @borderRadius;
+        }
     }
 
     td {
         vertical-align: top;
         border-top: @border;
+        padding: @cellPadding;
+
+        &:first-child {
+            border-left: @border;
+        }
+
+        &:last-child {
+            border-right: @border;
+        }
     }
 }
 
