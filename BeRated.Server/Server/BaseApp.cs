@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Owin;
+using System.Threading.Tasks;
 
 namespace BeRated.Server
 {
@@ -15,6 +16,11 @@ namespace BeRated.Server
 		public virtual void OnResponse(IOwinContext context, string markup, TimeSpan invokeDuration, TimeSpan renderDuration)
 		{
 		}
+
+        public virtual Task RequestWrapper(Func<Task> getRequestTask)
+        {
+            return getRequestTask();
+        }
 
         public virtual void Dispose()
         {

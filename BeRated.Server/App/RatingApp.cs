@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Ashod;
+﻿using Ashod;
 using BeRated.Cache;
 using BeRated.Common;
 using BeRated.Model;
 using BeRated.Server;
 using Microsoft.Owin;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CacheGame = BeRated.Cache.Game;
 using CacheKill = BeRated.Cache.Kill;
 using CacheRound = BeRated.Cache.Round;
@@ -21,7 +23,7 @@ using TrueSkillCalculator = Moserware.Skills.TrueSkillCalculator;
 
 namespace BeRated.App
 {
-	public class RatingApp : BaseApp
+    public class RatingApp : BaseApp
     {
         private const string TimeConstraintsCookie = "timeConstraints";
 
@@ -29,6 +31,7 @@ namespace BeRated.App
 		private CacheManager _Cache;
 
 		private Dictionary<string, CacheEntry> _WebCache = new Dictionary<string, CacheEntry>();
+        private ReaderWriterLockSlim _WebCacheLock = new ReaderWriterLockSlim();
 
         private Random _Random = new Random();
 
@@ -39,7 +42,9 @@ namespace BeRated.App
 			_Cache.OnUpdate += OnCacheUpdate;
         }
 
-		public override void Dispose()
+        #region Overrides
+
+        public override void Dispose()
 		{
 			_Cache.Dispose();
 			base.Dispose();
@@ -49,22 +54,26 @@ namespace BeRated.App
 		{
 			CacheEntry cacheEntry;
             string key = GetCacheKey(context);
-			if (_WebCache.TryGetValue(key, out cacheEntry))
+            using (_WebCacheLock.ScopedUpgradeableReader())
             {
-                var cacheTime = cacheEntry.Time;
-                var now = DateTimeOffset.Now;
-                if (
-                    cacheTime.Year == now.Year &&
-                    cacheTime.Month == now.Month &&
-                    cacheTime.Day == now.Day
-                )
+                if (_WebCache.TryGetValue(key, out cacheEntry))
                 {
-				    return cacheEntry.Markup;
-                }
-                else
-                {
-                    // The entry is outdated, get rid of it
-                    _WebCache.Remove(key);
+                    var cacheTime = cacheEntry.Time;
+                    var now = DateTimeOffset.Now;
+                    if (
+                        cacheTime.Year == now.Year &&
+                        cacheTime.Month == now.Month &&
+                        cacheTime.Day == now.Day
+                    )
+                    {
+                        return cacheEntry.Markup;
+                    }
+                    else
+                    {
+                        // The entry is outdated, get rid of it
+                        _WebCacheLock.EnterWriteLock();
+                        _WebCache.Remove(key);
+                    }
                 }
             }
 			return null;
@@ -76,7 +85,17 @@ namespace BeRated.App
 			PrintPerformanceMessage(context, invokeDuration, renderDuration);
 		}
 
-		public void Initialize()
+        public override Task RequestWrapper(Func<Task> getRequestTask)
+        {
+            using (_Cache.Lock.ScopedReader())
+            {
+                return getRequestTask();
+            }
+        }
+
+        #endregion
+
+        public void Initialize()
         {
             base.Initialize(_Configuration.ViewPath);
 			_Cache.Run();
@@ -489,19 +508,22 @@ namespace BeRated.App
 		private void UpdateCache(IOwinContext context, string markup)
 		{
             string key = GetCacheKey(context);
-			_WebCache[key] = new CacheEntry(markup);
-			int maximumCacheSize = _Configuration.CacheSize.Value * 1024 * 1024;
-			int cacheSize = 0;
-			foreach (var pair in _WebCache)
-				cacheSize += pair.Value.Markup.Length;
-			var pairs = _WebCache.OrderBy(pair => pair.Value.Time).ToList();
-			while (cacheSize > maximumCacheSize && pairs.Any())
-			{
-				var pair = pairs.First();
-				pairs.RemoveAt(0);
-				_WebCache.Remove(pair.Key);
-				cacheSize -= pair.Value.Markup.Length;
-			}
+            using (_WebCacheLock.ScopedWriter())
+            {
+                _WebCache[key] = new CacheEntry(markup);
+			    int maximumCacheSize = _Configuration.CacheSize.Value * 1024 * 1024;
+			    int cacheSize = 0;
+			    foreach (var pair in _WebCache)
+				    cacheSize += pair.Value.Markup.Length;
+			    var pairs = _WebCache.OrderBy(pair => pair.Value.Time).ToList();
+			    while (cacheSize > maximumCacheSize && pairs.Any())
+			    {
+				    var pair = pairs.First();
+				    pairs.RemoveAt(0);
+				    _WebCache.Remove(pair.Key);
+				    cacheSize -= pair.Value.Markup.Length;
+			    }
+            }
 		}
 
 		private void PrintPerformanceMessage(IOwinContext context, TimeSpan invokeDuration, TimeSpan renderDuration)

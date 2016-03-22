@@ -34,25 +34,28 @@ namespace BeRated.Server
             var response = context.Response;
             try
             {
-                var uri = context.Request.Uri;
-                string path = uri.PathAndQuery;
-                if (path.Length == 0)
-                    throw new MiddlewareException("Path is empty.");
-                if (path == "/favicon.ico")
+                return _Instance.RequestWrapper(() =>
                 {
-                    response.StatusCode = 404;
-                    return response.WriteAsync("Not found.");
-                }
-				string output = _Instance.GetCachedResponse(context);
-				if (output == null)
-				{
-					TimeSpan invokeDuration;
-					TimeSpan renderDuration;
-					output = ProcessRequest(context, out invokeDuration, out renderDuration);
-					_Instance.OnResponse(context, output, invokeDuration, renderDuration);
-				}
-                var task = context.Response.WriteAsync(output);
-                return task;
+                    var uri = context.Request.Uri;
+                    string path = uri.PathAndQuery;
+                    if (path.Length == 0)
+                        throw new MiddlewareException("Path is empty.");
+                    if (path == "/favicon.ico")
+                    {
+                        response.StatusCode = 404;
+                        return response.WriteAsync("Not found.");
+                    }
+				    string output = _Instance.GetCachedResponse(context);
+				    if (output == null)
+				    {
+					    TimeSpan invokeDuration;
+					    TimeSpan renderDuration;
+					    output = ProcessRequest(context, out invokeDuration, out renderDuration);
+					    _Instance.OnResponse(context, output, invokeDuration, renderDuration);
+				    }
+                    var task = context.Response.WriteAsync(output);
+                    return task;
+                });
             }
             catch (Exception exception)
             {

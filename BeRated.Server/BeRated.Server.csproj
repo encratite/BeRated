@@ -84,6 +84,8 @@
     <Compile Include="Cache\RatingPair.cs" />
     <Compile Include="Common\GameOutcome.cs" />
     <Compile Include="Cache\Player.cs" />
+    <Compile Include="Common\ReaderWriterLockScope.cs" />
+    <Compile Include="Common\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="Common\Team.cs" />
     <Compile Include="Cache\LogParser.cs" />
     <Compile Include="Cache\Disconnect.cs" />

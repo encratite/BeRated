@@ -20,6 +20,8 @@ namespace BeRated.Cache
         private const int WinnerRank = 1;
         private const int LoserRank = 2;
 
+        public ReaderWriterLockSlim Lock { get; private set; } = new ReaderWriterLockSlim();
+
         public IEnumerable<Player> Players
         {
             get
@@ -123,43 +125,46 @@ namespace BeRated.Cache
 
 		private void ProcessLog(string path)
 		{
-			_MaxRounds = MaxRoundsDefault;
-            _MatchStartCounter = 0;
-            _Map = null;
-			_PlayerStates = new Dictionary<string, PlayerGameState>();
-            _RoundKills = new List<Kill>();
-			string fileName = Path.GetFileName(path);
-            DateTime lastWriteTime;
-            bool hasLastWriteTime = _LogStates.TryGetValue(fileName, out lastWriteTime);
-            var fileInfo = new FileInfo(path);
-            if (hasLastWriteTime && fileInfo.LastWriteTime == lastWriteTime)
-                return;
-			var content = File.ReadAllText(path);
-			if (
-                !content.Contains("Log file closed\n") &&
-                !content.Contains("disconnected (reason \"Punting bot, server is hibernating\")\n")
-            )
+            using (Lock.ScopedWriter())
             {
-                // The log file has not been completed yet
-                Logger.Warning("Unable to process incomplete file {0}", path);
-                return;
+                _MaxRounds = MaxRoundsDefault;
+                _MatchStartCounter = 0;
+                _Map = null;
+			    _PlayerStates = new Dictionary<string, PlayerGameState>();
+                _RoundKills = new List<Kill>();
+			    string fileName = Path.GetFileName(path);
+                DateTime lastWriteTime;
+                bool hasLastWriteTime = _LogStates.TryGetValue(fileName, out lastWriteTime);
+                var fileInfo = new FileInfo(path);
+                if (hasLastWriteTime && fileInfo.LastWriteTime == lastWriteTime)
+                    return;
+			    var content = File.ReadAllText(path);
+			    if (
+                    !content.Contains("Log file closed\n") &&
+                    !content.Contains("disconnected (reason \"Punting bot, server is hibernating\")\n")
+                )
+                {
+                    // The log file has not been completed yet
+                    Logger.Warning("Unable to process incomplete file {0}", path);
+                    return;
+                }
+                var lines = content.Split('\n');
+			    int lineCounter = 1;
+                try
+                {
+				    foreach (var line in lines)
+				    {
+					    ProcessLine(line);
+					    lineCounter++;
+				    }
+                    Logger.Log("Processed {0}", path);
+                }
+                catch (NotSupportedException)
+                {
+                    Logger.Warning("Unable to process outdated format in {0}", path);
+                }
+                _LogStates[fileName] = fileInfo.LastWriteTime;
             }
-            var lines = content.Split('\n');
-			int lineCounter = 1;
-            try
-            {
-				foreach (var line in lines)
-				{
-					ProcessLine(line);
-					lineCounter++;
-				}
-                Logger.Log("Processed {0}", path);
-            }
-            catch (NotSupportedException)
-            {
-                Logger.Warning("Unable to process outdated format in {0}", path);
-            }
-            _LogStates[fileName] = fileInfo.LastWriteTime;
 		}
 
         private void ProcessLine(string line)
