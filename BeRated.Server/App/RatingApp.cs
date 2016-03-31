@@ -71,8 +71,9 @@ namespace BeRated.App
                     else
                     {
                         // The entry is outdated, get rid of it
-                        _WebCacheLock.EnterWriteLock();
-                        _WebCache.Remove(key);
+                        // Upgrade the lock
+                        using (_WebCacheLock.ScopedWriter())
+                            _WebCache.Remove(key);
                     }
                 }
             }

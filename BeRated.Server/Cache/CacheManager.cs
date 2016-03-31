@@ -136,7 +136,7 @@ namespace BeRated.Cache
                 DateTime lastWriteTime;
                 bool hasLastWriteTime = _LogStates.TryGetValue(fileName, out lastWriteTime);
                 var fileInfo = new FileInfo(path);
-                if (hasLastWriteTime && fileInfo.LastWriteTime == lastWriteTime)
+                if (hasLastWriteTime && fileInfo.LastWriteTimeUtc == lastWriteTime)
                     return;
 			    var content = File.ReadAllText(path);
 			    if (
@@ -146,6 +146,11 @@ namespace BeRated.Cache
                 {
                     // The log file has not been completed yet
                     Logger.Warning("Unable to process incomplete file {0}", path);
+                    if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc >= TimeSpan.FromHours(1))
+                    {
+                        // It is likely permanently incomplete, do not read it again
+                        _LogStates[fileName] = fileInfo.LastWriteTimeUtc;
+                    }
                     return;
                 }
                 var lines = content.Split('\n');
@@ -163,7 +168,7 @@ namespace BeRated.Cache
                 {
                     Logger.Warning("Unable to process outdated format in {0}", path);
                 }
-                _LogStates[fileName] = fileInfo.LastWriteTime;
+                _LogStates[fileName] = fileInfo.LastWriteTimeUtc;
             }
 		}
 
