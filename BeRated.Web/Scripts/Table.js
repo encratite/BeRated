@@ -100,7 +100,7 @@ var BeRated;
             String: "string"
         };
         return Table;
-    })();
+    }());
     function initializeSortableTables() {
         var tables = document.querySelectorAll("table.sortable");
         for (var i = 0; i < tables.length; i++) {

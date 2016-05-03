@@ -11,6 +11,7 @@ namespace BeRated.Cache
 		public string SteamId { get; private set; }
 
 		public List<Kill> Kills { get; set; }
+        public List<Kill> Assists { get; set; }
 		public List<Kill> Deaths { get; set; }
 
 		public List<Round> RoundsWon { get; set; }
@@ -46,6 +47,7 @@ namespace BeRated.Cache
 			SteamId = steamId;
 
 			Kills = new List<Kill>();
+            Assists = new List<Kill>();
 			Deaths = new List<Kill>();
 
 			RoundsWon = new List<Round>();

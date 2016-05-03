@@ -19,6 +19,7 @@ namespace BeRated.Cache
         private static Regex LogFileStartedPattern = new Regex(DatePrefix + "Log file started \\(file \".+?\"\\) \\(game \".+?\"\\) \\(version \"(\\d+)\"\\)");
         private static Regex MatchStartPattern = new Regex(DatePrefix + "World triggered \"Match_Start\" on \"(.+?)\"");
 		private static Regex KillPattern = new Regex(DatePrefix + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] killed " + PlayerPattern + " \\[(-?\\d+) (-?\\d+) (-?\\d+)\\] with \"(.+?)\"(?: \\((.+?)\\))?");
+        private static Regex AssistPattern = new Regex(DatePrefix + PlayerPattern + " assisted killing " + PlayerPattern);
 		private static Regex MaxRoundsPattern = new Regex(DatePrefix + "server_cvar: \"mp_maxrounds\" \"(\\d+)\"");
 		// grep -h -E -o "SFUI_[^""]+" * | sort | uniq
 		private static Regex EndOfRoundPattern = new Regex(DatePrefix + "Team \"(TERRORIST|CT)\" triggered \"(SFUI_Notice_All_Hostages_Rescued|SFUI_Notice_Bomb_Defused|SFUI_Notice_CTs_Win|SFUI_Notice_Hostages_Not_Rescued|SFUI_Notice_Target_Bombed|SFUI_Notice_Target_Saved|SFUI_Notice_Terrorists_Win)\" \\(CT \"(\\d+)\"\\) \\(T \"(\\d+)\"\\)");
@@ -78,7 +79,7 @@ namespace BeRated.Cache
             string flags = reader.String();
 			bool headshot = flags.Contains("headshot");
             bool penetrated = flags.Contains("penetrated");
-			var output = new Kill
+			var kill = new Kill
 			{
 				Time = time,
 				Killer = GetPlayer(killerName, killerSteamId, time),
@@ -91,8 +92,32 @@ namespace BeRated.Cache
                 Penetrated = penetrated,
 				Weapon = weapon,
 			};
-			return output;
+			return kill;
 		}
+
+        public Assist ReadPlayerAssist(string line)
+        {
+            var match = AssistPattern.Match(line);
+            if (!match.Success)
+				return null;
+            var reader = new MatchReader(match);
+            var time = ReadDate(reader);
+            string assistantName = reader.String();
+			string assistantSteamId = reader.String();
+            var assistantTeam = reader.Team();
+            string victimName = reader.String();
+			string victimSteamId = reader.String();
+            var victimTeam = reader.Team();
+            var assist = new Assist
+            {
+                Time = time,
+                Assistant = GetPlayer(assistantName, assistantSteamId, time),
+				AssistantTeam = assistantTeam,
+                Victim = GetPlayer(victimName, victimSteamId, time),
+                VictimTeam = victimTeam,
+            };
+            return assist;
+        }
 
 		public int? ReadMaxRounds(string line)
 		{

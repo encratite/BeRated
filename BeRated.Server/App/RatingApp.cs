@@ -196,7 +196,7 @@ namespace BeRated.App
         private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
         {
             var stats = _Cache.Players.Select(player => GetGeneralPlayerStats(player, constraints));
-			stats = stats.Where(player => player.Kills + player.Deaths > 0);
+			stats = stats.Where(player => player.Kills + player.Assists + player.Deaths > 0);
 			stats = stats.OrderBy(player => player.Name);
             return stats.ToList();
         }
@@ -204,8 +204,11 @@ namespace BeRated.App
 		private GeneralPlayerStats GetGeneralPlayerStats(Player player, TimeConstraints constraints)
         {
             var matchingKills = player.Kills.Where(kill => constraints.Match(kill.Time));
+            var matchingAssists = player.Assists.Where(assist => constraints.Match(assist.Time));
             var matchingDeaths = player.Deaths.Where(death => constraints.Match(death.Time));
+
             int kills = matchingKills.Count();
+            int assists = matchingAssists.Count();
             int deaths = matchingDeaths.Count();
 
             var matchingWins = player.Wins.Where(game => constraints.Match(game.Time));
@@ -230,6 +233,7 @@ namespace BeRated.App
                 KillsPerRound = Ratio.Get(kills, roundsPlayed),
                 KillDeathRatio = Ratio.Get(kills, deaths),
                 Kills = kills,
+                Assists = assists,
                 Deaths = deaths,
                 GamesPlayed = games,
                 GameWinRatio = Ratio.Get(wins, games),
@@ -542,6 +546,7 @@ namespace BeRated.App
                     Name = player.Name,
                     SteamId = player.SteamId,
                     Kills = gameKills.Count(kill => kill.Killer == player),
+                    Assists = gameKills.Count(kill => kill.Assistant == player),
                     Deaths = gameKills.Count(kill => kill.Victim == player),
                 };
                 return playerInfo;

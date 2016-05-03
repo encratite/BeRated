@@ -15,9 +15,6 @@ namespace BeRated.Model
         public bool IsTerrorist { get; set; }
 		public PlayerGameOutcome Outcome { get; set; }
 
-        public GameRating MatchRating { get; set; }
-        public GameRating KillRating { get; set; }
-
 		public List<PlayerGameInfo> PlayerTeam { get; set; }
 		public List<PlayerGameInfo> EnemyTeam { get; set; }
 	}

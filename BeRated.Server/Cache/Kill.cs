@@ -8,6 +8,8 @@ namespace BeRated.Cache
 		public DateTime Time { get; set; }
 		public Player Killer { get; set; }
 		public Team KillerTeam { get; set; }
+        public Player Assistant { get; set; }
+        public Team AssistantTeam { get; set; }
 		public Vector KillerPosition { get; set; }
 		public Player Victim { get; set; }
 		public Team VictimTeam { get; set; }

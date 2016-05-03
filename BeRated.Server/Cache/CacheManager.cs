@@ -176,6 +176,7 @@ namespace BeRated.Cache
                 ReadServerVersion,
                 ReadMap,
                 ReadPlayerKill,
+                ReadPlayerAssist,
                 ReadMaxRounds,
                 ReadTeamSwitch,
                 ReadDisconnect,
@@ -246,6 +247,34 @@ namespace BeRated.Cache
 				_RoundKills.Add(kill);
 			}
 			return true;
+        }
+
+        private bool ReadPlayerAssist(string line)
+        {
+            var assist = _LogParser.ReadPlayerAssist(line);
+            if (assist == null)
+                return false;
+            if (
+                !IgnoreStats() &&
+                assist.Assistant.SteamId != LogParser.BotId &&
+                assist.Victim.SteamId != LogParser.BotId &&
+                assist.Assistant != assist.Victim &&
+                assist.AssistantTeam != assist.VictimTeam
+            )
+			{
+                var kill = _RoundKills.LastOrDefault();
+                if (kill != null && kill.Time == assist.Time)
+                {
+                    var assistant = assist.Assistant;
+                    var assistantState = GetPlayerState(assistant);
+                    if (assistantState != null)
+                        assistantState.Assists++;
+                    assistant.Assists.Add(kill);
+                    kill.Assistant = assistant;
+                    kill.AssistantTeam = assist.AssistantTeam;
+                }
+            }
+            return true;
         }
 
 		private bool ReadMaxRounds(string line)

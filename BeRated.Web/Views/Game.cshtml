@@ -16,6 +16,7 @@
         <tr>
             <th data-column-type="string">@playerDescription</th>
             <th>Kills</th>
+            <th>Assists</th>
             <th>Deaths</th>
         </tr>
         @foreach (var player in team)
@@ -23,6 +24,7 @@
             <tr>
                 <td>@Helper.GetPlayerLink(player)</td>
                 <td>@player.Kills</td>
+                <td>@player.Assists</td>
                 <td>@player.Deaths</td>
             </tr>
         }

@@ -9,6 +9,7 @@ namespace BeRated.Cache
         public int? RoundPlayerLeft { get; set; }
 
 		public int Kills { get; set; }
+        public int Assists { get; set; }
 		public int Deaths { get; set; }
 
         public PlayerGameState(Player player, Team team)
@@ -16,6 +17,7 @@ namespace BeRated.Cache
             Team = team;
             RoundPlayerLeft = null;
 			Kills = 0;
+            Assists = 0;
 			Deaths = 0;
         }
     }

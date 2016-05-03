@@ -11,6 +11,7 @@ namespace BeRated.Model
 		public decimal? KillDeathRatio { get; set; }
 
 		public int Kills { get; set; }
+        public int Assists { get; set; }
 		public int Deaths { get; set; }
 
 		public int GamesPlayed { get; set; }
