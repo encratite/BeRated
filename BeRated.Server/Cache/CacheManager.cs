@@ -1,13 +1,10 @@
 ﻿using Ashod;
 using BeRated.Common;
-using Moserware.Skills;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using SkillPlayer = Moserware.Skills.Player;
-using SkillTeam = Moserware.Skills.Team;
 using Team = BeRated.Common.Team;
 
 namespace BeRated.Cache
@@ -318,9 +315,6 @@ namespace BeRated.Cache
                 var container = team == winningTeam ? player.RoundsWon : player.RoundsLost;
                 container.Add(round);
             }
-            Action<Player, Rating> setRating = (player, rating) => player.RoundRating = rating;
-            bool counterTerroristsWinGame = winningTeam == Team.CounterTerrorist;
-            AdjustRatings(counterTerroristsWinGame, playerStates, setRating);
             CheckForEndOfGame(round, roundsPlayed);
             _RoundKills = new List<Kill>();
             return true;
@@ -364,12 +358,6 @@ namespace BeRated.Cache
 			_Games.Sort((x, y) => x.Time.CompareTo(y.Time));
 			var playerStates = GetActivePlayerStates();
 			AddGame(terroristsWinGame, counterTerroristsWinGame, draw, game, playerStates);
-			if (!draw)
-			{
-				Action<Player, Rating> setRating = (player, rating) => player.MatchRating = rating;
-				AdjustRatings(counterTerroristsWinGame, playerStates, setRating);
-			}
-            AdjustKillRatings(playerStates);
 			AddPlayersToGame(game, playerStates);
             RemoveUnreferencedObjects();
 		}
@@ -402,71 +390,9 @@ namespace BeRated.Cache
 				var player = _Players[pair.Key];
 				var state = pair.Value;
 				var players = state.Team == Team.Terrorist ? game.Terrorists : game.CounterTerrorists;
-				var ratedPlayer = new RatedPlayer(player, state.PreGameMatchRating, state.PreGameRoundRating, state.PreGameKillRating);
-				players.Add(ratedPlayer);
+				players.Add(player);
 			}
 		}
-
-		private void AdjustRatings(bool counterTerroristsWinGame, List<KeyValuePair<string, PlayerGameState>> playerStates, Action<Player, Rating> setRating)
-        {
-            var counterTerrorists = new SkillTeam();
-            var terrorists = new SkillTeam();
-            bool counterTerroristsPlaying = false;
-            bool terroristsPlaying = false;
-            foreach (var pair in playerStates)
-            {
-                var player = _Players[pair.Key];
-                var state = pair.Value;
-                var skillPlayer = new SkillPlayer(player);
-                if (state.Team == Team.CounterTerrorist)
-                {
-                    counterTerrorists.AddPlayer(skillPlayer, player.MatchRating);
-                    counterTerroristsPlaying = true;
-                }
-                else
-                {
-                    terrorists.AddPlayer(skillPlayer, player.MatchRating);
-                    terroristsPlaying = true;
-                }
-            }
-            if (!counterTerroristsPlaying || !terroristsPlaying)
-                return;
-            var teams = Teams.Concat(counterTerrorists, terrorists);
-            int counterTerroristRank = counterTerroristsWinGame ? WinnerRank : LoserRank;
-            int terroristRank = !counterTerroristsWinGame ? WinnerRank : LoserRank;
-            var newRatings = TrueSkillCalculator.CalculateNewRatings(GameInfo.DefaultGameInfo, teams, counterTerroristRank, terroristRank);
-            foreach (var pair in newRatings)
-            {
-                var player = (Player)pair.Key.Id;
-                setRating(player, pair.Value);
-            }
-        }
-
-		private void AdjustKillRatings(List<KeyValuePair<string, PlayerGameState>> playerStates)
-        {
-            if (playerStates.Count < 2)
-                return;
-            var sortedPlayerStates = GetSortedPlayerStates(playerStates);
-            var skillTeams = sortedPlayerStates.Select(pair =>
-            {
-                var player = _Players[pair.Key];
-                var skillPlayer = new SkillPlayer(pair);
-                var rating = pair.Value.PreGameKillRating;
-                var team = new SkillTeam(skillPlayer, rating);
-                return team;
-            });
-            var teams = Teams.Concat(skillTeams.ToArray());
-            var ranks = new List<int>();
-            for (int i = 1; i <= sortedPlayerStates.Count; i++)
-                ranks.Add(i);
-            var newRatings = TrueSkillCalculator.CalculateNewRatings(GameInfo.DefaultGameInfo, teams, ranks.ToArray());
-            foreach (var pair in newRatings)
-            {
-                var statePair = (KeyValuePair<string, PlayerGameState>)pair.Key.Id;
-                var player = _Players[statePair.Key];
-                player.KillRating = pair.Value;
-            }
-        }
 
         private List<KeyValuePair<string, PlayerGameState>> GetSortedPlayerStates(List<KeyValuePair<string, PlayerGameState>> playerStates)
         {

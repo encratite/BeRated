@@ -1,7 +1,7 @@
-﻿using System;
+﻿using BeRated.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using BeRated.Common;
 
 namespace BeRated.Cache
 {
@@ -20,8 +20,8 @@ namespace BeRated.Cache
 
         public GameOutcome Outcome { get; private set; }
 
-        public List<RatedPlayer> Terrorists { get; private set; }
-        public List<RatedPlayer> CounterTerrorists { get; private set; }
+        public List<Player> Terrorists { get; private set; }
+        public List<Player> CounterTerrorists { get; private set; }
 
         private Round LastRound { get { return Rounds.Last(); } }
 
@@ -31,20 +31,13 @@ namespace BeRated.Cache
 			Rounds = rounds;
             Outcome = outcome;
 
-            Terrorists = new List<RatedPlayer>();
-            CounterTerrorists = new List<RatedPlayer>();
+            Terrorists = new List<Player>();
+            CounterTerrorists = new List<Player>();
 		}
 
         public override string ToString()
         {
             return string.Format("{0} ({1}v{2})", Time.ToString("g"), Terrorists.Count, CounterTerrorists.Count);
         }
-
-		public RatedPlayer GetRatedPlayer(Player player)
-		{
-			var players = Terrorists.Concat(CounterTerrorists);
-			var ratedPlayer = players.First(r => r.Player == player);
-			return ratedPlayer;
-		}
     }
 }

@@ -80,8 +80,6 @@
     <Compile Include="Cache\Game.cs" />
     <Compile Include="Cache\ItemPair.cs" />
     <Compile Include="Cache\PlayerGameState.cs" />
-    <Compile Include="Cache\RatedPlayer.cs" />
-    <Compile Include="Cache\RatingPair.cs" />
     <Compile Include="Common\GameOutcome.cs" />
     <Compile Include="Cache\Player.cs" />
     <Compile Include="Common\ReaderWriterLockScope.cs" />
@@ -151,10 +149,6 @@
     <ProjectReference Include="..\..\Ashod\Ashod\Ashod.csproj">
       <Project>{9659019c-3181-4c5c-bd0d-0117456328a6}</Project>
       <Name>Ashod</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Skills\Skills\Skills.csproj">
-      <Project>{15ad1345-984c-48ed-af9a-2eab44e5aa2b}</Project>
-      <Name>Skills</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

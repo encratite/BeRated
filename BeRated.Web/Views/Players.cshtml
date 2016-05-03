@@ -12,33 +12,27 @@
 <table class="sortable grid">
     <tr>
         <th data-column-type="string">Name</th>
-        <th title="Match Rating: conservative TrueSkill rating based on games won">Match rating</th>
-        <!-- <th title="Round Rating: conservative TrueSkill rating based on rounds won">Round rating</th> -->
-        <th title="Kill Rating: Conservative TrueSkill rating based on kills">Kill rating</th>
         <th>Kills per round</th>
         <th>Kill/death ratio</th>
         <th>Kills</th>
         <th>Deaths</th>
         <th>Games won</th>
         <th>Games played</th>
-        <!-- <th>Rounds won</th> -->
-        <!-- <th title="Rounds played">Rounds</th> -->
+        <th>Rounds won</th>
+        <th title="Rounds played">Rounds</th>
     </tr>
     @foreach (var player in Model)
     {
         <tr>
             <td>@Helper.GetPlayerLink(player)</td>
-            <td>@Helper.GetRating(player.StartMatchRating, player.EndMatchRating)</td>
-            <!-- <td>@Helper.GetRating(player.StartRoundRating, player.EndRoundRating)</td> -->
-            <td>@Helper.GetRating(player.StartKillRating, player.EndKillRating)</td>
             <td>@Helper.Round(player.KillsPerRound)</td>
             <td>@Helper.Round(player.KillDeathRatio)</td>
             <td>@player.Kills</td>
             <td>@player.Deaths</td>
             <td>@Helper.Percentage(player.GameWinRatio)</td>
             <td>@player.GamesPlayed</td>
-            <!-- <td>@Helper.Percentage(player.RoundWinRatio)</td> -->
-            <!-- <td>@player.RoundsPlayed</td> -->
+            <td>@Helper.Percentage(player.RoundWinRatio)</td>
+            <td>@player.RoundsPlayed</td>
         </tr>
     }
 </table>

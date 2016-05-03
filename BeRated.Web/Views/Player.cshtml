@@ -11,14 +11,6 @@
 
 <table class="description">
     <tr>
-        <td>Match rating</td>
-        <td>@Helper.GetRating(Model.StartMatchRating, Model.EndMatchRating)</td>
-    </tr>
-    <tr>
-        <td>Kill rating</td>
-        <td>@Helper.GetRating(Model.StartKillRating, Model.EndKillRating)</td>
-    </tr>
-    <tr>
         <td>Kills per round</td>
         <td>@Helper.Round(Model.KillsPerRound)</td>
     </tr>
@@ -65,21 +57,3 @@
         </tr>
     }
 </table>
-
-<div class="ratingChart">
-    {
-        "title": "Rating chart",
-        "controller": "/GetPlayerRatings",
-        "enableLegend": true,
-        "series": [
-            {
-                "name": "Match rating",
-                "property": "matchRating"
-            },
-            {
-                "name": "Kill rating",
-                "property": "killRating"
-            }
-        ]
-    }
-</div>

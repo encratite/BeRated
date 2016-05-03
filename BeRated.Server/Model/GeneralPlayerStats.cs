@@ -7,15 +7,6 @@ namespace BeRated.Model
 		public DateTime? FirstRoundTime { get; set; }
         public DateTime? LastRoundTime { get; set; }
 
-        public double? StartMatchRating { get; set; }
-		public double EndMatchRating { get; set; }
-
-        public double? StartRoundRating { get; set; }
-        public double EndRoundRating { get; set; }
-
-        public double? StartKillRating { get; set; }
-		public double EndKillRating { get; set; }
-
 		public decimal? KillsPerRound { get; set; }
 		public decimal? KillDeathRatio { get; set; }
 

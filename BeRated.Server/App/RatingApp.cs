@@ -12,14 +12,9 @@ using System.Threading.Tasks;
 using CacheGame = BeRated.Cache.Game;
 using CacheKill = BeRated.Cache.Kill;
 using CacheRound = BeRated.Cache.Round;
-using GameInfo = Moserware.Skills.GameInfo;
 using ModelGame = BeRated.Model.Game;
 using ModelKill = BeRated.Model.Kill;
 using ModelRound = BeRated.Model.Round;
-using SkillPlayer = Moserware.Skills.Player;
-using SkillTeam = Moserware.Skills.Team;
-using SkillTeams = Moserware.Skills.Teams;
-using TrueSkillCalculator = Moserware.Skills.TrueSkillCalculator;
 
 namespace BeRated.App
 {
@@ -129,27 +124,6 @@ namespace BeRated.App
 		}
 
         [Controller]
-        public object Ratings()
-        {
-            return null;
-        }
-
-        [Controller]
-        public List<MatchmakingPlayer> Matchmaker()
-        {
-            var players = _Cache.Players.Select(player => GetMatchmakingPlayer(player));
-            return players.OrderBy(player => player.Name).ToList();
-        }
-
-        [Controller]
-        public List<MatchmakingResult> Matchmaking(string ids, bool swap)
-        {
-            var players = GetPlayersFromSteamIds(ids);
-            var results = GetMatchmakingResults(players, swap);
-            return results;
-        }
-
-        [Controller]
         public ModelGame Game(long id)
         {
             var game = _Cache.Games.First(g => g.Id == id);
@@ -219,41 +193,6 @@ namespace BeRated.App
 
         #endregion
 
-        #region JSON controllers
-
-        [JsonController]
-        public List<PlayerRatings> GetPlayerRatings(string id)
-        {
-            var player = _Cache.GetPlayer(id);
-            var ratings = new List<PlayerRatings> {  GetPlayerRatings(player) };
-            return ratings;
-        }
-
-        [JsonController]
-        public List<PlayerRatings> GetAllRatings()
-        {
-            var ratings = _Cache.Players.Select(player => GetPlayerRatings(player)).ToList();
-            return ratings;
-        }
-
-        [JsonController]
-        public MatchmakingTeams GetMatchmakingTeams(string ids)
-        {
-            var players = GetPlayersFromSteamIds(ids);
-            bool swap = _Random.Next(0, 1) == 1;
-            var results = GetMatchmakingResults(players, swap);
-            var bestResult = results.First();
-            var teams = new MatchmakingTeams
-            {
-                Quality = bestResult.Quality,
-                CounterTerrorists = GetSteamIdList(bestResult.Team1),
-                Terrorists = GetSteamIdList(bestResult.Team1),
-            };
-            return teams;
-        }
-
-        #endregion
-
         private List<GeneralPlayerStats> GetGeneralPlayerStats(TimeConstraints constraints)
         {
             var stats = _Cache.Players.Select(player => GetGeneralPlayerStats(player, constraints));
@@ -298,27 +237,6 @@ namespace BeRated.App
                 RoundWinRatio = Ratio.Get(roundsWon, roundsPlayed),
             };
 
-            if (games > 0)
-            {
-                var firstGame = matchingGames.First();
-                var startRating = firstGame.GetRatedPlayer(player);
-                generalStats.StartMatchRating = startRating.MatchRating.PreGameRating.ConservativeRating;
-                generalStats.StartRoundRating = startRating.RoundRating.PreGameRating.ConservativeRating;
-                generalStats.StartKillRating = startRating.KillRating.PreGameRating.ConservativeRating;
-
-                var lastGame = matchingGames.Last();
-                var endRating = lastGame.GetRatedPlayer(player);
-                generalStats.EndMatchRating = endRating.MatchRating.PostGameRating.ConservativeRating;
-                generalStats.EndRoundRating = endRating.RoundRating.PostGameRating.ConservativeRating;
-                generalStats.EndKillRating = endRating.KillRating.PostGameRating.ConservativeRating;
-            }
-            if (constraints.Start == null && constraints.End == null)
-            {
-                generalStats.StartMatchRating = null;
-                generalStats.StartRoundRating = null;
-                generalStats.StartKillRating = null;
-            }
-
             return generalStats;
         }
 
@@ -339,13 +257,12 @@ namespace BeRated.App
 		{
             var matchingGames = player.Games.Where(game =>
                 constraints.Match(game.Time) &&
-                (game.Terrorists.Any(p => p.Player == player) || game.CounterTerrorists.Any(p => p.Player == player))
+                (game.Terrorists.Contains(player) || game.CounterTerrorists.Contains(player))
             );
             matchingGames = matchingGames.OrderByDescending(game => game.Time);
             var games = matchingGames.Select(game =>
             {
-                var ratedPlayer = game.GetRatedPlayer(player);
-                bool isTerrorist = game.Terrorists.Any(p => p.Player == player);
+                bool isTerrorist = game.Terrorists.Contains(player);
                 int terroristScore = game.TerroristScore;
                 int counterTerroristScore = game.CounterTerroristScore;
                 var terrorists = GetPlayerInfos(game.Terrorists, game);
@@ -369,8 +286,6 @@ namespace BeRated.App
                     EnemyScore = isTerrorist ? counterTerroristScore : terroristScore,
                     IsTerrorist = isTerrorist,
                     Outcome = outcome,
-                    MatchRating = GetGameRating(ratedPlayer.MatchRating),
-                    KillRating = GetGameRating(ratedPlayer.KillRating),
                     PlayerTeam = isTerrorist ? terrorists : counterTerrorists,
                     EnemyTeam = isTerrorist ? counterTerrorists : terrorists,
                 };
@@ -481,31 +396,6 @@ namespace BeRated.App
 			return outcomes;
 		}
 
-		private List<PlayerRatingSample> GetRatingSamples(Player player, Func<RatedPlayer, RatingPair> getRating)
-		{
-			return player.Games.Select(game =>
-			{
-				var ratedPlayer = game.GetRatedPlayer(player);
-				var ratingPair = getRating(ratedPlayer);
-				return new PlayerRatingSample
-				{
-					Time = game.Time,
-					Value = ratingPair.PostGameRating.ConservativeRating,
-				};
-			}).OrderBy(sample => sample.Time).ToList();
-		}
-
-        private PlayerRatings GetPlayerRatings(Player player)
-        {
-            return new PlayerRatings
-            {
-                Name = player.Name,
-                SteamId = player.SteamId,
-                MatchRating = GetRatingSamples(player, (ratedPlayer) => ratedPlayer.MatchRating),
-                KillRating = GetRatingSamples(player, (ratedPlayer) => ratedPlayer.KillRating),
-            };
-        }
-
 		private void UpdateCache(IOwinContext context, string markup)
 		{
             string key = GetCacheKey(context);
@@ -539,7 +429,7 @@ namespace BeRated.App
 				Logger.Error(message);
 		}
 
-        private bool IsSameTeam(List<PlayerInfo> team1, List<RatedPlayer> team2, bool precise = true)
+        private bool IsSameTeam(List<PlayerInfo> team1, List<Player> team2, bool precise = true)
         {
             var ids1 = GetSteamIds(team1);
 			var ids2 = GetSteamIds(team2);
@@ -555,20 +445,20 @@ namespace BeRated.App
 			return new HashSet<string>(ids);
 		}
 
-		private HashSet<string> GetSteamIds(List<RatedPlayer> team)
+		private HashSet<string> GetSteamIds(List<Player> team)
 		{
-			var ids = team.Select(player => player.Player.SteamId);
+			var ids = team.Select(player => player.SteamId);
 			return new HashSet<string>(ids);
 		}
 
-        private void AddGameToTeamStats(List<RatedPlayer> players, bool isTerroristTeam, GameOutcome outcome, List<TeamStats> teams)
+        private void AddGameToTeamStats(List<Player> players, bool isTerroristTeam, GameOutcome outcome, List<TeamStats> teams)
         {
 			if (players.Count == 0)
 				return;
             var team = teams.FirstOrDefault(teamStats => IsSameTeam(teamStats.Players, players));
             if (team == null)
             {
-                var playerInfos = players.Select(player => GetPlayerInfo(player.Player));
+                var playerInfos = players.Select(player => GetPlayerInfo(player));
 				playerInfos = playerInfos.OrderBy(player => player.Name);
                 team = new TeamStats(playerInfos.ToList());
                 teams.Add(team);
@@ -642,19 +532,17 @@ namespace BeRated.App
             return players.Select(player => GetPlayerInfo(player)).OrderBy(player => player.Name).ToList();
         }
 
-        private List<PlayerGameInfo> GetPlayerInfos(List<RatedPlayer> team, CacheGame game)
+        private List<PlayerGameInfo> GetPlayerInfos(List<Player> team, CacheGame game)
         {
             var gameKills = game.Rounds.SelectMany(round => round.Kills).ToList();
             var playerInfos = team.Select(player =>
             {
                 var playerInfo = new PlayerGameInfo
                 {
-                    Name = player.Player.Name,
-                    SteamId = player.Player.SteamId,
-                    Kills = gameKills.Count(kill => kill.Killer == player.Player),
-                    Deaths = gameKills.Count(kill => kill.Victim == player.Player),
-                    MatchRating = GetGameRating(player.MatchRating),
-                    KillRating = GetGameRating(player.KillRating),
+                    Name = player.Name,
+                    SteamId = player.SteamId,
+                    Kills = gameKills.Count(kill => kill.Killer == player),
+                    Deaths = gameKills.Count(kill => kill.Victim == player),
                 };
                 return playerInfo;
             });
@@ -691,81 +579,6 @@ namespace BeRated.App
             string internalName = null;
             Context.Current.Cookies.TryGetValue(TimeConstraintsCookie, out internalName);
             return internalName;
-        }
-
-        private GameRating GetGameRating(RatingPair pair)
-        {
-            return new GameRating(pair.PreGameRating.ConservativeRating, pair.PostGameRating.ConservativeRating);
-        }
-
-        private List<MatchmakingResult> GetMatchmakingResults(List<Player> players, bool swapTeams)
-        {
-            if (players.Count < 3)
-                throw new ArgumentException("Not enough players.");
-            var results = new List<MatchmakingResult>();
-            var team1 = new List<Player> { players.First() };
-            var team2 = new List<Player>();
-            if (swapTeams)
-            {
-                var temporaryTeam = team1;
-                team1 = team2;
-                team2 = temporaryTeam;
-            }
-            var remainingPlayers = players.Skip(1);
-            EvaluateMatchmakingPermutations(team1, team2, remainingPlayers, results);
-            return results.OrderByDescending(result => result.Quality).Take(100).ToList();
-        }
-
-        private void EvaluateMatchmakingPermutations(IEnumerable<Player> team1, IEnumerable<Player> team2, IEnumerable<Player> remainingPlayers, List<MatchmakingResult> results)
-        {
-            var player = remainingPlayers.FirstOrDefault();
-            if (player != null)
-            {
-                remainingPlayers = remainingPlayers.Skip(1);
-                var playerArray = new [] { player };
-                EvaluateMatchmakingPermutations(team1.Concat(playerArray), team2, remainingPlayers, results);
-				EvaluateMatchmakingPermutations(team1, team2.Concat(playerArray), remainingPlayers, results);
-            }
-            else
-            {
-                if (Math.Abs(team1.Count() - team2.Count()) > 1)
-                    return;
-                var skillTeam1 = GetSkillTeam(team1);
-                var skillTeam2 = GetSkillTeam(team2);
-                var teams = SkillTeams.Concat(skillTeam1, skillTeam2);
-                double quality = TrueSkillCalculator.CalculateMatchQuality(GameInfo.DefaultGameInfo, teams);
-                var result = new MatchmakingResult
-                {
-                    Quality = quality,
-                    Team1 = GetPlayerInfos(team1),
-                    Team2 = GetPlayerInfos(team2),
-                };
-                results.Add(result);
-            }
-        }
-
-        private SkillTeam GetSkillTeam(IEnumerable<Player> players)
-        {
-            var team = new SkillTeam();
-            foreach (var player in players)
-            {
-                var skillPlayer = new SkillPlayer(player);
-                team.AddPlayer(skillPlayer, player.MatchRating);
-            }
-            return team;
-        }
-
-        private MatchmakingPlayer GetMatchmakingPlayer(Player player)
-        {
-            var lastRound = player.Rounds.LastOrDefault();
-            return new MatchmakingPlayer
-            {
-                Name = player.Name,
-                SteamId = player.SteamId,
-                MatchRating = player.MatchRating.ConservativeRating,
-                Games = player.Games.Count(),
-                LastRound = GetRoundTime(lastRound),
-            };
         }
 
         private DateTime? GetRoundTime(CacheRound round)

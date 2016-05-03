@@ -10,7 +10,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <TypeScriptToolsVersion>1.7</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>1.8</TypeScriptToolsVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -23,8 +23,6 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\Cookies.ts" />
-    <TypeScriptCompile Include="Scripts\Matchmaker.ts" />
-    <TypeScriptCompile Include="Scripts\RatingChart.ts" />
     <TypeScriptCompile Include="Scripts\Table.ts" />
     <TypeScriptCompile Include="Scripts\TimeConstraints.ts" />
   </ItemGroup>
@@ -52,9 +50,6 @@
     <Content Include="Views\Player.cshtml" />
     <Content Include="Stylesheets\Player.less" />
     <Content Include="Stylesheets\Common.less" />
-    <Content Include="Views\Ratings.cshtml" />
-    <Content Include="Views\Matchmaker.cshtml" />
-    <Content Include="Views\Matchmaking.cshtml" />
     <None Include="Views\Weapons.cshtml" />
   </ItemGroup>
   <ItemGroup>

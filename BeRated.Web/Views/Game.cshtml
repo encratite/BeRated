@@ -17,8 +17,6 @@
             <th data-column-type="string">@playerDescription</th>
             <th>Kills</th>
             <th>Deaths</th>
-            <th>Match rating</th>
-            <th>Kill rating</th>
         </tr>
         @foreach (var player in team)
         {
@@ -26,8 +24,6 @@
                 <td>@Helper.GetPlayerLink(player)</td>
                 <td>@player.Kills</td>
                 <td>@player.Deaths</td>
-                <td>@Helper.GetRating(player.MatchRating)</td>
-                <td>@Helper.GetRating(player.KillRating)</td>
             </tr>
         }
     </table>
