@@ -5,3 +5,5 @@ obj
 *.user
 *.opensdf
 *.sdf
+*.opendb
+*.db

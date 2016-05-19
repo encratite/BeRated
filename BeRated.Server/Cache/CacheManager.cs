@@ -302,10 +302,18 @@ namespace BeRated.Cache
                 state = new PlayerGameState(player, team);
                 _PlayerStates[steamId] = state;
             }
-            state.Team = team;
-            state.RoundPlayerLeft = null;
-			state.Kills = 0;
-			state.Deaths = 0;
+            if
+            (
+                !state.RoundPlayerLeft.HasValue ||
+                team == Team.CounterTerrorist ||
+                team == Team.Terrorist
+            )
+            {
+                state.Team = team;
+                state.RoundPlayerLeft = null;
+			    state.Kills = 0;
+			    state.Deaths = 0;
+            }
             return true;
         }
 
@@ -497,10 +505,7 @@ namespace BeRated.Cache
 
         private List<KeyValuePair<string, PlayerGameState>> GetActivePlayerStates()
         {
-            return _PlayerStates.Where(pair =>
-                pair.Value.RoundPlayerLeft == null ||
-                _Rounds.Count - pair.Value.RoundPlayerLeft.Value < 2
-            ).ToList();
+            return _PlayerStates.ToList();
         }
 
 		private PlayerGameState GetPlayerState(Player player)
