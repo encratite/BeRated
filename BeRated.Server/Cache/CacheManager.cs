@@ -136,10 +136,8 @@ namespace BeRated.Cache
                 if (hasLastWriteTime && fileInfo.LastWriteTimeUtc == lastWriteTime)
                     return;
 			    var content = File.ReadAllText(path);
-			    if (
-                    !content.Contains("Log file closed\n") &&
-                    !content.Contains("disconnected (reason \"Punting bot, server is hibernating\")\n")
-                )
+                var lines = content.Split('\n');
+			    if (!LogIsComplete(lines))
                 {
                     // The log file has not been completed yet
                     Logger.Warning("Unable to process incomplete file {0}", path);
@@ -150,7 +148,6 @@ namespace BeRated.Cache
                     }
                     return;
                 }
-                var lines = content.Split('\n');
 			    int lineCounter = 1;
                 try
                 {
@@ -535,6 +532,29 @@ namespace BeRated.Cache
                 player.RoundsWon = player.RoundsWon.Where(round => referencedRounds.Contains(round)).ToList();
                 player.RoundsLost = player.RoundsLost.Where(round => referencedRounds.Contains(round)).ToList();
             }
+        }
+
+        private bool LogIsComplete(IEnumerable<string> lines)
+        {
+            int maxRounds = 30;
+            foreach (var line in lines)
+            {
+                int? newMaxRounds = _LogParser.ReadMaxRounds(line);
+                if (newMaxRounds.HasValue)
+                {
+                    maxRounds = newMaxRounds.Value;
+                    continue;
+                }
+                var round = _LogParser.ReadEndOfRound(line);
+                if (round != null)
+                {
+                    bool win = Math.Max(round.CounterTerroristScore, round.TerroristScore) > maxRounds / 2;
+                    bool draw = round.CounterTerroristScore + round.TerroristScore >= maxRounds;
+                    if (win || draw)
+                        return true;
+                }
+            }
+            return false;
         }
     }
 }
