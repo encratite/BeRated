@@ -42,7 +42,7 @@ namespace BeRated.Cache
 
 		private Thread _ReaderThread = null;
 
-        private Dictionary<string, DateTime> _LogStates = new Dictionary<string, DateTime>();
+        private HashSet<string> _LogsProcessed = new HashSet<string>();
 
 		private Dictionary<string, Player> _Players = new Dictionary<string, Player>();
 
@@ -130,21 +130,22 @@ namespace BeRated.Cache
 			    _PlayerStates = new Dictionary<string, PlayerGameState>();
                 _RoundKills = new List<Kill>();
 			    string fileName = Path.GetFileName(path);
-                DateTime lastWriteTime;
-                bool hasLastWriteTime = _LogStates.TryGetValue(fileName, out lastWriteTime);
-                var fileInfo = new FileInfo(path);
-                if (hasLastWriteTime && fileInfo.LastWriteTimeUtc == lastWriteTime)
+                if (_LogsProcessed.Contains(fileName))
+                {
+                    // The log file had already been processed
                     return;
+                }
 			    var content = File.ReadAllText(path);
                 var lines = content.Split('\n');
 			    if (!LogIsComplete(lines))
                 {
                     // The log file has not been completed yet
                     Logger.Warning("Unable to process incomplete file {0}", path);
+                    var fileInfo = new FileInfo(path);
                     if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc >= TimeSpan.FromHours(1))
                     {
                         // It is likely permanently incomplete, do not read it again
-                        _LogStates[fileName] = fileInfo.LastWriteTimeUtc;
+                        _LogsProcessed.Add(fileName);
                     }
                     return;
                 }
@@ -162,7 +163,7 @@ namespace BeRated.Cache
                 {
                     Logger.Warning("Unable to process outdated format in {0}", path);
                 }
-                _LogStates[fileName] = fileInfo.LastWriteTimeUtc;
+                _LogsProcessed.Add(fileName);
             }
 		}
 
