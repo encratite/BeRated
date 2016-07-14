@@ -142,7 +142,7 @@ namespace BeRated.Cache
                     // The log file has not been completed yet
                     Logger.Warning("Unable to process incomplete file {0}", path);
                     var fileInfo = new FileInfo(path);
-                    if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc >= TimeSpan.FromHours(1))
+                    if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc >= TimeSpan.FromHours(8))
                     {
                         // It is likely permanently incomplete, do not read it again
                         _LogsProcessed.Add(fileName);
