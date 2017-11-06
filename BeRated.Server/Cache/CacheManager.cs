@@ -95,8 +95,7 @@ namespace BeRated.Cache
 			else
 			{
 				player = new Player(name, steamId, time);
-				if (steamId != LogParser.BotId)
-					_Players[steamId] = player;
+				_Players[steamId] = player;
 			}
 			return player;
 		}
@@ -225,8 +224,6 @@ namespace BeRated.Cache
                 return false;
 			if (
                 !IgnoreStats() &&
-                kill.Killer.SteamId != LogParser.BotId &&
-                kill.Victim.SteamId != LogParser.BotId &&
                 kill.Killer != kill.Victim &&
                 kill.KillerTeam != kill.VictimTeam
             )
@@ -254,8 +251,6 @@ namespace BeRated.Cache
                 return false;
             if (
                 !IgnoreStats() &&
-                assist.Assistant.SteamId != LogParser.BotId &&
-                assist.Victim.SteamId != LogParser.BotId &&
                 assist.Assistant != assist.Victim &&
                 assist.AssistantTeam != assist.VictimTeam
             )
@@ -291,8 +286,6 @@ namespace BeRated.Cache
                 return false;
 			string steamId = teamSwitch.Player.SteamId;
 			var team = teamSwitch.CurrentTeam;
-			if (steamId == LogParser.BotId)
-				return false;
             var player = GetPlayer(steamId);
             PlayerGameState state;
             if (!_PlayerStates.TryGetValue(steamId, out state))
@@ -321,8 +314,6 @@ namespace BeRated.Cache
 			if (disconnect == null)
                 return false;
 			string steamId = disconnect.Player.SteamId;
-			if (steamId == LogParser.BotId)
-				return true;
             PlayerGameState state;
             if (!_PlayerStates.TryGetValue(steamId, out state))
                 return true;
@@ -361,7 +352,7 @@ namespace BeRated.Cache
 			if (purchase == null)
                 return false;
 			string steamId = purchase.Player.SteamId;
-			if (!IgnoreStats() && steamId != LogParser.BotId)
+			if (!IgnoreStats())
             {
                 var state = _PlayerStates[steamId];
                 var team = state.Team;
